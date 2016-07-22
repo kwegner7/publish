@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<!-- 
+    Each node of the tree is a triple - html pages, styles, javascript:
+        index.html and sub-pages
+        styles.css
+        methods.js
+        classes.js
+        entry-points.js 
+        
+    Thus, styles are inherited along the well-ordered path.
+    Javascript methods and classes are common and available (possibly inherited)
+        along the well-ordered path.
+-->  
+
+<head>
+  <title>Pictures</title>
+  <base href=".">
+
+  <script src="../../methods.js"></script>
+  <script src="../methods.js"></script>
+  <script src="methods.js"></script>
+  
+  <script src="../../classes.js"></script>
+  <script src="../classes.js"></script>
+  <script src="classes.js"></script>
+  
+  <script src="../../entry-points.js"></script>
+  <script src="../entry-points.js"></script>
+  <script src="entry-points.js"></script>
+
+  <link href=../../styles.css type=text/css rel=STYLESHEET>
+  <link href=../styles.css type=text/css rel=STYLESHEET>
+  <link href=styles.css type=text/css rel=STYLESHEET>
+      
+  <style type=text/css>
+  </style>
+</head>
+
+<body onload="initialize()">
+<div id="outermost-container">
+
+    <div class=frame-tall style="float:left;">
+        <div class=frame-tall1>
+            <h1 onclick="prevPhoto();">&#60;&#60;</h1>
+        </div>
+        <h3 class=frame-tall2 id=page>insert text here</h3>
+    </div>
+
+    <div id=frame-photo style="float:left;">insert images here</div>
+
+    <div class=frame-tall style="float:left;">
+        <div class=frame-tall1>
+            <h1 onclick="nextPhoto();">&#62;&#62;</h1>
+        </div>
+        <div class=frame-tall2>
+            <a id=download> <!-- insert href and download name here -->
+                <h3>DOWN<br>LOAD</h3>
+            </a>
+        </div>
+    </div>
+
+    <div style="clear:both"></div>
+</div>
+</body>
+</html>
+
+
+
+<!--
+****************************************************************
+*      COMPLETELY SEPARATE STYLE FROM CONTENT
+*      USE WELL-ORDERED HIERARCHY OF STYLE CLASSES INCLUDING LOCAL
+*      USE p, h1, h2, etc over div when possible
+*      Use div to apply common styles to more than one frame
+*
+* Specify the arrangement of the frames using float, clear, combining
+* Specify the Content of each element.
+* Avoid any style specifications here.
+* Instead use class and id specifiers.
+*
+**************************************************************** 
+-->
+
+<!--
+                          BEST PRACTICES
+
+body is a pallete of rectangles. Each rectangle is a sparse well ordered tree of
+nested rectangles. The sparseness is filled with background color at various 
+levels. 
+
+css is a class tree of attributes of a Content. Content is the object with
+attributes that are Style Properties. We have:
+
+Class Browser
+    Class Normal
+        Class Photos
+            Class Local
+
+Within each class are subclasses:
+    Class P, Class Img, Class H1, Class Div
+    Class Id, Class Class
+
+The Content is instantiated as a Browser-Normal-Photos-OuterDiv
+The method "render" of Content is invoked recursively by the Browser
+
+Rectangles can be simple, disjoint layers where each top level rectangle
+can be layered with z component and mistiness. Uses float:left, float:right,
+clear:left, clear:right and combining of rectangles be other rectangles.
+
+Rectangles can also be placed absolutely or relatively rather than float.
+Rectangles can move with Javascript.
+
+
+****************************************************************
+*
+* In the cloud, the URL is at:
+*   http://kwegner7.github.io/photos/Summer2016
+*
+* In this PC, the URL is at:
+*   file:///data/proj/git/website/photos/Summer2016/index.html
+*
+**************************************************************** 
+-->
+
+
+
+
+

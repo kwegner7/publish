@@ -1,0 +1,90 @@
+/*
+    ELEMENT SELECTORS { STYLE PROPERTIES }
+*/
+
+* {margin:0;} /* select all elements to have no margin between */
+
+body {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 14px;
+  background-color:white;
+  /* overflow: auto;  fix for some float problems */
+}
+
+h1 {
+  font-size: 150%;
+  font-weight: bold;
+  text-align: left;
+  text-decoration: none;
+}
+
+h2 {
+  font-size: 125%;
+  font-weight: bold;
+  text-align: left;
+  text-decoration: none;
+}
+
+h3 {
+  font-size: 100%;
+  font-weight: bold;
+  text-align: left;
+  text-decoration: none;
+}
+
+p {
+  font-size: 100%;
+  font-weight: normal;
+  text-align: left;
+  text-decoration: none;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+  background-color:inherit;
+}
+
+a:link {
+  color: black;
+  text-decoration: none;
+  background-color:inherit;
+}
+
+a:visited {
+  color: black;
+  text-decoration: none;
+  background-color:inherit;
+}
+
+a:hover {
+  color: black;
+  text-decoration: none;
+  background-color:inherit;
+}
+
+a:active {
+  color: black;
+  text-decoration: none;
+  background-color:inherit;
+}
+
+ul {
+  font-size: 100%;
+  font-weight: normal;
+  text-align: left;
+  text-decoration: none;
+}
+
+ol {
+  font-size: 100%;
+  font-weight: normal;
+  text-align: left;
+  text-decoration: none;
+}
+
+img {
+  height: 100%;
+}
+
+

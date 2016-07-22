@@ -1,0 +1,106 @@
+/*
+    SELECT THESE ELEMENTS { AND APPLY THESE STYLE PROPERTIES }
+*/
+
+
+/*******************************************************************************
+* These are the rectangles - size, bordering, background color only
+*******************************************************************************/
+
+#outermost-container {          /* 3 thicknesses surround contained element   */
+    margin: 10px auto;          /* outermost space between frames             */
+    border: 20px solid #CAF7F5; /* visible border                             */
+    padding: 10px;              /* surrounds the contents of the frame        */
+    width: 900px;               /* from inside padding left to right          */
+    background-color:white;     /* of padding and contained element           */
+}                               /* distance from left to right outside border */
+                                /* is width + 2 padding + 2 border = 960px    */
+
+#frame-photo {
+  width: 80%; height: 490px;
+  padding:  0px 0;
+  background-color:white;
+  text-align:center;
+}
+
+.frame-tall {
+  width: 10%; height: 490px;
+  padding: 0 0;
+  background-color:white;
+  text-align:center;
+}
+
+.frame-tall1 {
+  width: 100%; height: 270px;
+  padding: 30px 0 0 0;
+}
+
+.frame-tall2 {
+  width: 100%; height: 150px;
+  padding: 40px 0 0 0;
+}
+
+/*******************************************************************************
+* Adjust the normal text styles
+*******************************************************************************/
+
+.frame-tall1 h1 {
+  color:blue; 
+  text-align:center;
+  font-size:200%;
+}
+
+.frame-tall2 h3, h3.frame-tall2 {
+  color:blue; 
+  text-align:center;
+  line-height:110%;
+}
+
+
+
+/*******************************************************************************
+* Understanding bordering of rectangles
+********************************************************************************
+
+        --------------------------------------------------
+        | margin                                         |
+        |  --------------------------------------------  |
+        |  | border                                   |  |
+        |  |  --------------------------------------  |  |
+        |  |  | padding                            |  |  |
+        |  |  |  --------------------------------  |  |  |
+        |  |  |  |                              |  |  |  |
+        |  |  |  |                              |  |  |  |
+        |  |  |  |                              |  |  |  |
+        |  |  |  |           CONTENT            |  |  |  |
+        |  |  |  |                              |  |  |  |
+        |  |  |  |<---------  width  ---------->|  |  |  |
+        |  |  |  |                              |  |  |  |
+        |  |  |  --------------------------------  |  |  |
+        |  |  |                                    |  |  |
+        |  |  --------------------------------------  |  |
+        |  |                                          |  |
+        |  --------------------------------------------  |
+        |                                                |
+        --------------------------------------------------
+
+   margin is the outermost white space between frames
+       the color of the margin is the background color of the larger container
+
+   border is then within the margin
+       the color of the border is specified in the border property
+
+   padding surrounds the text (or image) within the border
+       the color of the padding matches the background color of the element (<p>)
+
+   width specifies distance from inside of padding left to right
+
+   Therefore,
+       #foo {margin: 21em; border: 1em; padding: 2em; width: 10em;}
+       will create a box 16em wide from outside border left to right: 
+       10em + 2em padding for each side, + 1em border for each side
+                 |1| 2|  10   | 2|1|
+
+*/
+
+

@@ -1,0 +1,68 @@
+
+If this new album follows the usual "photos" style
+then it needs to implement only:
+    images folder containing the images
+    methods.js containing list of file in the images folder
+
+Create a new folder under /data/proj/common/photos/
+     cd /data/proj/common/photos/
+     mkdir --parents new-album new-album/images
+     cd /data/proj/common/photos/new-album
+     cp ../template/index.html .
+     cp ../template/methods.js .
+     cp ../template/classes.js .
+     cp ../template/entry-points.js .
+     cp ../template/styles.css .
+     
+Determine the pictures:
+     cd /data/edit-pictures
+     mkdir new-album
+     move original big pictures into /data/edit-pictures/new-album
+     picture-smaller.bsh /data/edit-pictures/new-album
+     This creates /data/edit-pictures/new-album/smaller
+     copy /data/edit-pictures/new-album/smaller
+     to   /data/proj/common/photos/new-album/images
+     and modify /data/proj/common/photos/new-album/methods.js to include:
+            "IMG_1531.JPG",
+            "IMG_1532.JPG",
+            "IMG_1533.JPG",
+            "IMG_1534.JPG",
+     
+Open:
+     /data/proj/common/photos/new-album/index.html
+
+     
+How to publish so that the link is:
+
+    http://kwegner7.github.io/camp/photos/nary-and-kurt
+    
+    Move the following files to /data/proj/git/website
+        /data/proj/common/photos
+        /data/proj/common/styles.css
+        /data/proj/common/methods.js
+        /data/proj/common/classes.js
+        /data/proj/common/entry-points.js
+        
+    cd /data/proj/git/website && git status
+2003 04:53 PM website> git remote -v
+backup  /media/kurt/Linux3TB/proj/website.git (fetch)
+backup  /media/kurt/Linux3TB/proj/website.git (push)
+github  https://github.com/kwegner7/camp.git (fetch)
+github  https://github.com/kwegner7/camp.git (push)
+2004 04:53 PM website> git branch -v
+* master 465d946 [ahead 1] upload 2016-07-21
+2005 04:54 PM website> 
+
+    So there exists only a local master branch here.
+    git diff master backup/master
+    git diff master github/master
+    git push backup master
+    git push github master
+
+
+
+
+
+
+
+
