@@ -1,0 +1,26 @@
+#!/bin/bash -norc
+
+##############################################################################
+# copy ubuntu files to the windows side in order to use SyncToy
+##############################################################################
+
+declare -r SOURCE_FOLDER="/home/kurt/ubu"
+declare -r DESTINATION_FOLDER="/media/File System - Windows/Users/Kurt/Documents"
+
+echo ''
+IFS=$'\n'
+mkdir --parents "$DESTINATION_FOLDER"
+
+cp --recursive --update --preserve=timestamps --backup=numbered --interactive \
+    ${SOURCE_FOLDER} ${DESTINATION_FOLDER}
+ 
+declare -r SIZE=$(du -h --summarize $DESTINATION_FOLDER/ubu | cut -f1)
+echo -en "\nFiles have been copied to $DESTINATION_FOLDER/ubu " 
+echo -e "size is $SIZE\n" 
+
+rm "/media/File System - Windows/Users/Kurt/ToBePrinted/final/*.pdf"
+cp --dereference /home/kurt/ubu/pdf/fiance-visa/final/*.pdf "/media/File System - Windows/Users/Kurt/ToBePrinted/final"
+
+IFS=$'\x20\t\n'
+exit
+

@@ -1,0 +1,36 @@
+#!/bin/bash
+
+########################################################################
+# useful functions
+########################################################################
+function multiset_checksums()
+{
+    find "${1}"/ -xdev -type f ${2} -exec md5sum '{}' ';'
+}
+
+########################################################################
+# prepend file names with its checksum
+########################################################################
+function main()
+{
+    local -r ROOT_FOLDER="${1}"
+    local -r SELECT_THESE_FILES="${2}"
+    local -r OUTFILE=$(mktemp)
+
+    echo -en "      Assign each file to its equivalence class:" >&2
+    multiset_checksums "${ROOT_FOLDER}" "${SELECT_THESE_FILES}" > "${OUTFILE}"
+    printf "%6d files found under ${ROOT_FOLDER}\n" "`cat ${OUTFILE} | wc -l`" >&2
+
+    cat ${OUTFILE}
+    rm -f ${OUTFILE}
+    return 0
+
+}
+
+##############################################################################
+# Example:
+#    prepend-checksums.bsh '/home/kurt/kmw/wedding' '-iname *.jpg' > '/tmp/list-of-files1a.txt'
+##############################################################################
+main "$@"
+exit "$?"
+

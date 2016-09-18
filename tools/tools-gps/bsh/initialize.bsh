@@ -1,0 +1,84 @@
+#!/bin/bash
+
+##############################################################################
+# global symbols
+##############################################################################
+
+    true='( 1 -eq 1 )'
+    false='( 0 -eq 1 )'
+
+########################################################################
+# strip extension from full path or file name
+########################################################################
+function strip_ext()
+{
+    local -r no_ext=$(echo $1 | sed 's,\..*$,,')
+    local -r better=${1%.*}
+    echo $better
+    return 0
+}
+
+########################################################################
+# get file name without path and without extension
+########################################################################
+function filename_only()
+{
+    local -r remove_ext=$(strip_ext $1)
+    local -r better=${remove_ext##*/}
+    echo $better
+    return 0
+}
+########################################################################
+# get file name without path and with extension
+########################################################################
+function filename_ext()
+{
+    local -r better=${1##*/}
+    echo $better
+    return 0
+}
+########################################################################
+# get path and without file name and without extension
+########################################################################
+function path_only()
+{
+    local -r better=${1%/*}
+    echo $better
+    return 0
+}
+
+########################################################################
+# extension
+########################################################################
+function extension_only()
+{
+    local -r better=${1##*.}
+    echo $better
+    return 0
+}
+
+########################################################################
+# recursive on sub-folders
+########################################################################
+function subfolders()
+{
+    readonly var_folders=$(ls -1 -R $1 | grep ':$')
+    for next in ${var_folders}
+    do
+    {
+        echo mkdir --parents --mode=777 ${next%:}
+    }
+    done
+}
+
+########################################################################
+# pipe in a file created in the script
+########################################################################
+function pipe_in()
+{
+	cat<<-input_lines
+		yes
+		12
+		UTC
+	input_lines
+}

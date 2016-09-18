@@ -1,0 +1,83 @@
+#!/bin/bash
+
+################################################################################
+# Check the disk usage for each volume
+#
+# Invocation:
+#     check-volumes.bsh
+################################################################################
+
+################################################################################
+# check_volumes
+################################################################################
+function check_volumes()
+{
+    echo -e "\nChecking Volumes ..."
+
+    declare -a VOLUMES=(
+      "/home" # Linux New /
+    )
+
+    declare -a MEDIA=(`ls -1 /media/kurt | sed 's@^@/media/kurt/@'`)
+    WAS_VOLUMES=( ${VOLUMES[@]} ${MEDIA[@]})  
+
+    declare -a VOLUMES=(`find /vol -type l`)
+
+    IFS=$'\n'
+    for VOLUME in ${VOLUMES[*]}
+    do
+        if [ -e ${VOLUME} ]
+        then 
+            echo ''
+            echo  ${VOLUME}
+            df -kh ${VOLUME} | sed 's/^/    /'
+        fi
+    done
+    IFS=$'\x20\t\n'
+
+    echo ''
+}
+
+function main()
+{
+    check_volumes "$@"
+}
+
+main "$@"
+exit $?
+
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda13       35G   27G  6.3G  82% /
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda8       165G   74G   83G  48% /media/d7d564b2-2bdd-4cad-afef-b992d986b752
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda7        46G   26G   19G  58% /media/kurt/f938b6a4-56e7-4a93-bfb9-7db13e9360dc
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sdb1       2.7T  1.3T  1.3T  51% /media/kurt/Linux3TB
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda5       180G  136G   44G  76% /media/kurt/Windows
+
+
+/dev/sdb1  on /media/kurt/Linux3TB
+/dev/sda5  on /media/kurt/Windows
+/dev/sda7  on /media/kurt/f938b6a4-56e7-4a93-bfb9-7db13e9360dc
+/dev/sda8  on /media/d7d564b2-2bdd-4cad-afef-b992d986b752
+/dev/sda13 on /
+
+cd /vol
+ln -s /media/kurt/Linux3TB
+ln -s /media/kurt/Windows
+ln -s /media/d7d564b2-2bdd-4cad-afef-b992d986b752 orig
+ln -s /media/kurt/f938b6a4-56e7-4a93-bfb9-7db13e9360dc root-old
+ln -s / root
+
+
+
+
+
+

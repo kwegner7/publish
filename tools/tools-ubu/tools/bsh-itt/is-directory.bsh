@@ -1,0 +1,12 @@
+#!/bin/bash
+#############################################################################
+# Invocation:
+#               ( is_directory abc.txt ) && echo IS A DIRECTORY
+#############################################################################
+if file --preserve-date --mime --brief $1 | grep directory > /dev/null
+then
+    exit 0
+else
+    exit 1
+fi
+

@@ -1,0 +1,18 @@
+#!/bin/bash -norc
+########################################################################
+# copy meds from ubuntu to windows
+########################################################################
+declare -r MY_DOCUMENTS="/media/File System - Windows/Users/Kurt/Documents"
+declare -r PDF_FROM="/home/kurt/ubu/code/python/meds/out/html"
+declare -r DELIVERY_FROM="/home/kurt/ubu/code/python/delivery"
+
+IFS=$'\n'
+    rm -rf "${MY_DOCUMENTS}/html"
+    cp -r $PDF_FROM ${MY_DOCUMENTS}/
+    
+    rm -rf "${MY_DOCUMENTS}/delivery"
+    cp -r $DELIVERY_FROM ${MY_DOCUMENTS}/
+    
+    cp /home/kurt/Documents/INSTRUCTIONS.html "${MY_DOCUMENTS}/html"
+IFS=$' \t\n'
+

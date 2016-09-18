@@ -1,0 +1,12 @@
+SVN=file:///media/FLASHBLU/repositories/TOOLS/repository
+svn ls $SVN
+svn checkout $SVN/TOOLS /repositories/TOOLS
+
+SVN=file:///media/FLASHBLU/repositories/RDAT/repository
+svn ls $SVN/RDAT
+svn checkout $SVN/RDAT /repositories/RDAT
+
+SVN=file:///media/FLASHBLU/repositories/MAS/repository
+svn ls $SVN/MAS-8023
+svn checkout $SVN/MAS-8023 /repositories/MAS-8023
+

@@ -1,0 +1,83 @@
+########################################################################
+# strip extension from file name
+########################################################################
+function strip_ext()
+{
+    local -r no_ext=$(echo $1 | sed 's,\..*$,,')
+    local -r better=${1%.*}
+    echo $better
+    return 0
+}
+
+########################################################################
+# recursive on sub-folders
+########################################################################
+function subfolders()
+{
+    readonly var_folders=$(ls -1 -R $1 | grep ':$')
+    for next in ${var_folders}
+    do
+    {
+        echo mkdir --parents --mode=777 ${next%:}
+    }
+    done
+}
+
+########################################################################
+# pipe in a file created in the script
+########################################################################
+function pipe_in()
+{
+	cat<<-input_lines
+		yes
+		12
+		UTC
+	input_lines
+}
+
+########################################################################
+# main
+########################################################################
+function main ()
+{
+    cd d:/photos/Nikon/Tanzania2009_0
+    readonly var_folders=$(ls -1 DSCN????.JPG)
+    for next in ${var_folders}
+    do
+    {
+	    orig=$(echo $next | sed s@_01@@)
+		echo $next
+		if [ -e d:/photos/Nikon/Year2009/$orig ];
+        then
+		    echo it exists $orig
+		    rm $next
+        fi
+
+		#cp -p $next d:/photos/Nikon/Year2009
+    }
+    done
+	exit
+	
+	echo NEXT SECTION
+    readonly dups=$(ls -1 DSCN????_01.JPG)
+    readonly carina=$(ls -1 DSCN????.JPG)
+    for next in ${carina}
+    do
+    {
+	    orig=$(echo $next | sed s@_01@@)
+		#echo $orig
+		echo $next		
+		if [ ! -e d:/photos/Nikon/Year2009/$next ];
+        then
+		    echo doesnt exist $name
+        fi
+		#cp -p $next d:/photos/Nikon/Year2009
+		#cmp $next d:/photos/Nikon/Year2009/$next
+    }
+    done
+}
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"

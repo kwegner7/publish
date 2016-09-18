@@ -1,0 +1,13 @@
+#!/bin/bash -norc
+########################################################################
+# Read an svn repository
+########################################################################
+IFS=$'\n'
+declare -r WHERE="/media/BLUE 8GB/proj/MAS-8023/svn"
+declare -r NARY="file:///media/BLUE 8GB/proj/MAS-8023/svn"
+echo $NARY
+
+
+cd $WHERE && ls -la
+svn ls -R $NARY
+

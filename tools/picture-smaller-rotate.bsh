@@ -1,0 +1,80 @@
+#!/bin/bash
+
+##############################################################################
+# reduce
+##############################################################################
+function reduce()
+{
+    declare INPUT_JPG="${1}"
+    declare OUTPUT_JPG="${2}"
+    declare OUTPUT_FOLDER=`dirname "${OUTPUT_JPG}"`
+
+    if [ ! -e "${INPUT_JPG}" ]
+    then
+        echo -e "\nERROR: The file ${INPUT_JPG} does not exist!"        
+        return 1
+    fi
+
+    declare -i FILESIZE=$(stat -c%s "${INPUT_JPG}")
+    if (( $FILESIZE < 400000 ))
+    then
+        echo Copying " ${INPUT_JPG}" $FILESIZE
+        cp -p "${INPUT_JPG}" "${OUTPUT_FOLDER}"
+    else
+        declare -i GOAL=200000
+        declare SQRT=$(echo "sqrt(${GOAL}*10000/${FILESIZE})" | bc)
+        mkdir --parents "${OUTPUT_FOLDER}"
+        convert "${INPUT_JPG}" -resize "${SQRT}"% "${OUTPUT_JPG}"
+        declare -i NEWSIZE=$(stat -c%s "${OUTPUT_JPG}")
+        echo Reducing "${INPUT_JPG}" $FILESIZE "${SQRT}"% $NEWSIZE
+    fi
+    return 0
+}
+
+##############################################################################
+# Reduce the size of picture and rotate if necessary:
+#    picture-smaller.bsh infolder/aaa.jpg  outfolder/aaa.jpg
+##############################################################################
+function main()
+{
+    cd "${1}"
+    rm -rf smaller && mkdir --parents smaller
+    IFS=$'\n'
+    for NEXT_PICTURE in `find . -maxdepth 1 -iname "*.jpg" -print`
+    do
+        reduce "${NEXT_PICTURE}" smaller/"${NEXT_PICTURE}"
+        declare -i ORIENTATION_CODE=$(exiftool -b -Orientation ${NEXT_PICTURE})
+        if (( ORIENTATION_CODE == 6 ))
+        then
+            echo ROTATING ${NEXT_PICTURE} ${ORIENTATION_CODE}
+            convert smaller/"${NEXT_PICTURE}" -rotate 90 smaller/"${NEXT_PICTURE}" 
+            exiftool -Orientation=1 -n -overwrite_original_in_place smaller/"${NEXT_PICTURE}"
+        fi
+        if (( ORIENTATION_CODE == 8 ))
+        then
+            echo ROTATING ${NEXT_PICTURE} ${ORIENTATION_CODE}
+            convert smaller/"${NEXT_PICTURE}" -rotate 270 smaller/"${NEXT_PICTURE}" 
+            exiftool -Orientation=1 -n -overwrite_original_in_place smaller/"${NEXT_PICTURE}"
+        fi
+        if (( ORIENTATION_CODE == 3 ))
+        then
+            echo ROTATING ${NEXT_PICTURE} ${ORIENTATION_CODE}
+            convert smaller/"${NEXT_PICTURE}" -rotate 180 smaller/"${NEXT_PICTURE}" 
+            exiftool -Orientation=1 -n -overwrite_original_in_place smaller/"${NEXT_PICTURE}"
+        fi
+    done
+    IFS=$'\x20\t\n' 
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit "$?"
+
+exiftool -Orientation=1 -n <imagename>
+
+
+
+
+

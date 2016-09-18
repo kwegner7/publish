@@ -1,0 +1,166 @@
+#!/bin/bash
+
+################################################################################
+# compare_files
+################################################################################
+function compare_files()
+{
+    declare FOLDER1="$1"
+    declare FOLDER2="$2"
+    declare FILES1="$3"
+    declare FILES2="$4"
+
+    IFS=$'\n'
+
+    if ! $BRIEF; then
+        echo -e "\nTHESE FILES EXIST IN BOTH FOLDERS BUT THEY DO NOT MATCH:"
+    fi
+    declare -i NUMBER_MATCHES=0
+    declare -i NUMBER_NOMATCH=0
+    for FILE in $FILES1; do
+        if [ -f ${FOLDER2}/$FILE ]
+        then
+            size1=$(stat -c%s ${FOLDER1}/$FILE)
+            size2=$(stat -c%s ${FOLDER2}/$FILE)
+            time1=$(stat -c%Y ${FOLDER1}/$FILE)
+            time2=$(stat -c%Y ${FOLDER2}/$FILE)
+            if [[ "$size1" -eq "$size2" ]] && [[ "$time1" -eq "$time2" ]]
+            then
+                : echo "        MATCH $FILE"; (( NUMBER_MATCHES++ ))
+                continue
+            fi
+            if cmp --silent ${FOLDER1}/$FILE ${FOLDER2}/$FILE
+            then 
+                : echo "        MATCH $FILE"; (( NUMBER_MATCHES++ ))
+            else 
+                echo "    $FILE"; (( NUMBER_NOMATCH++ ))
+            fi
+        fi
+    done
+    echo -e "    NUMBER OF MATCHING FILES: $NUMBER_MATCHES"
+    if ! $BRIEF; then
+        echo -e "    NUMBER OF FILES THAT DO NOT MATCH: $NUMBER_NOMATCH"
+    fi
+
+    declare -i NUMBER_FILES=0
+    if ! $BRIEF; then
+        echo -e "\nTHESE FILES EXIST ONLY IN ${FOLDER1}:"
+        for FILE in $FILES1; do
+            if [ ! -f ${FOLDER2}/$FILE ]; then
+                echo "    $FILE"; (( NUMBER_FILES++ ))
+            fi
+        done
+        echo -e "    NUMBER OF FILES ONLY IN ${FOLDER1}: $NUMBER_FILES"
+    fi
+
+    declare -i NUMBER_FILES=0
+    if ! $BRIEF; then
+        echo -e "\nTHESE FILES EXIST IN ${FOLDER2}:"
+        for FILE in $FILES2; do
+            if [ ! -f ${FOLDER1}/$FILE ]; then
+                echo "    $FILE"; (( NUMBER_FILES++ )); fi
+        done
+        echo -e "    NUMBER OF FILES ONLY IN ${FOLDER2}: $NUMBER_FILES"
+    fi
+
+    IFS=$'\x20\t\n'
+
+    echo -e ""
+}
+
+
+
+
+
+################################################################################
+# main
+################################################################################
+function main()
+{
+    if [ "$1" = "--brief" ]; then
+        declare -gr BRIEF=true
+        shift
+    else
+        declare -gr BRIEF=false
+    fi
+
+    declare FOLDER1=`readlink -f ${1}`
+    declare FOLDER2=`readlink -f ${2}`
+    declare FOLDER1="${1}"
+    declare FOLDER2="${2}"
+    declare FOLDER1=`readlink -f ${1}`
+    declare FOLDER2=`readlink -f ${2}`
+
+    if [[ -d ${FOLDER1} ]] && [[ -d ${FOLDER2} ]]
+    then
+        if $BRIEF; then
+            echo -e "Comparing ${FOLDER1}"
+        else
+            echo -e "\nThe folder ${FOLDER1} exists"
+            echo -e "The folder ${FOLDER2} exists"
+        fi
+        cd "$FOLDER1"
+        declare FILES1=$(find . -type f \( -name "*.py" -o -name "*.rb" -o -name "*.html" -o -name "*" \) -print)
+        cd "$FOLDER2"
+        declare FILES2=$(find . -type f \( -name "*.py" -o -name "*.rb" -o -name "*.html" -o -name "*" \) -print)
+        compare_files "$FOLDER1" "$FOLDER2" "$FILES1" "$FILES2"
+    else
+        echo -e "\nBoth of these folders must exist:"
+        echo -e "    ${FOLDER1}"
+        echo -e "    ${FOLDER2}"
+        echo ''
+    fi
+}
+
+main "$@"
+exit $?
+
+find options | xargs [commands_to_execute_on_found_files] 
+
+
+#!/bin/bash
+
+if [ "$0" = "$BASH_SOURCE" ]; then
+  echo 'Script not invoked by "source", exiting...'
+  exit
+fi
+RUNSHELL=`readlink /proc/$$/exe`
+if [ "$RUNSHELL" != "/bin/bash" ]; then
+  echo 'Script must be run under "bash", exiting...'
+  return
+fi
+
+# This script initializes environment variables by downloading them
+# from Heroku.  It should be invoked with the "source" command so that
+# environment variable initializations are retained by the running
+# process.
+
+echo "Fetching VARS from Heroku..."
+HEROKUVARS="`heroku config --app <heroku-app-name>`"
+
+echo "Extracting SHARED_URL_KEY..."
+if [ "`echo $HEROKUVARS | grep 'SHARED_URL_KEY: '`" != "" ]; then
+  SHARED_URL_KEY=`echo ${HEROKUVARS#*SHARED_URL_KEY: } |awk '{print $1}'`
+  export SHARED_URL_KEY
+else
+  echo "--- SHARED_URL_KEY not found ---"
+fi
+
+echo "Extracting QBUSER..."
+if [ "`echo $HEROKUVARS | grep 'QBUSER: '`" != "" ]; then
+  QBUSER=`echo ${HEROKUVARS#*QBUSER: } |awk '{print $1}'`
+  export QBUSER
+else
+  echo "--- QBUSER not found ---"
+fi
+
+echo "Extracting QBPWD..."
+if [ "`echo $HEROKUVARS | grep 'QBPWD: '`" != "" ]; then
+  QBPWD=`echo ${HEROKUVARS#*QBPWD: } |awk '{print $1}'`
+  export QBPWD
+else
+  echo "--- QBPWD not found ---"
+fi
+
+
+

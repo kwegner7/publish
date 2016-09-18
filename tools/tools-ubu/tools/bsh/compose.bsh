@@ -1,0 +1,48 @@
+#!/bin/bash -norc
+
+##############################################################################
+# set links
+##############################################################################
+function set-links ()
+{
+    IFS=$'\n'
+    for NEXT in `cd $FINAL && cd $1 && ls -1 *.pdf`
+    do
+        cd $FINAL
+        if [ ! -e $NEXT -o -L $NEXT ]
+        then
+            ln --force --verbose -s $1/$NEXT
+        else
+            echo ERROR: $NEXT is not a link!
+        fi
+    done
+    IFS=$'\x20\t\n'
+    return 0
+}
+
+##############################################################################
+# compose a pdf document
+##############################################################################
+declare -xr     BASE="/home/kurt/ubu/pdf/fiance-visa"
+declare -xr    FINAL="$BASE/final"
+declare -xr FOTOWALL="../sources/fotowall/pdf-derived"
+declare -xr    FORMS="../sources/forms"
+declare -xr    SCANS="../sources/scans"
+declare -xr   SCANSD="../sources/scans/pdf-derived"
+declare -xr     TEXT="../sources/text/pdf-derived"
+
+echo ''
+
+    rm -rf $FINAL && mkdir --parents $FINAL
+    set-links $FORMS
+    set-links $SCANS
+    set-links $SCANSD
+    set-links $TEXT
+    set-links $FOTOWALL # this should be last
+    echo ''
+    cd $FINAL && ls -l
+    
+exit
+ 
+ 
+

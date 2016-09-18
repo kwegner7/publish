@@ -1,0 +1,84 @@
+#!/bin/bash
+
+function compare_files()
+{
+    declare FOLDER1="$1"
+    declare FOLDER2="$2"
+    declare FILES1="$3"
+    declare FILES2="$4"
+    declare WHICH="--copy-missing-files"
+    declare WHICH="--code"
+
+    IFS=$'\n'
+
+    declare -i NUMBER_MATCHES=0
+    declare -i NUMBER_NOMATCH=0
+    echo -e "\nCHECKING THE FILES THAT EXIST IN BOTH FOLDERS:"
+    for FILE in $FILES1; do
+        if [ -f ${FOLDER2}/$FILE ]
+        then
+            size1=$(stat -c%s ${FOLDER1}/$FILE)
+            size2=$(stat -c%s ${FOLDER2}/$FILE)
+            time1=$(stat -c%Y ${FOLDER1}/$FILE)
+            time2=$(stat -c%Y ${FOLDER2}/$FILE)
+            if [[ "$size1" -eq "$size2" ]] && [[ "$time1" -eq "$time2" ]]
+            then
+                #echo 'eq ' $size1" "$size2" "$time1" "$time2
+                : echo "        MATCH $FILE"; (( NUMBER_MATCHES++ ))
+                continue
+            fi
+            if cmp --silent ${FOLDER1}/$FILE ${FOLDER2}/$FILE
+            then 
+                : echo "        MATCH $FILE"; (( NUMBER_MATCHES++ ))
+            else 
+                echo "    NOT MATCH $FILE"; (( NUMBER_NOMATCH++ ))
+                if [[ $WHICH == --pictures ]]; then
+                    mkdir --parents $(dirname "${FOLDER2}/$FILE")
+                    cp -p --verbose "${FOLDER1}/$FILE" "${FOLDER2}/$FILE"
+                fi
+            fi
+        fi
+    done
+    echo -e "    NUMBER OF FILES THAT MATCH $NUMBER_MATCHES"
+    echo -e "    NUMBER OF FILES THAT DO NOT MATCH $NUMBER_NOMATCH"
+
+    #declare -i NUMBER_FILES=0
+    #echo -e "\nTHESE FILES DO NOT MATCH:"
+    #for FILE in $FILES1; do
+    #    if [ -f ${FOLDER2}/$FILE ]; then
+    #        if ! cmp --silent ${FOLDER1}/$FILE ${FOLDER2}/$FILE; then 
+    #            echo "    $FILE"; (( NUMBER_FILES++ )); fi
+    #            #echo "DIFFERENCES ARE:"
+    #            #diff ${FOLDER1}/$FILE ${FOLDER2}/$FILE
+    #    fi
+    #done
+    #echo -e "    TOTAL $NUMBER_FILES"
+
+    declare -i NUMBER_FILES=0
+    echo -e "\nCHECKING THE FILES THAT EXIST IN ${FOLDER1}"
+    echo -e "                      BUT NOT IN ${FOLDER2}:"
+    for FILE in $FILES1; do
+        if [ ! -f ${FOLDER2}/$FILE ]; then
+            echo "    $FILE"; (( NUMBER_FILES++ ))
+            if [[ $WHICH == --copy-missing-files ]]; then
+                mkdir --parents $(dirname "${FOLDER2}/$FILE")
+                cp -p --verbose "${FOLDER1}/$FILE" "${FOLDER2}/$FILE"
+            fi
+        fi
+    done
+    echo -e "    TOTAL $NUMBER_FILES"
+
+    declare -i NUMBER_FILES=0
+    echo -e "\nCHECKING THE FILES THAT EXIST IN ${FOLDER2}"
+    echo -e "                      BUT NOT IN ${FOLDER1}:"
+    for FILE in $FILES2; do
+        if [ ! -f ${FOLDER1}/$FILE ]; then
+            echo "    $FILE"; (( NUMBER_FILES++ )); fi
+    done
+    echo -e "    TOTAL $NUMBER_FILES"
+
+    IFS=$'\x20\t\n'
+
+    echo -e ""
+}
+

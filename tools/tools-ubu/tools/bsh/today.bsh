@@ -1,0 +1,94 @@
+#!/bin/bash -norc
+##############################################################################
+# cd /usr/share/zoneinfo && cat zone.tab | grep Singapore
+##############################################################################
+
+declare -r NUMBER_PARAMS=${#@}
+
+if (( $NUMBER_PARAMS > 0 ))
+then
+    declare -r WHEN="$@"
+else
+    declare -r WHEN="${1:-now}"
+fi
+
+
+function print_time ()
+{
+    declare -x TZ=$1
+    if false
+    then
+        echo DOY $(date --date="$WHEN" +%j" "%a" "%b" "%e" "%I:%M" "%P" "%Y" "%Z) $1
+        echo $(date --date="$WHEN" +%a" "%b" "%e" "%I:%M" "%P" "%Y" "%z" "%Z) $1
+    else
+        echo -n $(date --date="$WHEN" +%I:%M" "%P" "%a" "%b" "%e)
+        echo -e " ($1)"
+    fi
+}
+
+function print_special ()
+{
+    declare -x TZ=$1
+    if false
+    then
+        echo $(date --date="$WHEN" +%a" "%b" "%e" "%I:%M" "%P)
+    else
+        echo $(date --date="$WHEN" +%I:%M" "%P" "%a" "%b" "%e)
+    fi
+}
+
+declare -ra ZONES=\
+(
+    'America/Los_Angeles'
+    'America/Denver'
+    'America/New_York'
+    'Europe/London'
+    'Europe/Berlin'
+    'Africa/Dar_es_Salaam'
+    'Asia/Jakarta'
+    'Asia/Singapore'
+    'Asia/Manila'
+    'Asia/Hong_Kong'
+    'Asia/Tokyo'
+)
+
+declare -ra SPECIAL=\
+(
+    'America/Denver'
+    'Asia/Singapore'
+)
+
+declare -ra WHO=\
+(
+    'Kurt in Woodland Park'
+    '   Sunari in Makassar'
+)
+declare -ri HOW_MANY=${#WHO[*]}
+
+echo ''
+{
+    for next in ${ZONES[*]}
+    do
+        print_time $next
+    done
+}
+
+echo ''
+{
+    declare -i i=0
+    for next in ${SPECIAL[*]}
+    do
+        echo -ne "${WHO[$i]}: "
+        print_special $next
+        (( i++ )) 
+    done
+}
+echo ''
+
+exit
+
+today.bsh 'TZ="America/Los_Angeles" 01:30 am 2012-10-08'
+today.bsh 'TZ="America/Los_Angeles" 01:30 am 2012-10-08 19 hours 31 minutes'
+END
+
+

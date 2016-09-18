@@ -1,0 +1,88 @@
+#!/bin/bash
+
+##############################################################################
+# Invocation:
+#    run Chase
+#
+# Expected Folders:
+#    ./src/Chase.py
+#    ./runs/Chase/in
+#    ./runs/Chase/out
+#    ./runs/Chase/check
+#    ./runs/Chase/out/DetailsEachMonth/csv 
+#    ./runs/Chase/out/DetailsEachMonth/html 
+#    ./runs/Chase/in must contain all the input .csv files 
+#
+##############################################################################
+declare -r HERE=`pwd`
+declare -r SRC="${HERE}/src/" 
+declare -r RUNS="${HERE}/runs/" 
+declare -r RUN="${1}" 
+declare -r FOLDER_IN="${RUNS}${RUN}/in/"
+declare -r FOLDER_OUT="${RUNS}${RUN}/out/"
+
+if [ ! -e $SRC ]
+then
+    echo -e "FOLDER NOT FOUND: $SRC"
+    exit 1
+fi
+
+if [ ! -e $RUNS ]
+then
+    echo -e "FOLDER NOT FOUND: $RUNS"
+    exit 1
+fi
+
+if [ ! -e $FOLDER_OUT ]
+then
+    echo -e "FOLDER NOT FOUND: $FOLDER_OUT"
+    exit 1
+fi
+
+if [ ! -e $FOLDER_IN ]
+then
+    echo -e "FOLDER NOT FOUND: $FOLDER_IN"
+    exit 1
+fi
+
+if [ ! -e ${SRC}${RUN}.py ]
+then
+    echo -e "FILE NOT FOUND: ${SRC}${RUN}.py"
+    exit 1
+fi
+
+echo -e "\nSource code is:" 
+echo -e "    ${SRC}" 
+echo -e "Output folder is:" 
+echo -e "    ${FOLDER_OUT}" 
+echo -e "Input folder is:" 
+echo -e "    ${FOLDER_IN}" 
+
+find ${SRC} -name "*.pyc" -exec rm {} ';'
+python ${SRC}${RUN}.py ${FOLDER_IN} ${FOLDER_OUT} 
+
+exit 0   
+
+
+##############################################################################
+# HOW TO CONVERT CSV TO CSV AND CSV TO HTML
+# 1) Modify this run.bsh to invoke ./src/GoSpecialCamp.py
+# 2) Modify ./src/GoSpecialCamp.py
+#    to invoke ./classes/report/SpecialCamp.py
+# 3) Modify ./classes/report/SpecialCamp.py
+#    to configure each of the report types that will be run
+#    whichConfigClass is at classes/database/config/Config.py
+# /home/kurt/ubu/special-camp/download  meds-2014-01-13.csv
+##############################################################################
+
+##############################################################################
+#
+# If the special camp database has changed and has been reloaded, it is
+# necessary to recreate the top index.html to account for changes to the
+# list of campers.
+#
+# The rails Meds Controller will invoke ./src/GoSpecialCamp.py to produce
+# the index.html that is rendered from the Meds Controller index method.
+#
+##############################################################################
+

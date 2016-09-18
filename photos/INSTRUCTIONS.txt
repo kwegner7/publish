@@ -1,13 +1,25 @@
+The structure of publish:
+publish/
+    classes.js entry-points.js methods.js styles.css (common)
+    page-type1/
+    page-type2/
+    photos/
+        classes.js entry-points.js methods.js styles.css (common to photos) 
+        album1/
+            classes.js entry-points.js methods.js styles.css (common to album1)  
+            images/        
+
+
 
 If this new album follows the usual "photos" style
 then it needs to implement only:
     images folder containing the images
     methods.js containing list of file in the images folder
 
-Create a new folder under /data/proj/common/photos/
-     cd /data/proj/common/photos/
+Create a new folder under /data/proj/publish/photos/
+     cd /data/proj/publish/photos/
      mkdir --parents new-album new-album/images
-     cd /data/proj/common/photos/new-album
+     cd /data/proj/publish/photos/new-album
      cp ../template/index.html .
      cp ../template/methods.js .
      cp ../template/classes.js .
@@ -15,14 +27,15 @@ Create a new folder under /data/proj/common/photos/
      cp ../template/styles.css .
      
 Determine the pictures:
+     declare NEW_ALBUM="2016-08"
      cd /data/edit-pictures
-     mkdir new-album
-     move original big pictures into /data/edit-pictures/new-album
-     picture-smaller.bsh /data/edit-pictures/new-album
-     This creates /data/edit-pictures/new-album/smaller
-     copy /data/edit-pictures/new-album/smaller
-     to   /data/proj/common/photos/new-album/images
-     and modify /data/proj/common/photos/new-album/methods.js to include:
+     mkdir ${NEW_ALBUM}
+     move original big pictures into /data/edit-pictures/${NEW_ALBUM}
+     picture-smaller.bsh /data/edit-pictures/${NEW_ALBUM}
+     This creates /data/edit-pictures/${NEW_ALBUM}/smaller
+     copy /data/edit-pictures/${NEW_ALBUM}/smaller
+     to   /data/proj/common/photos/${NEW_ALBUM}/images
+     and modify /data/proj/common/photos/${NEW_ALBUM}/methods.js to include:
             "IMG_1531.JPG",
             "IMG_1532.JPG",
             "IMG_1533.JPG",
@@ -34,7 +47,7 @@ Open:
      
 How to publish so that the link is:
 
-    http://kwegner7.github.io/camp/photos/nary-and-kurt
+    http://kwegner7.github.io/publish/photos/nary-and-kurt
     
     Move the following files to /data/proj/git/website
         /data/proj/common/photos
@@ -59,9 +72,13 @@ github  https://github.com/kwegner7/camp.git (push)
     git push backup master
     git push github master
 
+https://github.com/kwegner7/publish.git
+  git push github refs/heads/master refs/heads/gh-pages
 
-
-
+    git push -u github gh-pages
+    git push github
+        now means:
+            git push github refs/heads/gh-pages
 
 
 

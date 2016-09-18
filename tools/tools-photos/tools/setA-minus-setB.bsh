@@ -1,0 +1,54 @@
+#!/bin/bash
+
+########################################################################
+# useful functions
+########################################################################
+function set_intersection()
+{
+    cat ${1} ${2} | sort | uniq --repeated 
+}
+
+function set_disjoint_union()
+{
+    # ff0792222dd5d09cf03eed15b94f91a1
+    cat ${1} ${2} | sort | uniq --unique --check-chars=32
+}
+
+function set_minus()
+{
+    local -r DISJOINT=$(mktemp)
+    set_disjoint_union ${1} ${2} > ${DISJOINT}
+    set_intersection ${DISJOINT} ${1}
+}
+
+########################################################################
+# A - B = (A disjoint union B) intersect A
+########################################################################
+function main()
+{
+    local -r SET_A="${1}"
+    local -r SET_B="${2}"
+    local -r OUTFILE=$(mktemp)
+
+    echo -en "         Classes in first set not in second set:" >&2
+    set_minus "${SET_A}" "${SET_B}" | cut --delimiter=' ' --fields=3- > ${OUTFILE}
+
+    local -ir SIZE_OUTFILE=$(cat ${OUTFILE} | wc -l)
+    printf "%6d unique files in first set not in second set\n" "${SIZE_OUTFILE}" >&2
+
+    cat ${OUTFILE}
+    rm -f ${OUTFILE}
+    return 0
+
+}
+
+##############################################################################
+# Example:
+#    setA-minus-setB \
+#    ./runs/Dell/out/selected-representativesA.txt \
+#    ./runs/Dell/out/selected-representativesB.txt \
+#    > ./runs/Dell/out/files-in-A-not-in-B.txt
+##############################################################################
+main "$@"
+exit "$?"
+

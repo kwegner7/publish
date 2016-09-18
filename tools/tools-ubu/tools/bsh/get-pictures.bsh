@@ -1,0 +1,45 @@
+#!/bin/bash -norc
+
+declare -ri RUPIAHS_PER_DOLLAR=8950
+
+function convert_to_dollars ()
+{
+    declare -i RUPIAHS=$1
+    declare -i DOLLARS=$(( RUPIAHS/RUPIAHS_PER_DOLLAR ))
+    declare -i CENTS=$(( RUPIAHS*100/RUPIAHS_PER_DOLLAR % 100 ))
+    echo $DOLLARS dollars $CENTS cents
+    return 0
+}
+
+function convert_to_rupiahs ()
+{
+    declare -i DOLLARS=$1
+    declare -i RUPIAHS=$(( DOLLARS*RUPIAHS_PER_DOLLAR ))
+    echo $RUPIAHS rupiahs
+    return 0
+}
+
+if false
+then
+    convert_to_dollars $1
+    convert_to_rupiahs $1
+fi
+
+if false
+then
+    echo $(( 10#$RUPIAHS_PER_DOLLAR ))
+    echo $(( 0xFFF ))
+    declare x=111
+    echo $(( x %= 100 ))
+fi
+
+if [ -e /tmp/get-pictures ]
+then
+    rm -rf /tmp/get-pictures
+fi
+mkdir --parents /tmp/get-pictures
+cd /media/5D30-4030 && find -name "*.jpg" -exec cp --no-clobber --verbose --preserve=timestamps {} /home/kurt/Pictures/droid ';'
+cd /media/MOT       && find -name "*.jpg" -exec cp --no-clobber --verbose --preserve=timestamps {} /home/kurt/Pictures/droid ';'
+
+exit
+

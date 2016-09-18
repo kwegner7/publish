@@ -1,0 +1,464 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+
+########################################################################
+# how to present file differences
+########################################################################
+function reset ()
+{
+    echo ''
+    echo '        Resetting ... '
+
+    rm -rf ${TEMP_FOLDER}
+    mkdir --parents --mode=777 ${TEMP_FOLDER}
+    mkdir --parents --mode=777 ${FILE_DIFFS1}
+    mkdir --parents --mode=777 ${FILE_DIFFS2}
+
+    return 0
+}
+
+########################################################################
+# accumulate list of files
+########################################################################
+function accumulate ()
+{
+    local -r next_capture=${1:-FOLDER_NAME_ERROR}
+
+    echo '        Adding Folder:' $next_capture
+
+    if (( 1 ))
+    then
+        cd $next_capture
+        find . -name "*" -print | grep -v "\/\.svn" >> $ACCUMULATE1
+    else
+        :
+    fi
+
+    cat $ACCUMULATE1 | sort -u > $ACCUMULATE2
+    cat $ACCUMULATE2           > $ACCUMULATE1
+
+    return 0
+}
+
+########################################################################
+# check for mismatches
+########################################################################
+function check_for_mismatch ()
+{
+    declare -r COPY_DIFFS_TO_WORKING="TRUE"
+    declare -r out_summary=/tmp/kurt/diff_summary.txt
+    declare -r out_details=/tmp/kurt/diff_details.txt
+    rm -rf $out_summary
+    rm -rf $out_details
+    declare -r number_folders=${#*}
+    declare -a folder
+    folder=($@)
+
+    echo '' | tee --append $out_summary
+    for (( i=0 ; i<$number_folders ; i++ ))
+    do
+        echo "        FOLDER $i IS: ${folder[$i]}" | tee --append $out_summary
+    done
+    echo '' | tee --append $out_summary
+
+    for next in $(cat $ACCUMULATE1)
+    do
+        declare -a next_type[$number_folders]
+        for (( i=0 ; i<$number_folders ; i++ ))
+        do
+            ####################################################################
+            # determine type of file
+            ####################################################################
+            if   [ -d ${folder[$i]}/$next -a ! -L ${folder[$i]}/$next ]; then next_type[$i]="DIR_REGULAR"
+            elif [ -d ${folder[$i]}/$next -a   -L ${folder[$i]}/$next ]; then next_type[$i]="DIR_LINK"
+            elif [ -f ${folder[$i]}/$next -a ! -L ${folder[$i]}/$next ]; then next_type[$i]="FILE_REGULAR"
+            elif [ -f ${folder[$i]}/$next -a   -L ${folder[$i]}/$next ]; then next_type[$i]="FILE_LINK"
+            elif [ -L ${folder[$i]}/$next -a ! -e ${folder[$i]}/$next ]; then next_type[$i]="NULL_LINK"
+            elif [ -e ${folder[$i]}/$next                             ]; then next_type[$i]="EXISTS"
+                                                                         else next_type[$i]="DOESNT_EXIST"
+            fi
+
+            ####################################################################
+            # refine the way type is printed
+            ####################################################################
+            if (( 0 )); then
+                print1=${next_type[$i]/FILE_REGULAR/FILE (v${i})   }
+                print2=${print1/DOESNT_EXIST/  ---       }
+                print3=${print2/FILE_LINK/LINK (v${i})   }
+                print4=${print3/DIR_REGULAR/DIRECTORY   }
+                print5=${print4/DIR_LINK/DIR LINK    }
+                print6=${print5/NULL_LINK/NULL LINK   }
+                print7=${print6/EXISTS/EXISTS      }
+            else
+                print1=${next_type[$i]/FILE_REGULAR/ ${i} }
+                print2=${print1/DOESNT_EXIST/---}
+                print3=${print2/FILE_LINK/LNK}
+                print4=${print3/DIR_REGULAR/DIR}
+                print5=${print4/DIR_LINK/DLK}
+                print6=${print5/NULL_LINK/NLL}
+                print7=${print6/EXISTS/+++}
+            fi
+
+            present[$i]=$print7
+            unique[$i]=1
+        done
+
+        ####################################################################
+        # check for files that have changed
+        ####################################################################
+        declare -a columns
+        columns[0]=""
+        declare -i count_diffs=0
+        declare is_regular_file=0
+
+        for (( i=1 ; i<$number_folders ; i++ ))
+        do
+            #echo i is $i
+            #for (( j=1 ; j<$i+1 ; j++ ))
+            for (( j=$i ; j>0 ; j-- ))
+            do
+                #echo $j $i ${next_type[$j-1]} ${next_type[$i]}
+                if [[ ( ${next_type[$j-1]} == "FILE_REGULAR" )
+                   && ( ${next_type[$i]}   == "FILE_REGULAR" ) ]]
+                then
+                    #echo checking $j minus 1 and $i $next
+                    is_reqular_file=1
+                    if (( unique[$j-1] )); then
+                    {
+                        if cmp -s ${folder[$j-1]}/$next ${folder[$i]}/$next; then
+                        {
+                            : FILES ARE THE SAME
+                            #echo they are the same
+                            present[$i]=${present[$j-1]}
+                            unique[$i]=0
+                            break
+                        }
+                        else
+                        {
+                            #echo they are different
+                            count_diffs+=1
+
+                            # if the number of folders is 2 then copy folder 1 to the working directory
+                            if [[ ( $number_folders -eq 2 )
+                               && ( $COPY_DIFFS_TO_WORKING == "TRUE" ) ]]; then
+                            {
+                                cp ${folder[1]}/$next $WORKING/$next
+                            }
+                            fi
+
+                            echo '' >> $out_details
+                            echo '' >> $out_details
+                            echo ==================================================================== >> $out_details
+                            echo "Comparing" ${folder[$j-1]}/$next >> $out_details
+                            echo "     with" ${folder[$i]}/$next >> $out_details
+                            echo '' >> $out_details
+                            (( 0 )) && diff --minimal --ignore-all-space --ignore-blank-lines --context \
+                                ${folder[$j-1]}/$next ${folder[$i]}/$next >> $out_details
+                            (( 1 )) && diff --minimal --ignore-all-space --ignore-blank-lines \
+                                ${folder[$j-1]}/$next ${folder[$i]}/$next >> $out_details
+                        }
+                        fi
+                    }
+                    else
+                    {
+                        : echo skipping comparison ...
+                    }
+                    fi
+                fi
+            done
+        
+            ####################################################################
+            # check for missing files, directories, directory links, and null links
+            ####################################################################
+            if (( $is_regular_file )); then
+                : DO NOTHING
+            elif [[ ${next_type[$i-1]} != ${next_type[$i]} ]]; then
+                count_diffs+=1
+            fi
+        done
+
+        ########################################################
+        # these flat files (or links to) have changes
+        ########################################################
+        if [ $count_diffs -gt 0 ]
+        then
+            for (( i=0 ; i<$number_folders ; i++ )); do
+                columns[$i]="${present[$i]}"
+            done
+
+            #path_to_diff=$(path_only $next)
+            #mkdir --parents $FILE_DIFFS1/$path_to_diff
+            #mkdir --parents $FILE_DIFFS2/$path_to_diff
+            #cp ${folder[$i-1]}/$next $(path_only $FILE_DIFFS1/$next)
+            #cp ${folder[$i]}/$next $(path_only $FILE_DIFFS2/$next)
+        fi
+
+        ####################################################################
+        # print a line
+        ####################################################################
+        if                                       \
+            [[                                   \
+                   ${next_type[0]} == "FILE_LINK" \
+                || ${next_type[1]} == "FILE_LINK" \
+                || ${next_type[0]} == "DIR_LINK" \
+                || ${next_type[1]} == "DIR_LINK" \
+                || ${next_type[0]} == "NULL_LINK" \
+                || ${next_type[1]} == "NULL_LINK" \
+            ]]
+        then
+            : DO NOTHING
+        elif [ ${#columns[0]} -gt 0 ]
+        then
+            for (( i=0 ; i<$number_folders ; i++ )); do
+                echo -n "${columns[$i]}   "  | tee --append $out_summary
+            done
+            echo "$next" | tee --append $out_summary
+        fi     
+    done
+    return 0
+}
+
+########################################################################
+# how to present file differences
+########################################################################
+function print_diffs ()
+{
+    local -r print_type=${1:-FILES_DIFFER}
+    local -r full_path=${2:-FILENAME_ERROR}
+    local -r print_to_file=${3}
+
+    local -r blanks="                                                           "
+    local where=$(path_only $full_path)
+    where+="                                                           "
+    local -r where_sized=${where:0:50}
+    local file=$(filename_ext $full_path)
+    local ext=$(extension_only $full_path)
+    local file_length=${#file}
+    if (( $file_length <= 50 )); then
+        blank_length=${blanks:0:50-file_length}
+        file=$blank_length$file
+    else
+        blank_length=""
+        file=${file:0:44}
+        file+="..."
+        file+=$ext
+    fi
+    local -r file_sized=${file}
+    local -r empty=" --- "
+    local -r v1=" (1) "
+    local -r v2=" (2) "
+
+    if [[ $print_type == "FILES_DIFFER" ]]; then
+        echo "      FILE: $file_sized $v1 $v2     FOLDER: $where"
+
+    elif [[ $print_type == "FILELINKS_DIFFER" ]]; then
+        echo " FILE LINK: $file_sized $v1 $v2     FOLDER: $where"
+
+    elif [[ $print_type == "FILE_IN_1ST" ]]; then
+        echo "      FILE: $file_sized $v1 $empty     FOLDER: $where"
+
+    elif [[ $print_type == "FILE_IN_2ND" ]]; then
+        echo "      FILE: $file_sized $empty $v2     FOLDER: $where"
+
+    elif [[ $print_type == "FILELINK_IN_1ST" ]]; then
+        echo " FILE LINK: $file_sized $v1 $empty     FOLDER: $where"
+
+    elif [[ $print_type == "FILELINK_IN_2ND" ]]; then
+        echo " FILE LINK: $file_sized $empty $v2     FOLDER: $where"
+
+    elif [[ $print_type == "DIR_IN_1ST" ]]; then
+        echo " DIRECTORY: $file_sized $v1 $empty     FOLDER: $where"
+
+    elif [[ $print_type == "DIR_IN_2ND" ]]; then
+        echo " DIRECTORY: $file_sized $empty $v2     FOLDER: $where"
+
+    elif [[ $print_type == "DIRLINK_IN_1ST" ]]; then
+        echo "  DIR LINK: $file_sized $v1 $empty     FOLDER: $where"
+
+    elif [[ $print_type == "DIRLINK_IN_2ND" ]]; then
+        echo "  DIR LINK: $file_sized $empty $v2     FOLDER: $where"
+
+    else
+        echo "ERROR IN print_diffs() --> " $print_type
+    fi
+
+    return 0
+}
+
+########################################################################
+# compare
+########################################################################
+function compare ()
+{
+    declare -r folder1=${1:-/public/users/kwegncc/working}
+    declare -r folder2=${2:-/public/users/kwegncc/exported_view}
+    declare -r    sync=$false
+
+    ########################################################################
+    # create a list of all files under each folder
+    ########################################################################
+    echo ''
+    echo '        1ST FOLDER IS:' $folder1
+    echo '        2ND FOLDER IS:' $folder2
+    echo ''
+
+    cat /tmp/f1 | sort -u > /tmp/f2
+    rm -f $folder2/../compare_summary.txt
+    rm -f $folder2/../compare_details.txt
+
+    for next in $(cat $ACCUMULATE1)
+    do
+    {
+        #declare       is_dir1="-d $folder1/$next && ! -L $folder1/$next"
+        #declare  is_link_dir1="-d $folder1/$next &&   -L $folder1/$next"
+        #declare      is_file1="-f $folder1/$next && ! -L $folder1/$next"
+        #declare is_link_file1="-f $folder1/$next &&   -L $folder1/$next"
+        #declare       exists1="-e $folder1/$next"
+
+        #declare       is_dir2="-d $folder2/$next && ! -L $folder2/$next"
+        #declare  is_link_dir2="-d $folder2/$next &&   -L $folder2/$next"
+        #declare      is_file2="-f $folder2/$next && ! -L $folder2/$next"
+        #declare is_link_file2="-f $folder2/$next &&   -L $folder2/$next"
+        #declare       exists2="-e $folder2/$next"
+ 
+        #if [  -e $folder1/$next -a   ! -e $folder1/$next -o ! -e $folder1/$next    ]; then echo TRUE; else echo FALSE; fi
+        #if [[ -e $folder1/$next && ( ! -e $folder1/$next || ! -e $folder1/$next ) ]]; then echo TRUE1; else echo FALSE1; fi
+        #if [[    $exists1       && ( !          $exists1 ||           $exists1 ) ]]; then echo TRUE2; else echo FALSE2; fi
+        #if [ 1 -o 1 ]; then echo TRUE3; else echo FALSE3; fi
+        #if [[ 1 || 1 ]]; then echo TRUE4; else echo FALSE4; fi
+
+        #if [[ -d $folder1/$next && ! -L $folder1/$next && -d $folder2/$next && ! -L $folder2/$next ]]; then echo IS A DIRECTORY1 $next $is_dir1; fi
+        #if [[  -f $folder1/$next && ! -L $folder1/$next && -f $folder2/$next && ! -L $folder2/$next  ]]; then echo IS A FILE1 $next $is_file1; fi
+
+        if (( 0 )); then
+            echo DO NOTHING
+
+        elif [[ -d $folder1/$next && ! -L $folder1/$next && -d $folder2/$next && ! -L $folder2/$next ]]; then
+            : DO NOTHING IF BOTH PLAIN DIRECTORIES
+
+        elif [[ -d $folder1/$next && -L $folder1/$next && -d $folder2/$next && -L $folder2/$next ]]; then
+            : DO NOTHING IF BOTH DIRECTORY LINKS
+
+        elif [[ ! -e $folder1/$next && -L $folder1/$next || ! -e $folder2/$next && -L $folder2/$next ]]; then
+            : DO NOTHING IF EITHER IS A NULL LINK
+
+#        elif                                          \
+#            [[                                        \
+#                $exists1 &&                           \
+#                $exists2 &&                           \
+#                (                                     \
+#                          $is_dir1 != $is_dir2       \
+#                 ||  $is_link_dir1 != $is_link_dir2  \
+#                 ||      $is_file1 != $is_file2      \
+#                 || $is_link_file1 != $is_link_file2 \
+#                )                                     \
+#            ]]
+#       then
+#            echo '    MISMATCH OF TYPES:' $next | tee -a $folder2/../compare_summary.txt
+
+        elif [[ -d $folder1/$next && ! -L $folder1/$next && ! -e $folder2/$next ]]; then
+            print_diffs DIR_IN_1ST $next $folder2/../compare_summary.txt
+ 
+        elif [[ -d $folder1/$next &&   -L $folder1/$next && ! -e $folder2/$next ]]; then
+            print_diffs DIRLINK_IN_1ST $next $folder2/../compare_summary.txt
+
+        elif [[ -d $folder2/$next && ! -L $folder2/$next && ! -e $folder1/$next ]]; then
+            print_diffs DIR_IN_2ND $next $folder2/../compare_summary.txt
+ 
+        elif [[ -d $folder2/$next &&   -L $folder2/$next && ! -e $folder1/$next ]]; then
+            print_diffs DIRLINK_IN_2ND $next $folder2/../compare_summary.txt
+
+         elif [[ -f $folder1/$next && ! -L $folder1/$next && ! -e $folder2/$next ]]; then
+            print_diffs FILE_IN_1ST $next $folder2/../compare_summary.txt
+
+        elif [[ -f $folder1/$next &&   -L $folder1/$next && ! -e $folder2/$next ]]; then
+            print_diffs FILELINK_IN_1ST $next $folder2/../compare_summary.txt
+
+        elif [[ -f $folder2/$next && ! -L $folder2/$next && ! -e $folder1/$next ]]; then
+            print_diffs FILE_IN_2ND $next $folder2/../compare_summary.txt
+
+        elif [[ -f $folder2/$next &&   -L $folder2/$next && ! -e $folder1/$next ]]; then
+            print_diffs FILELINK_IN_2ND $next $folder2/../compare_summary.txt
+ 
+        elif [[ -f $folder1/$next && ! -L $folder1/$next && -f $folder2/$next ]]; then
+            if ( ! cmp -s $folder1/$next $folder2/$next ); then
+                if (( 0 ))
+                then
+                    echo "         FILES DIFFER: $next copying ..." | tee -a $folder2/../compare_summary.txt
+                    cp $folder2/$next $folder1/$next
+                else
+                    print_diffs FILES_DIFFER $next $folder2/../compare_summary.txt
+                    echo '         FILES DIFFER:' $next >> $folder2/../compare_details.txt
+                    diff $folder1/$next $folder2/$next  >> $folder2/../compare_details.txt
+                fi
+           fi
+
+        elif [[ -f $folder1/$next &&   -L $folder1/$next && -f $folder2/$next ]]; then
+            if ( ! cmp -s $folder1/$next $folder2/$next )
+            then
+                if (( 0 ))
+                then
+                    echo "    FILE LINKS DIFFER: $next copying ..." | tee -a $folder2/../compare_summary.txt
+                    cp $folder2/$next $folder1/$next
+                else
+                    print_diffs FILELINKS_DIFFER $next $folder2/../compare_summary.txt
+                    echo '    FILE LINKS DIFFER:' $next >> $folder2/../compare_details.txt
+                    diff $folder1/$next $folder2/$next  >> $folder2/../compare_details.txt
+                fi
+            fi
+
+        else
+            echo "THERE HAS BEEN A MISTAKE --> $folder1/$next"
+        fi
+    }
+    done
+
+    return
+ }
+
+########################################################################
+# capture differences
+########################################################################
+function main ()
+{
+
+    ####################################################################
+    # export these variables
+    ####################################################################
+    declare -r -x TEMP_FOLDER=/tmp/kurt/compare_folders
+    declare -r -x ACCUMULATE1=$TEMP_FOLDER/accumulating1
+    declare -r -x ACCUMULATE2=$TEMP_FOLDER/accumulating2
+    declare -r -x FILE_DIFFS1=$TEMP_FOLDER/capture1
+    declare -r -x FILE_DIFFS2=$TEMP_FOLDER/capture2
+
+    if [[ $1 == "RESET" ]]
+    then
+        shift 1
+        reset "$@"
+
+    elif [[ $1 == "ACCUMULATE" ]]
+    then
+        shift 1
+        accumulate "$@"
+
+    elif [[ $1 == "MISMATCHES" ]]
+    then
+        shift 1
+        check_for_mismatch "$@"
+
+    else
+        compare "$@"
+    fi
+
+    return 0
+}
+
+main "$@"
+exit 0
+
+########################################################################
+# example
+########################################################################
+

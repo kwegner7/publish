@@ -1,0 +1,8 @@
+
+######################################################################### 
+# ssh dp3 -l kwegncc
+# at -f /home/kwegncc/scripts/nightly_build.txt 1810
+#########################################################################
+
+/usr/atria/bin/cleartool setview -exec "/vobs/uewr_source/Integration/build_all" kwegncc_using_cr
+gen_build_results > /home/kwegncc/build_results/`date +%Y-%m-%d`

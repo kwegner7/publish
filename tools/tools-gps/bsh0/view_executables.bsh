@@ -1,0 +1,65 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# view the derived executables within the VOB workspace
+########################################################################
+function main ()
+{
+    declare -r EXCLUDING='o a i ii'
+    echo '' && echo "Executables found under $PWD ..."
+    echo "Excluding files with extensions: $EXCLUDING" && echo ''
+
+    declare -r flag=${1:---none}
+    if [[ ${flag} == --cc ]]; then
+        declare -r ALL_DERIVED=$(ct lsprivate -do)
+    elif [[ ${flag} == --svn ]]; then
+        declare -r ALL_DERIVED=$(svn status $PWD | grep '^?' | cut --characters=1-7 --complement)
+    else
+        declare -r ALL_DERIVED=$(find . -name "*" -print)
+    fi
+
+    declare -i NOT_YET_LISTED=1
+    for DERIVED in ${ALL_DERIVED}
+	do
+        for EXT in ONCE #${EXCLUDING}
+    	do
+    		if [[
+                   -f $DERIVED 
+                && $(extension_only $DERIVED) != o
+                && $(extension_only $DERIVED) != a
+                && $(extension_only $DERIVED) != i
+                && $(extension_only $DERIVED) != ii
+            ]]
+    		then
+                ls -l $DERIVED
+                #(( ${NOT_YET_LISTED} )) && ls -l $EXEC
+                #NOT_YET_LISTED=0
+            fi
+        done
+    done
+    echo ''
+
+    #echo '' && cd ${INSTALL_ROOT}/${BUILD_VERSION}/Tactical/bin && ls -la && echo ''
+    #pwd
+
+    return 0
+}
+
+########################################################################
+# Invocation: view_executables [ --svn | --cc ]
+########################################################################
+main "$@"
+
+########################################################################
+# view must be set before invoking view_executables
+########################################################################
+if [ $false ]
+then
+    view=kwegncc_sps
+    config_spec=/home/kwegncc/INSTRUCTIONS/CLEARCASE/CONFIG_SPECS/SPS
+    ct setcs -tag $view $config_spec
+    ct setview $view
+fi
+

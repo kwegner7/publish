@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#
+# Copy only .py files into a new folder
+#
+
+declare SRC="/working/python/db3/src/"
+declare DEST="/working/python/finance/src/"
+
+IFS=$'\n'
+
+    #rm -rf "${DEST}"
+    cd $SRC
+    declare FILES=$(find . -name "*.py" -print)
+    for FILE in $FILES
+    do
+        echo Copying Python file $FILE
+        mkdir --parents ${DEST}/$(dirname $FILE)
+        cp $FILE ${DEST}/$(dirname $FILE)
+    done
+
+IFS=$'\x20\t\n'
+
+
+

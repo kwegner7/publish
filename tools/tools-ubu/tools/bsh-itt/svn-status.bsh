@@ -1,0 +1,103 @@
+#!/bin/bash
+
+##############################################################################
+# print symbols showing the project and checkout of current interest
+##############################################################################
+function print_current_symbols()
+{
+    echoerr "\nLocation of repository and working folders:"
+    echoerr "                PROJ: $PROJ"
+    echoerr "            PROJ_SVN: $PROJ_SVN"
+    echoerr "             WORKING: $WORKING"
+    echoerr "               NOTES: $NOTES"
+    echoerr "\nLocation of repository as internet link:"
+    echoerr "                 SVN: $SVN"
+    echoerr "\nPath in repository to current fileset of interest:"
+    echoerr "             PROJECT: $PROJECT"
+    echoerr "        BASE_VERSION: $BASE_VERSION"
+    echoerr "     BASE_CORRECTION: $BASE_CORRECTION"
+    echoerr "             FEATURE: $FEATURE"
+    echoerr "      IMPLEMENTATION: $IMPLEMENTATION"
+    echoerr "          CORRECTION: $CORRECTION"
+    echoerr "        BASE_FILESET: $BASE_FILESET"
+    echoerr " PREDECESSOR_FILESET: $PREDECESSOR_FILESET"
+    echoerr "     WORKING_FILESET: $WORKING_FILESET"
+    echoerr "\nLocation of flat folder for import:"
+    echoerr "       IMPORT_FOLDER: $IMPORT_FOLDER"
+    return 0
+}
+
+##############################################################################
+# print file sets in current repository
+##############################################################################
+function print_current_repository()
+{
+    if [ -e $WORKING/../svn ]
+    then
+        echoerr "\nRepository exists and contains these file sets:"
+        svn list --recursive $SVN | grep '/fileset/$' | sed "s/^/    /g" > /dev/stderr
+    else
+        echoerr "\nRepository does not exist"
+    fi
+    return 0
+}
+##############################################################################
+# print the status of the working directory
+##############################################################################
+function print_current_working()
+{
+    cd $WORKING
+    echoerr "\nActive working directory:"
+    shift4 $WORKING
+    echoerr "\nActive file set:"
+    svn info | grep URL | sed "s/^/    /g" > /dev/stderr
+    return 0
+}
+
+##############################################################################
+# svn-status
+#   Prints the status of the SVN repository and working folder
+##############################################################################
+function svn-status()
+{
+    local -r NUMBER_PARAMS=${#@}
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    if [ $NUMBER_PARAMS -ne 0 ]
+    then
+        echoerr There are no parameters, the repository must exist
+        echoerr Invocation:
+        echoerr "   svn-status" 
+        return 1
+    fi
+
+    ##########################################################################
+    # print status
+    ##########################################################################
+
+    $(print_current_symbols)
+    sleep 1
+    $(print_current_repository)
+    sleep 1
+    $(print_current_working)
+    sleep 1
+
+    return 0
+}
+
+##############################################################################
+# main entry point
+##############################################################################
+svn-status "$@"
+exit 0
+
+##############################################################################
+# example
+##############################################################################
+if false; then
+{
+    cd ~ && svn-status
+}
+fi

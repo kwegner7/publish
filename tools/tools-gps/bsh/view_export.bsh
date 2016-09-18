@@ -1,0 +1,87 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# export_view $VOB_FOLDER $VIEWS/$VIEW SPS
+########################################################################
+function main ()
+{
+    declare -r vob_folder=${1:-/vobs/sps_source}
+    declare -r receiving_folder=${2:-/public/users/kwegncc/receiving_folder_view}
+    declare -r view_type=${3:---SPS}
+
+    ########################################################################
+    # view must be set before invoking export_view
+    ########################################################################
+    if [ $false ]
+    then
+        view=kwegncc_sps
+        config_spec=/home/kwegncc/INSTRUCTIONS/CLEARCASE/CONFIG_SPECS/SPS
+        ct setcs -tag $view $config_spec
+        ct setview $view
+    fi
+
+    ########################################################################
+    # prepare the folder to receive the export
+    ########################################################################
+    if [ $true ]
+    then
+        if [ -d $receiving_folder ]; then rm -rf $receiving_folder; fi
+        mkdir -p $receiving_folder/export
+        ct catcs > $receiving_folder/config_spec.txt
+        touch $receiving_folder/timestamp-`date +%Y-%m-%d`
+    fi
+
+    ########################################################################
+    # export a vob folder from within a clearcase view
+    ########################################################################
+    cd $vob_folder
+    declare -r export_these=$(ct ls -recurse -vob_only -short -nxname)
+    for next in $export_these
+    do
+        if [ $view_type == "--SPS" ]
+        then
+            declare exclude1=${next##./SpsTestBench/TestData*}
+            declare exclude2=${next##./SP/TPU/sgi/lib/uewr/data.tar.gz}
+            declare exclude3=${next%%./SP/TPU/sgi/lib/uewr/data.tar.gz}
+        else
+            declare exclude1=${next##./SpsTestBench/TestData*}
+            declare exclude2=${next##./SP/TPU/sgi/lib/uewr/data.tar.gz}
+            declare exclude3=${next%%./SP/TPU/sgi/lib/uewr/data.tar.gz}
+        fi
+
+        if [   ${#exclude1} -eq 0 \
+            -o ${#exclude2} -eq 0 \
+            -o ${#exclude3} -eq 0 ]; then
+            echo '   EXCLUDED:' $next
+
+        elif [ -d $next -a ! -L $next ]; then
+            echo '  DIRECTORY:' $next
+            mkdir -p $receiving_folder/export/$next
+
+        elif [ -d $next -a -L $next ]; then
+            echo '   DIR LINK:' $next
+            cp $next $receiving_folder/export/$next
+
+        elif [ -f $next -a ! -L $next ]; then
+            echo '       FILE:' $next
+            cp $next $receiving_folder/export/$next
+
+        elif [ -f $next -a -L $next ]; then
+            echo '  FILE LINK:' $next
+            cp $next $receiving_folder/export/$next
+
+        else
+            echo 'WHAT IS IT?:' $next
+        fi
+    done
+
+    return
+}
+ 
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"

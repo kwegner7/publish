@@ -1,0 +1,248 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+#
+# Build SPS and/or Playback.
+#
+# Invocation:
+#   cd <someplace> && sps_build [ --heidi | --formal | --sarah | --playback | --dlt ]
+#
+########################################################################
+function main ()
+{
+    ##########################################################################
+    # process input parameters
+    ##########################################################################
+    declare -r flag=${1:---heidi}
+    declare -r sps_source_folder=${2:-$PWD}
+
+    {
+        ### soft link to the working directory
+        #rm -f /tmp/links/sps_source;
+        #ln -s $sps_source_folder /tmp/links/sps_source;
+
+        ### soft link to the delivered test data
+        rm -f /tmp/links/sps_source/SpsTestBench/TestData
+        ln -s /public/users/kwegncc/working5219/SpsTestBench/TestData /tmp/links/sps_source/SpsTestBench/TestData;
+    }
+
+    ##########################################################################
+    # export these variables that are required by the SPS build process
+    ##########################################################################cd 
+    declare -r -x SPRUN=/tmp/links/sps_source/sps_run
+    declare -r -x TPUDEV=/tmp/links/sps_source/SP/TPU/sgi/lib
+    declare -r -x PDEDEV=/tmp/links/sps_source/SP/TPU/sgi/tools/pde1.3
+    declare -r -x HARDWARE=-DTPU_PLUS
+    export SPRUN
+    export TPUDEV
+    export PDEDEV
+    export HARDWARE
+
+    #mkdir -p ~/libs/Matlab && cd ~/libs
+    #cp -r ${PDEDEV}/lib-sgi .
+    #cp -r /public/uewr_cots/Matlab_sps/Matlab/obj ./Matlab
+
+    if ( false )
+    then
+        LD_LIBRARY_PATH="/etc/lib:/usr/lib64:/usr/lib64/mips4:/usr/lib32:/usr/lib32/cmplrs"
+        LD_LIBRARY_PATH=${LD_LIBRARY_PATH}":/local/apps/gnu/lib/python2.2:/local/apps/gnu/gcc_libs:/local/apps/oracle/product/8.1.7/lib"
+        LD_LIBRARY_PATH=${LD_LIBRARY_PATH}":/local/apps/gnu/lib:/usr/openwin/lib:/usr/dt/lib:/usr/local/lib:/usr/local/lib/gcc-lib/sparc-sun-solaris2.8/3.2.3"
+        LD_LIBRARY_PATH=${LD_LIBRARY_PATH}":/local/apps/oracle8i/lib:/local/apps/gnu/lib"
+        LD_LIBRARY_PATH=${LD_LIBRARY_PATH}":${PDEDEV}/lib-sgi:/public/uewr_cots/Matlab_sps/Matlab/obj"
+        #LD_LIBRARY_PATH=${LD_LIBRARY_PATH}":~/libs/lib-sgi:~/libs/Matlab/obj"
+        export LD_LIBRARY_PATH
+    fi
+
+    if (( 1 )); then
+        echo -n '   $SPRUN IS: ' && echo $SPRUN
+        echo -n '  $TPUDEV IS: ' && echo $TPUDEV
+        echo -n '  $PDEDEV IS: ' && echo $PDEDEV
+        echo -n '$HARDWARE IS: ' && echo $HARDWARE
+        echo    '$LD_LIBRARY_PATH IS: ' && echo $LD_LIBRARY_PATH
+    fi
+
+    ##########################################################################
+    # initialize
+    ##########################################################################
+    {
+        rm -rf $SPRUN/build_sps_8.0.1-RFES*
+        rm  -f $SPRUN/build_sps_8.0.1-RFES*.tar
+        rm  -f $SPRUN/build_sps_8.0.1-RFES*.tar.gz
+        rm -rf $SPRUN
+        mkdir -p $SPRUN/SpsTestBench/SpsTestUtilities/test
+        mkdir -p $SPRUN/SpsTestBench/CmdGenerator/test
+        mkdir -p $SPRUN/SP/PC/test
+        mkdir -p $SPRUN/SpsTestBench/Comparator/test
+
+        #mkdir -p $sps_source_folder/SpsTestBench/TestData/Level7/IniFiles
+        #touch /tmp/sps_source/SpsTestBench/TestData/Level7/IniFiles/TICI_Level7_oa.ini
+        #touch /tmp/sps_source/SpsTestBench/TestData/Level7/IniFiles/TOCI_Level7_oa.ini
+        #must link to smake
+    }
+
+    ###########################################################################
+    # build the SPS
+    ###########################################################################
+    cd /tmp/links/sps_source/AutoRegTests
+
+    if [[ ${flag} == --dlt ]]; then
+
+        ### this will build dlt and mgr only
+        ### adds 1 10 13 14 20
+		./build_sps.py<<-responses
+			1
+			9
+			3
+			RFES
+			/tmp/links/sps_run
+			y
+		responses
+
+    elif [[ ${flag} == --formal ]]; then
+
+        ### this is the suggested formal build of SPS
+        ### this is run three times for faces selection 1, 2, 3
+		./build_sps.py<<-responses
+			1
+			1 10 11 12 20
+			3
+			8.0.1-RFES
+			/tmp/links/sps_run
+			y
+		responses
+
+    elif [[ ${flag} == --playback ]]; then
+
+        ### this is the suggested formal build of Playback
+        ### this is run two times for faces 1, 2, 3
+		./build_sps.py<<-responses
+			1
+			9 10 11 12 13
+			3
+			8.0.1-RFES
+			/tmp/links/sps_run
+			y
+		responses
+
+    elif [[ ${flag} == --sarah ]]; then
+
+        ### Sarah Manning suggests for testing playback and tools
+		./build_sps.py<<-responses
+			1
+			9 10 11 12 13 14 15
+			3
+			8.0.1-RFES
+			/tmp/links/sps_run
+			y
+		responses
+
+    elif [[ ${flag} == --heidi ]]; then
+
+        ### Heidi suggests
+		./build_sps.py<<-responses
+			1
+			1 9 10 11 12 13 14 15 18 19
+			2
+			RFES
+			/tmp/links/sps_run
+			y
+		responses
+
+    elif [[ ${flag} == --kurt ]]; then
+
+        ### Kurt suggests
+		./build_sps.py<<-responses
+			1
+			1 9 20
+			2
+			8.0.1-RFES
+			/tmp/links/sps_run
+			y
+		responses
+
+    else
+        echo BUILD FLAG HAS NOT BEEN SPECIFIED
+    fi
+
+    return 0
+}
+
+# 1) X SPS build: default configuration for string & site use (A-scope enabled; moderate amount of initialization printing; checkpoint enabled; -DDEBUGFAST enabled)
+# 2)   SPS build: A-scope enabled; moderate amount of initialization printing
+# 3)   SPS build: A-scope enabled; large amount of initialization printing
+# 4)   SPS build: A-scope enabled; moderate amount of initialization printing; checkpoint enabled
+# 5)   SPS build: A-scope enabled; large amount of initialization printing; checkpoint enabled
+# 6)   SPS build: A-scope enabled; moderate amount of initialization printing; checkpoint enabled; -DDEBUGFAST enabled
+# 7)   SPS build: A-scope enabled; moderate amount of initialization printing; -DDEBUGFAST enabled
+# 8)   SPS build: A-scope enabled; moderate amount of initialization printing; -DDEBUGMODE enabled (no optimization)
+# 9) X Playback build: moderate amount of initialization printing
+#10) X ReadDcf (tool for extracting LRIDs from .dcf files)
+#11) X generateSpsMasterReplica (tool for generating masterReplica.bin and spareMasterReplica.bin files)
+#12) X generateWeightedMFilter (tool for generating weightedMFilter.bin file)
+#13) X sps_reinit (tool for sending Terminate and Reinitialize commands to SPS)
+#14) X run_CmdGenerator (tool for generating inputs for use with the test bench)
+#15) X run_Comparator (tool for evaluating whether a test bench test passed or failed)
+#16)   SPS build: A-scope disabled; moderate amount of initialization printing; MrgControl RPRINTFs enabled
+#17)   SPS build: A-scope disabled; moderate amount of initialization printing; OaResultsEvaluation RPRINTFs enabled
+#18)   SPS build: Default TPU enabled build for regression tests (no A-scope; moderate amount of initialization printing; checkpoint enabled; -DDEBUGFAST enabled)
+#19)   SPS build: Default TPU disabled build for regression tests (no A-scope; moderate amount of initialization printing; checkpoint enabled; -DDEBUGFAST enabled)
+#20) X dlt and mrg utilities: used for tape archive/restore and Master Replica Generation
+
+
+###########################################################################
+# entry point
+###########################################################################
+declare -r HERE=$PWD
+rm -f $HERE/compilation_results.txt
+{
+    #######################################################################
+    # build the sps
+    #######################################################################
+    main "$@"
+
+    #######################################################################
+    # explanation of what has been built
+    #######################################################################
+    echo ==================================
+    echo EXPLANATION OF WHAT HAS BEEN BUILT
+    echo ==================================
+    cat $HERE/compilation_results.txt | grep success
+    cat $HERE/compilation_results.txt | grep WARN
+    #cat $HERE/compilation_results.txt | grep Error
+}
+
+echo DONE "$0"
+exit 0
+
+{
+   ( true     ) && cat $WORKING/compilation_results.txt | grep success
+   ( true     ) && cat $WORKING/compilation_results.txt | grep Copying
+   ( true     ) && cat $WORKING/compilation_results.txt | grep WARN
+   ( true     ) && cat $WORKING/compilation_results.txt | grep ERR
+   ( is_linux ) && cd $WORKING && view_executables --svn
+   ( is_linux ) && cd $WORKING/sps_run && tar -tf *.tar.gz
+}
+
+########################################################################'
+# example
+########################################################################'
+if (( 0 )); then
+
+    declare -x SPS_VERSION=5219UAS
+
+    echo '###############################################################'
+    echo  Setting the SVN working directory to be $SPS_VERSION
+    echo '###############################################################'
+    cd ${WORKING}
+    svn ls $SPS_sps_source_folder
+    svn switch $SPS_sps_source_folder/$SPS_VERSION $WORKING
+    svn info
+
+    echo '###############################################################'
+    echo  Building the SPS using ${WORKING}/AutoRegTests/build_sps.py...
+    echo '###############################################################'
+    sps_build ${WORKING}
+
+fi

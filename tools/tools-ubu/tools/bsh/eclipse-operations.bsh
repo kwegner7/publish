@@ -1,0 +1,197 @@
+#!/bin/bash
+
+# TODO:
+#   turn off spell check
+#   change the color of #Comment
+
+# An eclipse workspace is associated with:
+#   One perspective/preferences folder (.metadata)
+#   One or more source sets
+#   One repository
+#   For each source set associated with this workspace:
+#       A path within repository to each source set
+
+
+# 1) We associate a repository path with a name (CSV)
+#    The source set named CSV is checked out from the repository path:
+#        file:////repositories/python/repository/./python
+#
+# 2) The source code set is checked out to location:
+#        /repositories/python/workbenches/PYTHON/source-sets/CSV/src
+#
+# 3) We associate a workbench configuration with a name (PYTHON) located at
+#        /repositories/python/workbenches/PYTHON/.metadata
+
+# Creating a Project
+#    Right click on the existing project - Delete
+#    file > new > project > PyDev > PyDev project
+#        Project Name: CSV (this is the name we associate with the checkout)
+#        Location: /repositories/python/workbenches/PYTHON/source-sets/CSV
+#        Check the box "Add src folder and add to PYTHONPATH"
+#    This allows reference to "import dcr.*" for example
+
+# $BASE/repository
+# $BASE/workspace/workbench_python (.metadata)
+#                /project
+#                /project/.project
+#                /project/.pydevproject
+#                /project/src (this is called a package)
+#                /project/src/__init__.py
+#                /project/src/top_module.py
+#                /project/src/nested
+#                /project/src/nested/__init__.py
+#                /project/src/nested/nested_module.py
+
+#    File > new > PyDev package
+#        /project
+#        src.nested
+#     File > new > PyDev module
+#        /project
+#        src.nested
+#        nested-module
+#        <Empty>
+
+
+##############################################################################
+# info
+##############################################################################
+function info()
+{
+    echo -e "\nSVN Root is $SVN"
+    echo -e "Workspace is located at $WORKBENCH_LOC"
+    echo -e "Source code is located at $SOURCE_LOC"
+    return 0
+}
+
+##############################################################################
+# fresh-checkout
+##############################################################################
+function fresh-checkout()
+{
+    if [ ! -d $WORKBENCH_LOC ]
+    then
+        echo -e "\nCreating workspace from template ..."
+        mkdir --parents $(dirname $WORKBENCH_LOC)
+        cp -r $TEMPLATE_WORKSPACE $WORKBENCH_LOC
+    fi
+    if [ -d $PROJECT_LOC ]
+    then
+        echo -e "ERROR: Project exists already $PROJECT_LOC"
+        return 1
+    else
+        echo -e "\nChecking out source code ..."
+        svn checkout --quiet $SVN/$PATH_TO_SRC $PROJECT_LOC
+        eclipse -data $WORKBENCH_LOC &
+    fi
+    return 0
+}
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    ##########################################################################
+    # get parameters
+    ##########################################################################
+    declare -x          OPERATION=${1:--info}
+    declare -x          REPOS_LOC=${2:-/repositories/python/repository}
+    declare -x        PATH_TO_SRC=${3:-python}
+    declare -x     WORKBENCH_NAME=${4:-PYTHON}
+    declare -x       PROJECT_NAME=${5:-CSV}
+    declare -x TEMPLATE_WORKSPACE=${6:-~/Documents/ubu/templates/python/base/workspace}
+
+    ##########################################################################
+    # conveniences
+    ##########################################################################
+    declare -x           SVN=file:///${REPOS_LOC}
+    declare -x WORKBENCH_LOC=$(dirname $REPOS_LOC)/workbenches/$WORKBENCH_NAME
+    declare -x   PROJECT_LOC=$WORKBENCH_LOC/source-sets/$PROJECT_NAME/src
+
+    ##########################################################################
+    # operation
+    ##########################################################################
+      if [ $OPERATION = "--info"           ]; then shift && info "$@"
+    elif [ $OPERATION = "--fresh-checkout" ]; then shift && fresh-checkout "$@"
+    else 
+        echo -e " \"$OPERATION\" is not recognized"
+    fi
+
+    return 0
+}
+main "$@"
+exit 0
+
+##############################################################################
+# MAS
+##############################################################################
+if true
+then
+    cd /sharing/UEWR/MAS
+    eclipse-operations.bsh --fresh-checkout \
+        /sharing/UEWR/MAS/repository        \
+        MAS-8023/src/Oom                    \
+        MAS-8023-Annotated                  \
+        OOM            
+    eclipse-operations.bsh --info /sharing/UEWR/MAS/repository
+fi
+
+##############################################################################
+# Create a new Python Eclipse workspace from repository
+#    $REPOS_LOC $PATH_TO_SRC $WORKBENCH_NAME $PROJECT_NAME
+##############################################################################
+if true
+then
+    cd /workspaces
+    eclipse-operations.bsh --fresh-checkout \
+        /repositories/python/repository     \
+        python                              \
+        PYTHON                              \
+        CSV                                 \
+        /home/kurt/Documents/ubu/templates/python/base/workspace        
+fi
+
+if true
+then
+    cd /repositories/python/repository
+    ls -la 
+    /home/kurt/Documents/ubu/code/repository
+    
+if true
+then
+    cd /sharing
+    declare DRS=/sharing/UEWR/MAS/MAS-8023-Annotated/OOM/Oom/src/Trajectory_Drs.cxx
+    cat $DRS | sed "s@//.*@@" > /tmp/t1.txt
+    rm -f /tmp/t2.txt && touch /tmp/t2.txt
+    for TOKEN in `cat /tmp/t1.txt`
+    do
+        if echo $TOKEN | grep --quiet "for"
+        then
+            SEARCHING="true"
+            echo TRUE $TOKEN
+        fi
+        if [ $SEARCHING = "true" ]
+        then
+            if echo $TOKEN | grep --quiet ")"
+            then
+                SEARCHING="false"
+                echo FALSE $TOKEN
+            fi
+        fi
+        
+        if echo $TOKEN | grep --quiet ";"
+        then
+            echo -e " $TOKEN" >> /tmp/t2.txt
+        else
+            echo -en " $TOKEN" >> /tmp/t2.txt
+        fi
+    done
+fi
+    
+    
+    
+    
+    
+    
+    
+

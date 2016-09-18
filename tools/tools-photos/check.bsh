@@ -1,0 +1,61 @@
+#!/bin/bash
+
+##############################################################################
+# check_results
+##############################################################################
+function check_results()
+{
+
+    echo -e "\nChecking ${1} ..."
+    diff -sr --brief ./runs/${1}/out ./runs/${1}/check
+    find ./runs/${1}/out -name "*.html" -exec ls -lat {} ';'
+    echo "DIFFERENCES"
+    diff -sr --brief ./runs/${1}/out ./runs/${1}/check | grep differ
+}
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    check_results "Dell"
+    check_results "HpMini"
+    echo ''
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit 0
+
+
+
+
+
+
+echo -e "\nChecking Chase ..."
+diff -sr ./runs/Chase/out ./runs/Chase/check
+find ./runs/Chase/out -name "*.html" -exec ls -lat {} ';'
+
+echo -e "\nChecking CapitalOne ..."
+diff -sr ./runs/CapitalOne/out ./runs/CapitalOne/check
+find ./runs/CapitalOne/out -name "*.html" -exec ls -lat {} ';'
+
+
+echo -e "\nChecking BeyondBanking ..."
+diff -sr ./runs/BeyondBanking/out ./runs/BeyondBanking/check
+find ./runs/BeyondBanking/out -name "*.html" -exec ls -lat {} ';'
+
+echo -e "\nChecking Generic ..."
+diff -sr ./runs/Generic/out ./runs/Generic/check
+find ./runs/Generic/out -name "*.html" -exec ls -lat {} ';'
+
+echo -e "\nChecking Accounts ..."
+dos2unix ./src/db/specify/Specify_Accounts.csv
+dos2unix ./src/db/specify/Actual_Accounts.csv
+#diff -s ./src/db/specify/Specify_Accounts.csv \
+#        ./src/db/specify/Actual_Accounts.csv
+
+echo ''

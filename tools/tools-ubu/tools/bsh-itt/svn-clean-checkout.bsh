@@ -1,0 +1,47 @@
+#!/bin/bash
+
+##############################################################################
+# svn-clean-checkout
+#   Clean checks out $WORKING_FILESET/fileset to $WORKING
+##############################################################################
+function svn-clean-checkout()
+{
+    local -r NUMBER_PARAMS=${#@}
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    if [ $NUMBER_PARAMS -ne 0 -o ! -e $PROJ_SVN ]
+    then
+        echo There are no parameters, the repository must exist
+        echo Invocation:
+        echo "   svn-clean-checkout" 
+        return 1
+    fi
+
+    ##########################################################################
+    # checkout fresh copy of source set
+    ##########################################################################
+    echo -e "\nRemoving working directory ..." &&
+        cd $PROJ && rm -rf $WORKING && mkdir --parents $WORKING
+
+    echo -e "\nChecking out $WORKING_FILESET/fileset ..." &&
+        svn checkout $WORKING_FILESET/fileset $WORKING
+
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+svn-clean-checkout "$@"
+exit 0
+
+##############################################################################
+# example
+##############################################################################
+if false; then
+{
+    cd ~ && svn-clean-checkout
+}
+fi

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+    TZ='America/Los_Angeles'; export TZ;
+    echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) Pacific Time
+    TZ='America/New_York'; export TZ;
+    echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) Eastern Time
+    echo DOY `date --utc +%j` `date --utc +%a` $(date --utc +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date --utc +%I:%M" "%P) UTC Time
+    TZ='Europe/Berlin'; export TZ;
+    echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) "- " `date +%a` $(date +%I:%M" "%P) Central European Time
+    TZ='Africa/Dar_es_Salaam'; export TZ;
+    echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) East Africa Time
+    exit
+
+
+
+    TZ='America/Los_Angeles'; export TZ;
+    echo DOY `date +%j` $(date) Pacific Daylight Time
+    TZ='America/New_York'; export TZ;
+    echo DOY `date +%j` $(date) Eastern Daylight Time
+    echo DOY `date --utc +%j` $(date --utc) UTC Time
+    TZ='Africa/Dar_es_Salaam'; export TZ;
+    echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) "("$(date +%I:%M%P) East Africa Time")"

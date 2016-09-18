@@ -1,0 +1,79 @@
+#!/bin/bash
+
+##############################################################################
+# accumulate list of folders in current directory
+##############################################################################
+function list_of_folders()
+{
+    local -r this_folder=$(filename_only .)
+    local -r folders=$(find ${this_folder}  \
+        -mindepth 1                         \
+        -maxdepth 1                         \
+        -type d                             \
+        -a ! -name "*\.svn*"                \
+        -exec echo {} ';'                   )
+    #   -exec echo $(filename_only {} ) ';' )
+    echo $folders
+    return 0
+}
+
+##############################################################################
+# count-text-files
+##############################################################################
+function count-text-files()
+{
+    local -r NUMBER_PARAMS=${#@}
+    local -r destination_folder=$(path_only $1)
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    if                                     \
+    [                                      \
+           \( $NUMBER_PARAMS -gt 0   \)    \
+    ]
+    then
+        echo No parameters allowed, invocation:
+        echo "   count-text-files.bsh" 
+        return 1
+    fi
+
+    ##########################################################################
+    # inputs are OK
+    ##########################################################################
+    local -r folders=$(list_of_folders)
+    echo '' && echo Current Directory: $PWD
+    for next in ${folders}
+    do
+        echo -n "    " $next "contains "
+        echo -n $(printf "%d" `find $next -type f -print | wc --lines`)
+        echo " text files"
+    done
+    echo ''
+    return 0
+}
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    cd $PWD && count-text-files "$@"
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit 0
+
+##############################################################################
+# example
+##############################################################################
+if false; then
+{
+    cd c:/zeus8023
+    count-text-files.bsh
+}
+fi

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# main
+########################################################################
+function main ()
+{
+    ########################################################################
+    # create a convenient link for each .bsh file
+    ########################################################################
+    for fullpath in $(ls ${SCRIPTS_BSH}/*.bsh)
+    do
+    {
+        local path_and_name=$(strip_ext $fullpath)
+        local name_only=$(filename_only $fullpath)
+        if [ $false ]; then echo $path_and_name; fi
+        if [ $false ]; then echo $name_only; fi
+        [ $false ] && echo $name_only
+        cd $USR_LOCAL_BIN &&
+            [ -e $name_only ] && rm $name_only
+        cd $USR_LOCAL_BIN && 
+            ln -s $fullpath $name_only &&
+            [ $false ] && ls -la $name_only
+    }
+    done
+    exit
+}
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"

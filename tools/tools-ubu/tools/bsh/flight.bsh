@@ -1,0 +1,76 @@
+#!/bin/bash -norc
+##############################################################################
+# flight.bsh 'San Francisco' Singapore 'Oct 8' '01:30 am' '19 hours 31 minutes'
+# flight.bsh  Singapore 'San Francisco' 'Oct 19' '01:10 pm' '17 hours 50 minutes'
+# cd /usr/share/zoneinfo && cat zone.tab
+##############################################################################
+declare -r NUMBER_PARAMS=${#@}
+declare -r CITY_DEPART=${1}
+declare -r CITY_ARRIVE=${2}
+declare -r DURATION_HOURS=${3}
+declare -r DURATION_MINS=${5}
+declare -r FLIGHT_DURATION="$DURATION_HOURS hours $DURATION_MINS minutes"
+shift 6
+declare -r REST=${@}
+echo ''
+
+##############################################################################
+# print the parameters
+##############################################################################
+if false
+then
+    echo ''
+    echo "         Departing from:" $CITY_DEPART
+    echo "            Arriving at:" $CITY_ARRIVE
+    echo " Date/Time of departure:" $REST
+    echo "     Duration of flight:" 
+    echo ''
+fi
+
+##############################################################################
+# time zone related to a city
+##############################################################################
+declare -A ZONE=(
+    [Denver]="America/Denver"
+    [Colorado Springs]="America/Denver"
+    [Boston]="America/New_York"
+    [Salt Lake City]="America/Denver"
+    [San Francisco]="America/Los_Angeles"
+    [San Diego]="America/Los_Angeles"
+    [Tokyo]="Asia/Tokyo"
+    [Singapore]="Asia/Singapore"
+    [Jakarta]="Asia/Jakarta"
+)
+declare -r GREP_DEPART=${ZONE[$CITY_DEPART]}
+declare -r GREP_ARRIVE=${ZONE[$CITY_ARRIVE]}
+
+##############################################################################
+# time zone related to a city
+##############################################################################
+declare CONFIG="TZ=\"${GREP_DEPART}\" ${REST}"
+echo "$(today.bsh "${CONFIG}" | grep ${GREP_DEPART} | cut -f3-5 -d' ')"
+echo -n "   $(today.bsh "${CONFIG}" | grep ${GREP_DEPART} | cut -f1-2 -d' ')"
+echo -n " leave from $CITY_DEPART"
+echo    " $(today.bsh "${CONFIG}" | grep ${GREP_DEPART} | cut -f6 -d' ')"
+
+declare CONFIG="TZ=\"${GREP_DEPART}\" ${REST} ${FLIGHT_DURATION}"
+echo "$(today.bsh "${CONFIG}" | grep ${GREP_ARRIVE} | cut -f3-5 -d' ')"
+echo -n "   $(today.bsh "${CONFIG}" | grep ${GREP_ARRIVE} | cut -f1-2 -d' ')"
+echo -n " arrive at $CITY_ARRIVE"
+echo    " $(today.bsh "${CONFIG}" | grep ${GREP_ARRIVE} | cut -f6 -d' ')"
+
+#echo Leaving "$CITY_DEPART:"
+#echo "   $(today.bsh "${CONFIG}" | grep ${GREP_DEPART})"
+
+#declare CONFIG="TZ=\"${GREP_DEPART}\" ${REST} ${FLIGHT_DURATION}"
+#echo Arriving "$CITY_ARRIVE:"
+#echo "   $(today.bsh "${CONFIG}" | grep ${GREP_ARRIVE})"
+
+##############################################################################
+# time zone related to a city
+##############################################################################
+echo "Duration of flight:"
+echo "   "$FLIGHT_DURATION
+
+exit
+

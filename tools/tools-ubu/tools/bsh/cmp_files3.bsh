@@ -1,0 +1,46 @@
+#!/bin/bash
+
+function compare_py_files()
+{    
+    declare SRC1="/working/python/finance/src/"
+    declare SRC2="/working/python/db5/src/"
+
+    cd $SRC2 && find . -name "*.pyc" -exec rm {} ';'
+    cd $SRC1 && find . -name "*.pyc" -exec rm {} ';'
+
+    IFS=$'\n'
+    cd $SRC1
+    declare FILES=$(find . -name "*.py" -print)
+    for FILE in $FILES
+    do
+        if [ -f ${SRC2}/$FILE ]
+        then
+            echo "   EXISTS ${SRC2}/$FILE"
+            if cmp --silent ${SRC1}/$FILE ${SRC2}/$FILE
+            then
+                echo "     SAME ${SRC2}/$FILE"
+            else
+                echo "----------  DIFFERS ${SRC2}/$FILE ----------"
+                #diff ${SRC1}/$FILE ${SRC2}/$FILE
+            fi
+        else
+            echo "   DOES NOT EXIST ${SRC2}/$FILE"
+        fi
+
+
+
+
+            #diff -s ${SRC1}/$FILE ${SRC2}/$FILE
+    done
+    IFS=$'\x20\t\n'
+}
+
+function main()
+{
+    compare_py_files
+}
+
+main "$@"
+exit $?
+
+

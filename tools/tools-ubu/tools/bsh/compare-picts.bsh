@@ -1,0 +1,46 @@
+#!/bin/bash
+
+function main()
+{
+    declare FOLDER1="${1}"
+    declare FOLDER2="${2}"
+
+    ############################################################################
+    declare FOLDER1="/media/kurt/3061-6633/DCIM"
+    declare FOLDER2="/media/kurt/MASTER PICS/all-pictures/NaryLittleCamera"
+
+    if [[ -d ${FOLDER1} ]] && [[ -d ${FOLDER2} ]]
+    then
+        echo -e "\nThe folder ${FOLDER1} exists"
+        echo -e "\nThe folder ${FOLDER2} exists"
+        cd "$FOLDER1"
+        declare FILES1=$(find . \( -name "*.csv" -o -name "*.html" -o -name "*.JPG" -o -name "*.jpg" \) -print)
+        cd "$FOLDER2"
+        declare FILES2=$(find . \( -name "*.csv" -o -name "*.html" -o -name "*.JPG" -o -name "*.jpg" \) -print)
+        compare_files "$FOLDER1" "$FOLDER2" "$FILES1" "$FILES2"
+    fi
+
+    ############################################################################
+    declare FOLDER1="/media/kurt/5D30-4030/dcim/Camera"
+    declare FOLDER2="/media/kurt/MASTER PICS/all-pictures/KurtCellPhone"
+
+    echo GOT HERE1 ${FOLDER1} ${FOLDER2}
+    if [[ -d ${FOLDER1} ]] && [[ -d ${FOLDER2} ]]
+    then
+        echo GOT HERE2 ${FOLDER1} ${FOLDER2}
+        echo -e "\nThe folder ${FOLDER1} exists"
+        echo -e "\nThe folder ${FOLDER2} exists"
+        cd "$FOLDER1"
+        declare FILES1=$(find . \( -name "*.csv" -o -name "*.html" -o -name "*.JPG" -o -name "*.jpg" \) -print)
+        cd "$FOLDER2"
+        declare FILES2=$(find . \( -name "*.csv" -o -name "*.html" -o -name "*.JPG" -o -name "*.jpg" \) -print)
+        compare_files "$FOLDER1" "$FOLDER2" "$FILES1" "$FILES2"
+    fi
+}
+
+# include the function "compare_function" to compare and copy
+. compare-files.bsh
+main "$@"
+exit $?
+
+

@@ -1,0 +1,123 @@
+#!/bin/bash
+
+########################################################################
+# useful functions
+########################################################################
+function get_date()
+{ 
+    echo ${1} | cut --delimiter ' ' --fields=1 | sed "s/:/-/g"
+}
+
+function get_time()
+{ 
+    echo ${1} | cut --delimiter ' ' --fields=2 | sed "s/://g"
+}
+
+function get_make()
+{ 
+    exiftool -S -EXIF:Make "${1}" | cut --delimiter=' ' --fields=2-
+}
+
+function get_model()
+{ 
+    exiftool -S -EXIF:Model "${1}" | cut --delimiter=' ' --fields=2-
+}
+
+function photo_rename()
+{
+local -a SELECTION=\
+(
+    -EXIF:Make
+    -EXIF:Model
+    -EXIF:AllDates
+    -FILE:FileModifyDate
+)
+local -a SELECTION=\
+(
+    -EXIF:AllDates
+)
+    echo --------------------------------------------
+
+    #echo selection is ${SELECTION[*]}
+
+    local -r MAKE=$(get_make "${1}")
+    local -r MODEL=$(get_model "${1}")
+    #echo $MODEL
+
+    local -r EARLIEST_DATE=$(exiftool -s -G -EXIF:AllDates "${1}" \
+        | tr --squeeze-repeats ' ' \
+        | cut --delimiter=' ' --fields=4-5 | sort | head -1)
+    local -ri EARLIEST_DATE_SIZE=`echo ${EARLIEST_DATE} | wc --chars`
+
+    if (( $EARLIEST_DATE_SIZE == 20 ))
+    then
+        local -r DATE=$(get_date ${EARLIEST_DATE})
+        local -r TIME=$(get_time ${EARLIEST_DATE})
+        local -r DATE_OF_PHOTO="${EARLIEST_DATE}"
+    else
+        local -r FILE_MODIFY_DATE=$(exiftool -s -G -FILE:FileModifyDate "${1}" \
+            | tr --squeeze-repeats ' ' \
+            | cut --delimiter=' ' --fields=4-5 \
+            | cut --delimiter='-' --fields=1)
+        local -ri FILE_DATE_SIZE=`echo ${FILE_MODIFY_DATE} | wc --chars`
+        local -r DATE=$(get_date ${FILE_MODIFY_DATE})
+        local -r TIME=$(get_time ${FILE_MODIFY_DATE})
+        if (( $FILE_DATE_SIZE == 20 ))
+        then
+            local -r DATE_OF_PHOTO="${FILE_MODIFY_DATE}"
+        else
+            local -r DATE_OF_PHOTO="DATE UNKNOWN"
+            local -r DATE="DATE_UNKNOWN"
+            local -r TIME="TIME_UNKNOWN"
+        fi
+    fi
+    local -r NEWNAME=$(echo ${DATE}_${TIME}_${MAKE}_${MODEL} | tr --delete ' ')
+    local FOLDER_NAME=$(dirname ${1})
+    local FOLDER_NAME="${2}"
+    mkdir --parents "$FOLDER_NAME/not-in-mac"
+    if [ -e "$FOLDER_NAME/not-in-mac/${NEWNAME}.JPG" ]
+    then
+        echo NAME ALREADY EXISTS
+        (( COUNT_REPLICATES++ )) 
+        cp --verbose --preserve=all "${1}" "$FOLDER_NAME/not-in-mac/${NEWNAME}-c${COUNT_REPLICATES}.JPG" 
+    else
+        cp --verbose --preserve=all "${1}" "$FOLDER_NAME/not-in-mac/${NEWNAME}.JPG"
+    fi
+
+}
+
+function copy_photo()
+{
+    mkdir --parents "${2}"
+    cp --preserve=all --verbose "${1}" "${2}"
+}
+
+########################################################################
+# prepend file names with its checksum
+########################################################################
+function main()
+{
+    local -r LIST_OF_FILES="${1}"
+    local -r FOLDER_OUT="${2}"
+    declare -ix COUNT_REPLICATES=$(( 0 ))
+
+    IFS=$'\n'
+    for PHOTO in $(cat ${LIST_OF_FILES})
+    do
+        #copy_photo "${PHOTO}" "${FOLDER_OUT}"
+        photo_rename "${PHOTO}" "${FOLDER_OUT}"
+    done
+    IFS=$'\x20\t\n'
+
+    df -kh "/dev/sda1"
+    return 0
+
+}
+
+##############################################################################
+# Example:
+#    photo-rename.bsh /home/kurt/working/bash/photos/runs/HpMini/out/InMiniNotInMac.txt
+##############################################################################
+main "$@"
+exit "$?"
+

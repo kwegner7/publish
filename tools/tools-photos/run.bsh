@@ -1,0 +1,77 @@
+#!/bin/bash
+
+########################################################################
+# Run "Dell"
+########################################################################
+
+
+function a_minus_b()
+{
+    local -r FOLDER_A=${1}
+    local -r FOLDER_B=${2}
+    local -r OUT=${3}
+
+    prepend-checksums.bsh "${FOLDER_A}" '-iname *.jpg' \
+        > "${OUT}"/prepended-checksumsA.txt
+    select-representatives.bsh \
+        "${OUT}"/prepended-checksumsA.txt \
+        > "${OUT}"/selected-representativesA.txt
+    prepend-checksums.bsh "${FOLDER_B}" '-iname *.jpg' \
+        > "${OUT}"/prepended-checksumsB.txt
+    select-representatives.bsh \
+        "${OUT}"/prepended-checksumsB.txt \
+        > "${OUT}"/selected-representativesB.txt
+    setA-minus-setB.bsh \
+        "${OUT}"/selected-representativesA.txt \
+        "${OUT}"/selected-representativesB.txt \
+        > "${OUT}"/files-in-A-not-in-B.txt
+}
+
+declare FOLDER_A='/home/kurt/kmw/wedding'
+declare FOLDER_B='/home/kurt/ubu'
+declare OUT='./runs/Dell/out'
+rm -rf ${OUT} && mkdir --parents ${OUT} 
+a_minus_b ${FOLDER_A} ${FOLDER_B} ${OUT}
+
+declare OUT='./runs/HpMini/out'
+rm -rf ${OUT} && mkdir --parents ${OUT} 
+setA-minus-setB.bsh \
+    /home/kurt/working/bash/photos/runs/HpMini/in/MiniHpEquivClasses.txt \
+    /home/kurt/working/bash/photos/runs/Mac/in/MacEquivClasses.txt       \
+        > "${OUT}"/files-in-A-not-in-B.txt
+
+if true
+then
+    declare OUT='./runs/Dell/out'
+    rm -rf /tmp/rename
+    photo-rename.bsh "${OUT}"/files-in-A-not-in-B.txt /tmp/rename
+    ls -1 /tmp/rename/not-in-mac/ > "${OUT}"/files-renamed.txt
+fi
+
+exit 0
+
+
+
+########################################################################
+# Find .jpg files in two folders and prepend 
+########################################################################
+find-jpg.bsh \
+    /home/kurt/kmw/wedding                                          \
+    /home/kurt/ubu                                                  \
+    /home/kurt/working/bash/photos/runs/Dell/in/KmwEquivClasses.txt \
+    /home/kurt/working/bash/photos/runs/Dell/in/UbuEquivClasses.txt \
+    -iname "*.jpg"                                                  \
+    > /home/kurt/working/bash/photos/runs/Dell/out/InKmwNotInUbu.txt
+
+
+find-jpg.bsh \
+    /home/kurt/all-photos-miniHP                                         \
+    /Users/nary/photolibary/Masters                                      \
+    /home/kurt/working/bash/photos/runs/HpMini/in/MiniHpEquivClasses.txt \
+    /home/kurt/working/bash/photos/runs/Mac/in/MacEquivClasses.txt       \
+    -iname "*.jpg"                                                       \
+    > /home/kurt/working/bash/photos/runs/HpMini/out/InMiniNotInMac.txt
+
+exit 0
+
+

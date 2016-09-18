@@ -1,0 +1,28 @@
+#!/bin/bash --norc
+
+##############################################################################
+# Run a program from here
+##############################################################################
+if [[ $PWD == /working/python/meds ]]
+then
+
+    echo Running from /working/python/meds
+    cp in/history/meds-2012-07-02.csv meds.csv
+    python src/meds.py
+    echo DONE
+    
+elif [[ $PWD == /working/cplusplus/cpp-conceptsDONT ]]
+then
+
+    gcc src/during_test.cpp -lstdc++ -o during_test.exe
+    ./during_test.exe
+    
+elif [[ $PWD == /working/cplusplus/cpp-concepts ]]
+then
+
+    gcc src/hello_world.cpp -lstdc++ -o hello_world.exe
+    ./hello_world.exe
+
+else
+    echo $PWD has no run command 
+fi

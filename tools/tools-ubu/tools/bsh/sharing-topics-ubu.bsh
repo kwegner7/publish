@@ -1,0 +1,334 @@
+#!/bin/bash
+
+#
+# Given: a repository with .../src and .../annotated/src
+#   and: a template workspace for either "baseline" or "annotated"
+#
+# Methods:
+#   Can create a folder system to hold the shared source code
+#
+
+# 
+# Software Engineer
+#
+# $BASE/UEWR/MAS/repository
+# $BASE/UEWR/MAS/MAS-8023-Annotated/src
+# $BASE/UEWR/MAS/MAS-8023-Annotated/.metadata
+# $BASE/UEWR/MAS/MAS-8023-CuedSearch/.metadata
+# $BASE/UEWR/MAS/MAS-8023-MemoryPools/.metadata
+#
+
+# 
+# Administrator
+# $BASE/$PROJECT/$PROGRAM/$ECLIPSE_WORKSPACE/$ECLIPSE_PROJECT
+# C:/sharing/admin/UEWR/MAS/repository
+# C:/sharing/admin/UEWR/MAS/MAS-8023/MAS-8023
+# C:/sharing/admin/UEWR/MAS/MAS-8023/.metadata
+# C:/sharing/admin/UEWR/MAS/MAS-8023.lnk
+# C:/sharing/admin/UEWR/MAS/MAS-8035/MAS-8035
+# C:/sharing/admin/UEWR/MAS/MAS-8035/.metadata
+# C:/sharing/admin/UEWR/MAS/MAS-8035.lnk
+#
+
+##############################################################################
+# Inherit in the SVN repository
+##############################################################################
+if false
+then
+    # MAS-8023 already there, so get MAS-8035 and delete .project and .cproject
+    declare SVN=file:///C:/sharing/admin/UEWR/MAS/repository
+    svn mkdir -m "" $SVN/MAS-8035 
+    svn copy  -m "" $SVN/MAS-8023/src $SVN/MAS-8035/src 
+    svn rm  -m "" $SVN/MAS-8035/src/.project $SVN/MAS-8035/src/.cproject
+    svn rm  -m "" $SVN/MAS-8023/src/.project $SVN/MAS-8023/src/.cproject
+fi
+
+##############################################################################
+# Copy differing files into SVN working folder
+##############################################################################
+function copy-differences()
+{
+    declare FROM_FOLDER=$1
+    declare TO_FOLDER=$2
+
+    declare FILES=`cat /tmp/FILES_IN_BOTH_THAT_DIFFER`
+    for FILE in $FILES
+    do
+        echo copying $FILE
+        cp --verbose --preserve=timestamps $FROM_FOLDER/$FILE $TO_FOLDER/$FILE
+    done
+    return 0
+}
+
+##############################################################################
+# create folder structure
+##############################################################################
+function folder-structure()
+{
+    echo ''
+    if [ ! -d $BASE/$PROJECT/$PROGRAM ]
+    then
+        echo Creating folder structure at $BASE/$PROJECT/$PROGRAM
+        mkdir --mode=755 --verbose --parents $BASE/$PROJECT/$PROGRAM
+    else
+        echo $BASE/$PROJECT/$PROGRAM already exists
+    fi
+
+    return 0
+}
+
+##############################################################################
+# List all source code studies
+##############################################################################
+function list-all-code-studies()
+{
+    echo -e "\nRepositories ..."
+    for REPOS in `find $BASE/*/*/repository -maxdepth 0 -print`
+    do
+        declare SVN=file:///$REPOS
+        echo -e "\n    $SVN"
+        declare VERSIONS=`svn ls $SVN`
+        for VERSION in $VERSIONS; do
+            for SUBVERSION in `svn ls $SVN/$VERSION`; do
+                if [ $SUBVERSION = src/ ]; then
+                    echo -e "        Folder $VERSION$SUBVERSION"; fi
+                for SUBSUBVERSION in `svn ls $SVN/$VERSION/$SUBVERSION`; do
+                    if [ $SUBSUBVERSION = src/ ]; then
+                        echo -e "        Folder $VERSION$SUBVERSION$SUBSUBVERSION"; fi
+                done
+            done
+        done
+    done
+    echo -e "\nChecked Out Source Code ..."
+    find $BASE/*/*/*/ -mindepth 1 -maxdepth 1 ! -name "*.metadata" ! -wholename "*/repository/*" -print | sed 's/^/    /'
+    echo -e "\nWorkbenches ..."
+    find $BASE/*/*/*/ -maxdepth 1 -name "*.metadata" -print | sed 's/^/    /'
+    echo -e "\nIndex to Workbenches ..."
+    find $BASE/index/* -maxdepth 0 -print | sed 's/^/    /'
+
+    return 0
+}
+
+##############################################################################
+# Remove .cproject and .project from the repository
+##############################################################################
+function remove-project-cproject()
+{
+    declare SVN=file:///$BASE/$PROJECT/$PROGRAM/repository
+    if [ $TOPIC = Annotated ]
+    then declare REPOS=$SVN/$PROGRAM-$VERSION/annotated/src
+    else declare REPOS=$SVN/$PROGRAM-$VERSION/src
+    fi
+    echo Checking if .project and/or .cproject are in the repository ...
+    for FILE in `svn ls $REPOS`
+    do
+        if [ $FILE = .project -o $FILE = .cproject ]
+        then
+            echo Removing $FILE from repository
+            svn rm -m "" $REPOS/$FILE
+        fi
+    done
+    return 0
+}
+
+##############################################################################
+# Get the template for the workspace
+##############################################################################
+function get-template-baseline()
+{
+    declare NEW_WORKBENCH=$BASE/$PROJECT/$PROGRAM/$PROGRAM-$VERSION-$TOPIC
+
+    if [ -e $NEW_WORKBENCH ]
+    then
+        echo $NEW_WORKBENCH already exists
+    else
+        cp -r --verbose /cygdrive/c/itt/templates/BaselineCode $NEW_WORKBENCH
+    fi
+    return 0
+}
+
+##############################################################################
+# Get the template for the workspace
+##############################################################################
+function get-template-annotated()
+{
+    declare NEW_WORKBENCH=$BASE/$PROJECT/$PROGRAM/$PROGRAM-$VERSION-$TOPIC
+
+    if [ -e $NEW_WORKBENCH ]
+    then
+        echo $NEW_WORKBENCH already exists
+    else
+        cp -r --verbose /cygdrive/c/itt/templates/AnnotatedCode $NEW_WORKBENCH
+    fi
+    return 0
+}
+
+##############################################################################
+# Checkout source code from repository and thus obtain .project
+# Convert to .cproject
+# Checkin .project and .cproject
+# Make shortcut
+##############################################################################
+function initialize-using-eclipse()
+{
+    echo ''
+
+    declare SVN=file:///$BASE/$PROJECT/$PROGRAM/repository
+
+    if [ $TOPIC = Annotated ]
+    then declare REPOS=$SVN/$PROGRAM-$VERSION/annotated/src
+    else declare REPOS=$SVN/$PROGRAM-$VERSION/src
+    fi
+
+    declare NEW_WORKBENCH=$BASE/$PROJECT/$PROGRAM/$PROGRAM-$VERSION-$TOPIC
+    declare NEW_SOURCE_CODE=$NEW_WORKBENCH/$PROGRAM-$VERSION-$TOPIC
+
+    if [ ! -d $NEW_WORKBENCH ]
+    then
+        echo Workspace does not exist $NEW_WORKBENCH
+        return 1
+    fi
+
+    if [ -d $NEW_SOURCE_CODE ]
+    then
+        echo Source code has already been checked out $NEW_SOURCE_CODE
+        return 1
+    fi
+
+    echo -e "################################################################################"
+    echo -e "Manual steps:"
+    echo -e "    1) Remove all repositories except:"
+    echo -e "           $SVN"
+    echo -e "    2) Checkout the source code and create .project"
+    echo -e "           New - Other - SVN - Project from SVN"
+    echo -e "           Repository is the only repository listed"
+    echo -e "           Checkout from $REPOS"
+    echo -e "           Name is $PROGRAM-$VERSION-$TOPIC"
+    echo -e "           Project location is default"
+    echo -e "    3) Convert generic project to C++ project and create .cproject"
+    echo -e "           New - Convert to C/C++ Project - Specify project type (uncheck)"
+    echo -e "    4) Do NOT checkin .project and .cproject"
+    echo -e "    5) Create shortcut to this workspace in the \"index\""
+    echo -e "################################################################################"
+    eclipse -data $NEW_WORKBENCH &
+
+    return 0
+}
+
+##############################################################################
+# Given: a baseline source set or an annotated source set exists in a repository
+# Produce: checks out into an Eclipse workspace
+##############################################################################
+function checkout-into-eclipse()
+{
+
+    #if [ $PROJECT = UEWR -a $PROGRAM = SPS -a ! -e $BASE/$PROJECT/$PROGRAM/repository ]; then
+    #    cp -r --verbose C:/common/UEWR/code-studies/SPS/repository $BASE/$PROJECT/$PROGRAM; fi
+    #if [ $PROJECT = UEWR -a $PROGRAM = MAS -a ! -e $BASE/$PROJECT/$PROGRAM/repository ]; then
+    #    cp -r --verbose F:/proj/MAS-8023/svn $BASE/$PROJECT/$PROGRAM/repository; fi
+
+    sharing-topics-ubu.bsh --remove-project-cproject     $BASE $PROJECT $PROGRAM $VERSION $TOPIC
+    if [ $TOPIC = Annotated ]
+    then sharing-topics-ubu.bsh --get-template-annotated $BASE $PROJECT $PROGRAM $VERSION $TOPIC
+    else sharing-topics-ubu.bsh --get-template-baseline  $BASE $PROJECT $PROGRAM $VERSION $TOPIC; fi
+    sharing-topics-ubu.bsh --initialize-using-eclipse    $BASE $PROJECT $PROGRAM $VERSION $TOPIC
+}
+
+##############################################################################
+# main and entry point
+##############################################################################
+function main ()
+{
+    ##########################################################################
+    # establish common symbols
+    ##########################################################################
+    declare -x DO_THIS=${1:---add-new-topic}
+    declare -x    BASE=${2:-BASE}
+    declare -x PROJECT=${3:-PROJECT}
+    declare -x PROGRAM=${4:-PROGRAM}
+    declare -x VERSION=${5:-VERSION}
+    declare -x   TOPIC=${6:-TOPIC}
+
+    declare -x WORKSPACE=$BASE/$PROJECT/$PROGRAM/$PROGRAM-$VERSION-$TOPIC
+    echo -e "\nWorkspace is ..."
+    echo -e "    $WORKSPACE"
+
+    ##########################################################################
+    # process
+    ##########################################################################
+      if [ $DO_THIS = "--folder-structure"         ]; then shift && folder-structure "$@"
+    elif [ $DO_THIS = "--list-all-code-studies"    ]; then shift && list-all-code-studies "$@"
+    elif [ $DO_THIS = "--remove-project-cproject"  ]; then shift && remove-project-cproject "$@"
+    elif [ $DO_THIS = "--get-template-baseline"    ]; then shift && get-template-baseline "$@"
+    elif [ $DO_THIS = "--get-template-annotated"   ]; then shift && get-template-annotated "$@"
+    elif [ $DO_THIS = "--initialize-using-eclipse" ]; then shift && initialize-using-eclipse "$@"
+    elif [ $DO_THIS = "--checkout-into-eclipse"    ]; then shift && checkout-into-eclipse "$@"
+    elif [ $DO_THIS = "--copy-differences"         ]; then shift && copy-differences "$@"
+    else                                              echo $SWITCH is not recognized
+    fi
+
+    return 0
+}
+main "$@"
+exit 0
+
+##############################################################################
+# Examples
+##############################################################################
+if true
+then
+    sharing-topics-ubu.bsh --list-all-code-studies C:/understanding
+
+    sharing-topics-ubu.bsh --folder-structure C:/understanding UEWR MAS
+    sharing-topics-ubu.bsh --folder-structure C:/understanding UEWR SPS
+    sharing-topics-ubu.bsh --folder-structure C:/understanding UEWR REX
+
+    # create repository UEWR MAS 8023,8035 Baseline
+    if false; then
+        cp -r --verbose C:/sharing/admin/UEWR/MAS/repository C:/understanding/UEWR/MAS/
+        cp -r --verbose C:/sharing/admin/UEWR/SPS/repository C:/understanding/UEWR/SPS/; fi
+
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/understanding UEWR MAS 8023 Baseline 
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/understanding UEWR MAS 8035 Baseline 
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/understanding UEWR SPS 801 Baseline 
+
+    # create repository UEWR MAS 8023,8035 Annotated, first copy
+    if false
+    then
+        SVN=file:///C:/understanding/UEWR/MAS/repository
+        svn mkdir -m "" $SVN/MAS-8023/annotated 
+        svn copy  -m "" $SVN/MAS-8023/src $SVN/MAS-8023/annotated
+    fi
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/understanding UEWR MAS 8023 Annotated 
+    folder-intersection.bsh C:/sharing/sw_eng/UEWR/MAS/MAS-8023-Annotated/MAS-8023-Annotated \
+                             C:/understanding/UEWR/MAS/MAS-8023-Annotated/MAS-8023-Annotated
+    sharing-topics-ubu.bsh --copy-differences \
+        C:/sharing/sw_eng/UEWR/MAS/MAS-8023-Annotated/MAS-8023-Annotated \
+        C:/understanding/UEWR/MAS/MAS-8023-Annotated/MAS-8023-Annotated
+    share
+
+    
+fi
+
+if false
+then
+    sharing-topics-ubu.bsh --list-all-code-studies C:/sharing/admin
+    sharing-topics-ubu.bsh --list-all-code-studies C:/sharing/sw_eng
+
+
+    sharing-topics-ubu.bsh --establish-repository C:/sharing/admin  UEWR MAS
+    sharing-topics-ubu.bsh --establish-repository C:/sharing/admin  UEWR SPS
+    sharing-topics-ubu.bsh --establish-repository C:/sharing/admin  UEWR REX
+    sharing-topics-ubu.bsh --establish-repository C:/sharing/sw_eng UEWR MAS
+    sharing-topics-ubu.bsh --establish-repository C:/sharing/sw_eng UEWR SPS
+    sharing-topics-ubu.bsh --establish-repository C:/sharing/sw_eng UEWR REX
+
+
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/sharing/admin  UEWR MAS 8023 Baseline 
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/sharing/admin  UEWR MAS 8035 Baseline
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/sharing/admin  UEWR SPS 801  Baseline
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/sharing/sw_eng UEWR MAS 8023 Annotated 
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/sharing/sw_eng UEWR MAS 8035 Annotated 
+    sharing-topics-ubu.bsh --checkout-into-eclipse C:/sharing/sw_eng UEWR SPS 801  Annotated
+fi
+

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# ----------------------------------------------------------------------
+# Specify the times of day to automatically perform daily backup
+# or use empty parentheses to disable automatic backups
+# ----------------------------------------------------------------------
+declare -ax CRON_TIMES=(
+  1100
+  1600
+)
+
+# ----------------------------------------------------------------------
+# Location of the base repository folder
+# ----------------------------------------------------------------------
+declare -x REPOSITORY="/tmp/repository"
+
+# ----------------------------------------------------------------------
+# List of folders to be backed up
+# ----------------------------------------------------------------------
+declare -ax FOLDERS=(
+  '/home/kurt/ubu'
+  '/working'
+  '/home/kurt/.local/share/tomboy'
+  '/media/File System - Windows/Users/Kurt/Documents/kmw'
+)
+
+# ----------------------------------------------------------------------
+# Specify files to exclude (see the manual page for rsync and the section
+# entitled "INCLUDE/EXCLUDE PATTERN RULES")
+# ----------------------------------------------------------------------
+declare -ax INCLUDE_EXCLUDE=(
+    --exclude='*.pyc'
+    --exclude='*.jpg'
+    --exclude='*.JPG'
+    --exclude='.directory'
+    --exclude='out/**'
+    --max-size='3M'
+)
+
+# ----------------------------------------------------------------------
+# Specify location of the log file (or /dev/null)
+# ----------------------------------------------------------------------
+declare -x LOG_FILE=~/rsync.log
+

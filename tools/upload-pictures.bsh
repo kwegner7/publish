@@ -1,0 +1,84 @@
+#!/bin/bash
+
+##############################################################################
+# upload_pictures
+##############################################################################
+function upload_pictures()
+{
+    declare COMCAST="upload.comcast.net"
+    declare ACCOUNT="kmwegner"
+    declare PASSWORD="indonesia7"
+    declare UPLOAD="-u ${ACCOUNT} -p ${PASSWORD} -R -v ${COMCAST}"
+
+    ncftp -u"kmwegner" -p"indonesia7" upload.comcast.net <<EOF
+rm    /pictures/Bandung/images/*
+rmdir /pictures/Bandung/images
+rm    /pictures/Bandung/*
+rmdir /pictures/Bandung
+EOF
+
+    mv /tmp/upload-pictures/pages /tmp/upload-pictures/Bandung
+    ncftpput -u"kmwegner" -p"indonesia7" -R -v upload.comcast.net /pictures /tmp/upload-pictures/Bandung   
+    # http://home.comcast.net/~kmwegner/pictures/Bandung/
+
+
+    return 0
+}
+
+##############################################################################
+# prepare_pictures
+##############################################################################
+function prepare_pictures()
+{
+    declare INPUT_FOLDER="${1}"
+    declare TMP_FOLDER=/tmp/upload-pictures
+    declare TMP_PAGES=${TMP_FOLDER}/pages
+    declare TMP_IMAGES=${TMP_PAGES}/images
+
+    if [ ! -e "${INPUT_FOLDER}" ]
+    then
+        echo -e "\nERROR: The folder ${INPUT_FOLDER} does not exist!"        
+        return 1
+    fi
+
+    rm -rf ${TMP_FOLDER}
+    mkdir --parents ${TMP_IMAGES}
+
+    declare JPGS=$(find "${INPUT_FOLDER}" -maxdepth 1 -iname "*.jpg" -print)
+    for JPG in ${JPGS}
+    do
+        picture-smaller.bsh ${JPG} ${TMP_IMAGES}/`basename ${JPG}`
+    done
+    post-album.bsh ${TMP_PAGES}
+    upload_pictures  /pictures/Bandung ${TMP_PAGES}
+    return 0
+}
+
+##############################################################################
+# Specify a folder of pictures.
+# Invoke picture-smaller to create /tmp/upload-pictures/pages/images/
+# Invoke post-album to create /tmp/upload-pictures/pages/
+# Upload to the Comcast Site
+#
+#    upload-pictures.bsh <specify folder>
+##############################################################################
+function main()
+{
+    prepare_pictures "${1}"
+    return "$?"
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit "$?"
+
+##############################################################################
+# examples
+##############################################################################
+upload-pictures.bsh /home/kurt/ubu/post-album/PicturesForRika
+
+ncftpput -u"kmwegner" -p"indonesia7" upload.comcast.net /dropbox /home/kurt/Documents/dropbox/printit.html   
+
+

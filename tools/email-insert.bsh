@@ -1,0 +1,83 @@
+#!/bin/bash
+
+################################################################################
+# Invocation:
+#     cd /proj/pictures/friends/run
+#     email_insert.bsh Dec2015Template.html Dec2015Messages.html Nakamura 2
+################################################################################
+
+################################################################################
+# email_insert
+################################################################################
+function email_insert()
+{
+    local -r TEMPLATE=${1}
+    local -r MESSAGES=${2}
+    local -r OUTFOLDER=${3}
+    local -r FRIEND=${4}
+    local -i HOW_MANY_INSERTS=${5}
+    local -r OUTFILE="${OUTFOLDER}/to${FRIEND}.html"
+    local -r FULL_PATH=`readlink -f "${OUTFILE}"`
+
+
+    mkdir --parents ${OUTFOLDER}
+    rm -f ${OUTFILE}
+    touch ${OUTFILE}
+
+    echo -e "\nCreating Email at ${FULL_PATH}"
+
+    IFS=$'\n'
+    declare -i i=1
+    while (( i <= HOW_MANY_INSERTS ))
+    do
+        local COMMON="--COMMON ${i}--"
+        local WHOM="--${FRIEND} ${i}--"
+
+        cat ${TEMPLATE} | sed -n "/${COMMON}/,/${COMMON}/ p" >> ${OUTFILE}     
+        cat ${MESSAGES} | sed -n "/${WHOM}/,/${WHOM}/ p"     >> ${OUTFILE}
+
+         (( i++ ))
+    done
+    local COMMON="--COMMON ${i}--"
+    cat ${TEMPLATE} | sed -n "/${COMMON}/,/${COMMON}/ p" >> ${OUTFILE}    
+    IFS=$'\x20\t\n'
+}
+
+function main()
+{
+    email_insert "$@"
+}
+
+main "$@"
+exit $?
+
+
+if true
+then
+    declare -ax FRIENDS=(
+      "Nakamura"
+      "Davida"
+    )
+
+    cd /proj/pictures/
+    for FRIEND in ${FRIENDS[*]}
+    do
+        email-insert.bsh \
+            run/friends/Dec2015Template.html \
+            run/friends/Dec2015Messages.html \
+            publish/friends ${FRIEND} 2 
+    done
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+

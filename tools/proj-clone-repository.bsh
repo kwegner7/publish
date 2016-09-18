@@ -1,0 +1,74 @@
+#!/bin/bash
+
+################################################################################
+# First you must manually create the empty repository at GITHUB:
+#        github.com
+#        https://github.com/kwegner7/sabato.git/
+#
+# Invocation:
+#     proj-clone-repository.bsh /proj/sabato sabato github
+#     proj-clone-repository.bsh /proj/sabato sabato backup
+################################################################################
+function proj_clone_repository()
+{
+    declare REPOSITORY_TO_CLONE="${1}"
+    declare PROJECT_NAME="${2}"
+    declare REMOTE_NAME="${3}"
+
+    cd "${REPOSITORY_TO_CLONE}"
+    if [[ ${REMOTE_NAME} == github ]]
+    then
+        declare -r GITHUB_PATH="https://github.com/kwegner7"
+        declare -r NEW_REPOSITORY=${GITHUB_PATH}/${PROJECT_NAME}.git
+        echo -e "\nCloning to $NEW_REPOSITORY"
+
+        : git remote add ${REMOTE_NAME} ${NEW_REPOSITORY}
+        : git push github master
+        : git branch gh-pages
+        : git checkout gh-pages
+        : git push --verbose --set-upstream github gh-pages
+
+        echo -e "\nThe working repository is ${REPOSITORY_TO_CLONE}"
+        cd "${REPOSITORY_TO_CLONE}"
+        git remote -v
+        git branch --all --verbose
+
+        echo -e "\nThe github repository is ${NEW_REPOSITORY}"
+
+    elif [[ ${REMOTE_NAME} == backup ]]
+    then
+        declare -r BACKUP_PATH="/media/kurt/Linux3TB/proj"
+        declare -r NEW_REPOSITORY=${BACKUP_PATH}/${PROJECT_NAME}.git
+        echo -e "\nCloning to $NEW_REPOSITORY"
+
+        cd "${BACKUP_PATH}"
+        : git clone --mirror --verbose ${REPOSITORY_TO_CLONE}/.git
+
+        cd "${REPOSITORY_TO_CLONE}"
+        : git remote add ${REMOTE_NAME} ${NEW_REPOSITORY}
+        : git push --verbose --set-upstream backup gh-pages
+
+        echo -e "\nThe working repository is ${REPOSITORY_TO_CLONE}"
+        cd "${REPOSITORY_TO_CLONE}"
+        git remote -v
+        git branch --all --verbose
+
+        echo -e "\nThe backup repository is ${NEW_REPOSITORY}"
+        cd ${NEW_REPOSITORY}
+        git remote -v
+        git branch --all --verbose
+    else
+        echo ${REMOTE_NAME} is not a remote name
+    fi
+
+    echo ''
+}
+
+function main()
+{
+    proj_clone_repository "$@"
+}
+
+main "$@"
+exit $?
+

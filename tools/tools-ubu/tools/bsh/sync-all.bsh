@@ -1,0 +1,28 @@
+#!/bin/bash
+    
+# ----------------------------------------------------------------------
+# main
+# ----------------------------------------------------------------------
+function main()
+{
+    # ------------------------------------------------------------------
+    # place web class homework website at comcast
+    # ------------------------------------------------------------------
+    declare COMCAST="upload.comcast.net"
+    declare ACCOUNT="kmwegner"
+    declare PASSWORD="indonesia7"
+
+
+    #cp --preserve /home/kurt/ubu/calendars/personal.ics /home/kurt/ubu/calendars/evolution-calendar.ics
+    #cat /home/kurt/ubu/calendars/traveling.ics >> /home/kurt/ubu/calendars/evolution-calendar.ics
+    # open up the evolution calendar and ACTIONS - PUBLISH CALENDAR
+    # ncftpput -u kmwegner -p indonesia7  upload.comcast.net /calendars /home/kurt/ubu/calendars/evolution-calendar.ics
+    ncftpput -u kmwegner -p indonesia7  upload.comcast.net /calendars /home/kurt/ubu/calendars/birthdays.ics
+
+    return 0
+}
+
+main "$@"
+exit $?
+
+

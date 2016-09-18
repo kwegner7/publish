@@ -1,0 +1,106 @@
+#!/bin/bash
+##############################################################################
+# cd /usr/share/zoneinfo && cat zone.tab | grep Singapore
+##############################################################################
+if (( 1 )); then
+TZ='America/Los_Angeles'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) "Pacific Time          (Los Angeles)"
+TZ='America/Denver'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) "Mountain Time         (Denver)"
+TZ='America/New_York'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) "Eastern Time          (Boston)"
+echo DOY `date --utc +%j` `date --utc +%a` $(date --utc +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date --utc +%I:%M" "%P) "UTC Time              (London)"
+TZ='Europe/Berlin'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) "- " `date +%a` $(date +%I:%M" "%P) "Central European Time (Berlin)"
+TZ='Africa/Dar_es_Salaam'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) "East Africa Time      (Dar es Salaam)"
+TZ='Asia/Jakarta'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) "Asia Time             (Indonesia)"
+TZ='Asia/Singapore'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) "Asia Time             (Singapore)"
+TZ='Asia/Manila'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) "Asia Time             (Philippines)"
+TZ='Asia/Hong_Kong'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) " - " `date +%a` $(date +%I:%M" "%P) "Asia Time             (Hong Kong)"
+fi 
+(( 1 )) && exit
+
+if [ -d /tmp -a ! -d /tmp ]
+    then
+        echo TRUE
+    else
+        echo FALSE
+fi
+if cmp -s /tmp/abc.html /tmp/pydoc.html; then echo TRUE; else echo FALSE; fi
+cmp -s /tmp/abc.html /tmp/abc.html
+if [ $? ]; then echo OK; else echo NOT; fi
+if [[ -e /tmp/*.html ]]; then echo OK; else echo NOT; fi
+false='( 1 -eq 0 )'
+echo $false
+if [ $false ]; then echo FALSE; else echo TRUE; fi
+if [ ! $false ]; then echo FALSE; else echo TRUE; fi
+if [[ ! $false ]]; then echo FALSE; else echo TRUE; fi
+
+
+echo $'SPECIALFORMOFSTRINGS'
+echo $'STR\nINGS\x61\x62\x63HERE'
+
+#### A Pipeline is separated by |
+#### A List is a sequence of Pipelines separated by && || ; (same as newline)
+
+    cat /tmp/abc.html | grep align | grep -v mojam; echo first pipe \
+        && echo hello | grep ll; echo second pipe; cat /tmp/zyc.cpp \
+        || echo third pipe \( doesnt actually pipe but it is called pipeline \)
+
+#### Wherever ; appears may have a newline
+NAME="Lauren"
+for WORD in AAA BBB CCC; do echo $WORD; done
+BEGIN=1
+for (( BEGIN=0 ; BEGIN<10 ; BEGIN++ )); do echo $BEGIN; done
+
+
+#######################################################################################
+# TESTING FOR A CONDITION - everything returns 0/true/OK or 1/false/ERROR
+#######################################################################################
+#### test a unary arithmetic expression for 0, returns 0 or 1
+#### in essence this collapses a non-zero expression to a 1
+if (( 0 )); then echo TRUE; else echo FALSE; fi
+if (( 1 )); then echo TRUE; else echo FALSE; fi
+(( 1 )) && echo TRUE || echo FALSE 
+#### test a binary comparison or unary test expression for TRUE/FALSE, returns 0 or 1 
+#### this is called a "Conditional Expression" and variable expansion is performed
+if [[ 0 -eq 1 ]]; then echo TRUE1; else echo FALSE1; fi
+[[ 0 -eq 1 ]]      \
+    && echo TRUE1  \
+    || echo FALSE1
+#### string comparison uses == and != and =~
+if [[ "MINE" == "Yim" ]]; then echo TRUE2; else echo FALSE2; fi
+if [[ ! ( "MINE" == "Yim" ) && ( "A" != "C" ) ]]; then echo TRUE2; else echo FALSE2; fi
+if [[ Yours =~ You?? ]]; then echo TRUE3; else echo FALSE3; fi 
+#######################################################################################
+# Outside of [[]] parenthesis and braces
+#######################################################################################
+( echo one; echo two )
+{ echo three; echo four; }
+(
+    echo five;
+    echo six
+)
+
+
+
+
+
+exit
+
+
+
+TZ='America/Los_Angeles'; export TZ;
+echo DOY `date +%j` $(date) Pacific Daylight Time
+TZ='America/New_York'; export TZ;
+echo DOY `date +%j` $(date) Eastern Daylight Time
+echo DOY `date --utc +%j` $(date --utc) UTC Time
+TZ='Africa/Dar_es_Salaam'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) "("$(date +%I:%M%P) East Africa Time")"
+TZ='Asia/Singapore'; export TZ;
+echo DOY `date +%j` `date +%a` $(date +%b" "%e" "%H:%M" "%Z" "%Y) "("$(date +%I:%M%P) Singapore Time")"

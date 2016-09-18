@@ -1,0 +1,90 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# do something with a list
+########################################################################
+function do_something()
+{
+    declare -a folder=(                                   \
+        /public/users/kwegncc/exports/5218                \
+        /public/users/kwegncc/exports/5219                \
+        /public/users/kwegncc/exports/801                 \
+        /public/users/kwegncc/exports/801A                \
+        /public/users/kwegncc/exports/802                 \
+        /public/users/kwegncc/views/mbarancc_sps/export   \
+        /public/users/kwegncc/views/hlaj2_sps_5219/export \
+    )
+
+    while read -e next; do
+    {
+        declare next1=${folder[0]}/$next
+        declare next2=${folder[1]}/$next
+        if   [ ! -e $next1 -o ! -e $next2 ]; then
+            : DONT EXIST SO DO NOTHING
+        elif [ -d $next1 -o -d $next2 ]; then
+            : DIRECTORIES SO DO NOTHING
+        elif [ -f $next1 -a -f $next2 ]; then
+            if ! cmp -s $next1 $next2; then
+            {
+                echo ''
+                echo ''
+                echo ====================================================================
+                echo "Comparing" $next1
+                echo "     with" $next2
+                echo ''
+                (( 0 )) && diff --minimal --ignore-all-space --ignore-blank-lines --context $next1 $next2
+                (( 1 )) && diff --minimal --ignore-all-space --ignore-blank-lines $next1 $next2
+            }
+            fi
+        else
+            echo MISTAKE $next1 $next2
+        fi
+    }
+    done
+    return 0
+}
+
+########################################################################
+# main
+########################################################################
+function main ()
+{
+
+    do_something </public/users/kwegncc/diffs1.lst
+
+    return 0
+
+    do_something<<-responses
+        ./AutoRegTests/build_sps.py
+        ./AutoRegTests/create_sps_install_files.py
+        ./AutoRegTests/create_sps_sap_install_files.py
+	responses
+    return 0
+   
+    ########################################################################
+    # create a convenient link for each .bsh file
+    ########################################################################
+    for fullpath in $(ls ${SCRIPTS_BSH}/*.bsh)
+    do
+    {
+        local path_and_name=$(strip_ext $fullpath)
+        local name_only=$(filename_only $fullpath)
+        if [ $false ]; then echo $path_and_name; fi
+        if [ $false ]; then echo $name_only; fi
+        [ $false ] && echo $name_only
+        cd $USR_LOCAL_BIN &&
+            [ -e $name_only ] && rm $name_only
+        cd $USR_LOCAL_BIN && 
+            ln -s $fullpath $name_only &&
+            [ $false ] && ls -la $name_only
+    }
+    done
+    exit
+}
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"

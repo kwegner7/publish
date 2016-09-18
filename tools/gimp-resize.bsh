@@ -1,0 +1,79 @@
+#!/bin/bash
+
+{
+cat <<EOF
+(define (batch-resize pattern width height)
+   (let* 
+      ((filelist (cadr (file-glob pattern 1))))
+      (while (not (null? filelist))
+         (let*
+            (
+               (filename (car filelist))
+               (image (car (gimp-file-load RUN-NONINTERACTIVE filename filename)))
+               (drawable (car (gimp-image-get-active-layer image)))
+            )
+            (gimp-image-scale-full image width height INTERPOLATION-CUBIC)
+            (gimp-file-save RUN-NONINTERACTIVE image drawable filename filename)
+            (gimp-image-delete image)
+         )
+         (set! filelist (cdr filelist))
+      )
+   )
+)
+EOF
+
+echo '(batch-resize "*.jpg" 1200 900)'
+echo "(gimp-quit 0)"
+
+} | gimp -i -b -
+exit 0
+
+for i in *.jpg; do
+  echo "(gimp-message \"$i\")"
+  echo "(batch-resize \"$i\" 604 453)"
+done
+
+ (define (batch-resize pattern width height)
+(let* ((filelist (cadr (file-glob pattern 1))))
+(while (not (null? filelist))
+(let* ((filename (car filelist))
+(image (car (gimp-file-load RUN-NONINTERACTIVE filename filename)))
+(drawable (car (gimp-image-get-active-layer image))))
+(gimp-image-scale-full image width height INTERPOLATION-CUBIC)
+(gimp-file-save RUN-NONINTERACTIVE image drawable filename filename)
+(gimp-image-delete image))
+(set! filelist (cdr filelist)))))
+
+This particular script takes a pattern for filename, desired width and height as inputs and resize all image files that are matched. This script overwrite the existing file. In order to run the script, save it with .scm extension in the ~/.gimp-/scripts/ directory.
+Then goto the directory which contains images, then run the following command to resize images.
+
+gimp -i -b '(batch-resize "*.JPG" 604 453)' -b '(gimp-quit 0)'
+The above command will resize all the image files end with .JPG to 604X453
+The above script can be customized to any other image processing requirements as well. Refer the Help -> Procedure Browser in GIMP for more operations.
+
+
+HOW TO EXECUTE FROM A BASH SCRIPT
+#!/bin/bash
+{
+cat <<EOF
+(define (convert-xcf-to-jpeg filename outfile)
+  (let* (
+	 (image (car (gimp-file-load RUN-NONINTERACTIVE filename filename)))
+	 (drawable (car (gimp-image-merge-visible-layers image CLIP-TO-IMAGE)))
+	 )
+    (file-jpeg-save RUN-NONINTERACTIVE image drawable outfile outfile .9 0 0 0 " " 0 1 0 1)
+    (gimp-image-delete image) ; ... or the memory will explode
+    )
+  )
+
+(gimp-message-set-handler 1) ; Messages to standard output
+EOF
+
+for i in *.xcf; do
+  echo "(gimp-message \"$i\")"
+  echo "(convert-xcf-to-jpeg \"$i\" \"${i%%.xcf}.jpg\")"
+done
+
+echo "(gimp-quit 0)"
+} | gimp -i -b -
+

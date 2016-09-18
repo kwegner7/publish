@@ -1,0 +1,48 @@
+#! /bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+TACTICAL_SYSTEM=${INSTALL_ROOT}/${BUILD_VERSION}/Tactical/System
+TACTICAL_BIN=${INSTALL_ROOT}/${BUILD_VERSION}/Tactical/bin
+
+echo ----------------------------------------------------------------
+echo '       STRING:' Development
+echo '     COMPUTER:' ${HOST}
+echo '  HOME FOLDER:' ${HOME}
+echo '  RUN VERSION:' ${INSTALL_ROOT}/${BUILD_VERSION}
+
+   EXECS=$(ct lsprivate -do | egrep -v "\.o|\.a|\.cpp|\.h|\.i|\.bin|\.txt")
+   for EXEC in ${EXECS}; do
+      ls -1 $EXEC;
+   done
+
+   cd ${INSTALL_ROOT}/${BUILD_VERSION}
+   EXECS1=$(echo AC AM CS DC DG EC MP RS SM TA TI TPA config DG_STUBS TA_OACAL MP_OACAL TPR OR icpBufferConfig RC DR RT TS TI CS SG RS)
+   for EXEC1 in ${EXECS1}; do
+      find . -name $EXEC1;
+   done
+
+if [ -f FALSE ]; then
+    echo '' && cat ${TACTICAL_SYSTEM}/Saps/irix/Sap.txt | grep Loading
+    echo '' && cat ${TACTICAL_SYSTEM}/Saps/sun/Sap.txt | grep Loading
+    echo '' && cat ${TACTICAL_SYSTEM}/MissionOps/TestDrivers/RS_SA/Sap.txt | grep Loading
+    echo '' && cat ${TACTICAL_SYSTEM}/MissionOps/TestDrivers/CS_SA/Sap.txt | grep Loading
+    echo ''
+    cd ${TACTICAL_SYSTEM}/MissionOps/TestDrivers/RS_SA      && egrep "startTime_|simFile_" simDefMsg.dat
+    cd ${TACTICAL_SYSTEM}/MissionOps/TestDrivers/CS_SA      && egrep "startTime_|simFile_" simDefMsg.dat
+    cd ${TACTICAL_SYSTEM}/MissionOps/TestDrivers/CS_SA/real && egrep "startTime_|simFile_" simDefMsg.dat
+    cd ${TACTICAL_SYSTEM}/MissionOps/TestDrivers/CS_SA/test && egrep "startTime_|simFile_" simDefMsg.dat
+fi
+
+
+    echo '' &&  cd ${TACTICAL_BIN} && ls -l1 AC AM CS DC DG EC MP RS SM TA TI TPA && echo '' 
+    echo '' && cat ${TACTICAL_SYSTEM}/Saps/irix/Sap.txt | grep Loading && echo ''
+    #echo '' && cat ${TACTICAL_SYSTEM}/Saps/irix/Sap.txt | grep SP1 | grep port && echo ''
+    #echo '' && cat ${TACTICAL_SYSTEM}/Saps/irix/Sap.txt | grep DP1 | grep port && echo ''
+    echo '' && cat ${TACTICAL_SYSTEM}/Saps/irix/Sap.txt | grep 52.21 && echo ''
+    echo '' &&  cd ${TACTICAL_SYSTEM}/MissionOps/TestDrivers/RS_SA && egrep "startTime_|simFile_" simDefMsg.dat && echo ''
+    echo ''
+
+
+echo ----------------------------------------------------------------
+

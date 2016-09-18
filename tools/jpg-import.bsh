@@ -1,0 +1,137 @@
+#!/bin/bash
+
+################################################################################
+# For each JPG,
+#    determine date of picture
+#    determine the checksum for the picture
+#    output with name 2015-11-05-34501280081.jpg
+#    if checksum already exists, then append -1, -2
+#    count JPGs and count collisions
+#
+# Invocation:
+#     jpg-import.bsh '/media/kurt/Windows/Users/Kurt/Pictures/2015-07-10' '/proj/finance/run/in/OrganizeJpg'
+################################################################################
+
+
+
+################################################################################
+# Inputs the name of a .jpg file
+# Extracts metadata and computes the checksum of the file
+################################################################################
+function get_checksum()
+{
+    echo $(md5sum ${1}| cut -d' ' -f1)
+}
+
+function get_tags()
+{
+    local -a TAGS=( $(exiftool -s3 -d "%Y-%m-%d" -forcePrint ${1} \
+        -Make  -Model -FileModifyDate -DateTimeOriginal -CreateDate -ModifyDate) )
+    for PRNT in ${TAGS[*]}; do
+        : echo $PRNT
+    done
+                 Make=${TAGS[0]}
+                Model=${TAGS[1]}
+       FileModifyDate=${TAGS[2]}
+     DateTimeOriginal=${TAGS[3]}
+           CreateDate=${TAGS[4]}
+           ModifyDate=${TAGS[5]}
+     MakeModel="${Make}(${Model})"
+
+    PictureDate=${FileModifyDate}
+    if [[ ${DateTimeOriginal} != '-' ]] && [[ ${DateTimeOriginal} < ${PictureDate} ]]; then
+        : echo DATE DIFFERENCE
+        PictureDate=${DateTimeOriginal}; fi
+    if [[ ${CreateDate} != '-' ]] && [[ ${CreateDate} < ${PictureDate} ]]; then
+        : echo DATE DIFFERENCE
+        PictureDate=${CreateDate}; fi
+    if [[ ${ModifyDate} != '-' ]] && [[ ${ModifyDate} < ${PictureDate} ]]; then
+        : echo DATE DIFFERENCE
+        PictureDate=${ModifyDate}; fi
+
+    #if file already exists in the folder based on CHECKSUM
+    #then do not copy the picture into the folder
+
+
+
+}
+
+################################################################################
+# There are two sets of pictures (actually an array of several set pairs): 
+#    M is the master set of pictures
+#    A is the set of pictures to import and add to M
+#    Compute M U (A-M)
+################################################################################
+function jpg_import()
+{
+    echo -e "At ${1} performing  find . -iname *.jpg -print"
+
+    local -r FOLDER_IN="${1}"
+    local -r CSV_OUT="${2}"
+
+    mkdir --parents `dirname ${CSV_OUT}`
+    rm -f "${CSV_OUT}"
+
+    IFS=$'\n'
+    cd ${FOLDER_IN}
+    for NEXT_PICTURE in $(find . -iname "*.jpg" -print)
+    do
+
+        #local CHECKSUM=$(get_checksum ${NEXT_PICTURE})
+        #get_tags ${NEXT_PICTURE}
+
+        if false
+        then
+            echo -e "\n             File: ${NEXT_PICTURE}"
+            echo -e "           Checksum: ${CHECKSUM}"
+            echo -e "          MakeModel: ${MakeModel}"
+            echo -e "     FileModifyDate: ${FileModifyDate}"
+            echo -e "   DateTimeOriginal: ${DateTimeOriginal}"
+            echo -e "         CreateDate: ${CreateDate}"
+            echo -e "         ModifyDate: ${ModifyDate}"
+        fi
+
+        local FULL_PATH=`readlink -f "${NEXT_PICTURE}"`
+        local DIRNAME=`dirname ${FULL_PATH}`
+        local BASENAME=`basename ${FULL_PATH}`
+        #local JPG_ELEMENT="${CHECKSUM}\`${PictureDate}\`${MakeModel}\`${DIRNAME}\`${BASENAME}"
+        local JPG_ELEMENT="${DIRNAME}\`${BASENAME}"
+        echo ${JPG_ELEMENT} >> "${CSV_OUT}"
+
+
+        # local NEW_NAME_JPG=${CHECKSUM}_${PictureDate}_${MakeModel}_`basename ${NEXT_PICTURE}`
+        # cp ${NEXT_PICTURE} ${FOLDER_OUT}/${NEW_NAME_JPG}
+    done
+    IFS=$'\x20\t\n'
+
+}
+
+function main()
+{
+    jpg_import "$@"
+}
+
+main "$@"
+exit $?
+
+
+
+FileSize                        : 1213 kB
+FileModifyDate                  : 2015:08:15 15:52:26-06:00
+DateTimeOriginal                : 2015:08:15 15:52:26
+CreateDate                      : 2015:08:15 15:52:26
+Create Date                     : 2015:09:09 20:35:35
+FileName                        : 2015:09:09 20:35:35_Apple_iPad Air.JPG
+FileModifyDate                  : 2015:09:09 20:35:35-06:00
+FileAccessDate                  : 2015:11:06 09:06:39-07:00
+FileInodeChangeDate             : 2015:11:06 10:21:59-07:00
+ModifyDate                      : 2015:09:09 20:35:35
+DateTimeOriginal                : 2015:09:09 20:35:35
+CreateDate                      : 2015:09:09 20:35:35
+GPSDateStamp                    : 2015:09:10
+GPSDateTime                     : 2015:09:10 02:35:35.3Z
+SubSecCreateDate                : 2015:09:09 20:35:35.568
+SubSecDateTimeOriginal          : 2015:09:09 20:35:35.568
+[Fri Nov 06 11:28 AM] 
+
+

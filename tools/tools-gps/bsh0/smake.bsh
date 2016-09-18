@@ -1,0 +1,191 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# convert smake into a script
+########################################################################
+function unmake()
+{
+    (( 0 )) && cd /public/users/kwegncc/sps_source/Control/dlt/test
+    if (( 0 )); then
+        declare -r MAKE='clearmake -C gnu -v'
+        echo unmaking ...
+        $MAKE -f $2 -s
+    fi
+
+    declare -r here=$PWD
+    declare -r IPA_TMPDIR=$(path_only $2)
+    declare -r IPA_MAKEFILE=$(filename_ext $2)
+    declare -r IPA_OUTFILENAME=$(filename_only $IPA_TMPDIR)
+    declare -r DLT_CMD1='/usr/bin/cc -c -64 symtab.I -o symtab.o -TENV:emit_global_data=symtab.G -Gspace 0 -pic1 -mips4  -OPT:Ofast=ip27 -TARG:abi=64:isa=mips4'
+    declare -r MRG_CMD1='/usr/bin/cc -c -64 symtab.I -o symtab.o -TENV:emit_global_data=symtab.G -Gspace 0 -pic1 -mips4  -OPT:Ofast=     -TARG:abi=64:isa=mips4'
+    declare -r DLT_CMD2='/usr/bin/CC -O3 -OPT:Ofast=ip27           -TARG:abi=64:isa=mips4 -64 1.I -o 1.o -c -TENV:ipa_ident=1301948418 -TENV:read_global_data=symtab.G -Gspace 0  -pic1 -mips4'
+    declare -r MRG_CMD2='/usr/bin/CC -O3 -OPT:Ofast=     -LANG:std -TARG:abi=64:isa=mips4 -64 1.I -o 1.o -c -TENV:ipa_ident=1301960588 -TENV:read_global_data=symtab.G -Gspace 0  -pic1 -mips4'
+    if   [[ ${IPA_OUTFILENAME} == 'dlt' ]]; then
+        declare -r CMD1=${DLT_CMD1}
+        declare -r CMD2=${DLT_CMD2}
+        declare -r EXTRA_FLAGS=''
+    #               -o dlt
+    #  
+
+    elif [[ ${IPA_OUTFILENAME} == 'mrg' ]]; then
+        declare -r CMD1=${MRG_CMD1}
+        declare -r CMD2=${MRG_CMD2}
+        declare -r EXTRA_FLAGS='-OPT:Ofast= -LANG:std'
+    else
+        declare -r CMD1=${DLT_CMD1}
+        declare -r CMD2=${DLT_CMD2}
+        declare -r EXTRA_FLAGS=''
+    fi
+
+    echo SMAKE INVOCATION IS: smake "$@"
+    #    SMAKE INVOCATION IS: smake -f mrg.ipaa02Q1D/makefile.ipa630861 -s
+    echo FROM DIRECTORY: $here
+    #    FROM DIRECTORY: /public/users/kwegncc/sps_source/Control/dlt/test/dlt
+    #    FROM DIRECTORY: /public/users/kwegncc/working/Control/mrg/src/mrg
+    echo THE MAKEFILE ${IPA_MAKEFILE} UNDER ${here}/${IPA_TMPDIR} IS:
+    echo 'START OF MAKEFILE'
+    (( 0 )) && cat ${here}/${IPA_TMPDIR}/${IPA_MAKEFILE}
+    echo 'END OF MAKEFILE'
+    echo THE LINK INSTRUCTIONS ${IPA_MAKEFILE} ARE:
+    echo 'START OF LINK INSTRUCTIONS'
+    cat ${here}/${IPA_TMPDIR}/*linkopt*
+    echo 'END OF LINK INSTRUCTIONS'
+    echo PROCESSING EXECUTABLE: $IPA_OUTFILENAME
+    echo COMPILATION 1: $CMD1
+    echo COMPILATION 2: $CMD2
+    echo EXTRA FLAGS: $EXTRA_FLAGS
+
+    # IPA_TMPDIR = dlt.ipaa02QNz
+    # IPA_OUTFILENAME = dlt
+    # default : $(IPA_OUTFILENAME)
+    # .IGNORE: $(IPA_OUTFILENAME)
+    # $(IPA_OUTFILENAME) ! $(IPA_TMPDIR)/1.o $(IPA_TMPDIR)/symtab.o
+    #         /usr/lib32/cmplrs/ld64 -from dlt.ipaa02QNz/linkopt.632319
+    # $(IPA_TMPDIR)/symtab.o ! $(IPA_TMPDIR)/symtab.I
+    #         cd -P $(IPA_TMPDIR);
+    #         /usr/bin/cc -c -64 symtab.I -o symtab.o
+    #             -TENV:emit_global_data=symtab.G -Gspace 0 -pic1 -mips4
+    #             -OPT:Ofast=ip27 -TARG:abi=64:isa=mips4
+    # $(IPA_TMPDIR)/symtab.G ! $(IPA_TMPDIR)/symtab.o
+    # $(IPA_TMPDIR)/1.o ! $(IPA_TMPDIR)/symtab.o $(IPA_TMPDIR)/symtab.G $(IPA_TMPDIR)/1.I
+    #         cd -P $(IPA_TMPDIR);
+    #         /usr/bin/CC -O3 -OPT:Ofast=ip27 -TARG:abi=64:isa=mips4 -64 1.I
+    #             -o 1.o -c -TENV:ipa_ident=1302115914 -TENV:read_global_data=symtab.G -Gspace 0  -pic1 -mips4
+
+    # IPA_TMPDIR = mrg.ipaa02QAJ
+    # IPA_OUTFILENAME = mrg
+    # default : $(IPA_OUTFILENAME)
+    # .IGNORE: $(IPA_OUTFILENAME)
+    # $(IPA_OUTFILENAME) ! $(IPA_TMPDIR)/1.o $(IPA_TMPDIR)/symtab.o
+    #       /usr/lib32/cmplrs/ld64 -from mrg.ipaa02QAJ/linkopt.631443
+    # $(IPA_TMPDIR)/symtab.o ! $(IPA_TMPDIR)/symtab.I
+    #       cd -P $(IPA_TMPDIR);
+    #       /usr/bin/cc -c -64 symtab.I -o symtab.o
+    #           -TENV:emit_global_data=symtab.G -Gspace 0 -pic1 -mips4
+    #           -OPT:Ofast= -TARG:abi=64:isa=mips4
+    # $(IPA_TMPDIR)/symtab.G ! $(IPA_TMPDIR)/symtab.o
+    # $(IPA_TMPDIR)/1.o ! $(IPA_TMPDIR)/symtab.o $(IPA_TMPDIR)/symtab.G $(IPA_TMPDIR)/1.I
+    #       cd -P $(IPA_TMPDIR);
+    #       /usr/bin/CC -O3 -OPT:Ofast= -LANG:std -TARG:abi=64:isa=mips4 -64 1.I
+    #            -o 1.o -c -TENV:ipa_ident=1302114709 -TENV:read_global_data=symtab.G -Gspace 0  -pic1 -mips4
+
+    # -call_shared -transitive_link -demangle -elf -_SYSTYPE_SVR4 -mips4 -64 -cxx -o dlt
+    # -L/usr/lib64/mips4/r10000 -L/usr/lib64/mips4 -L/usr/lib64 -woff 134 
+    # /usr/lib64/mips4/crt1.o /usr/lib64/c++init.o dlt.ipaa02QNz/1.o dlt.ipaa02QNz/symtab.o
+    # /public/users/kwegncc/sps_source/Control/Stripset/obj/mount_control.o -dont_warn_unused
+    # /usr/lib64/libCsup.so /usr/lib64/libC.so -Bdynamic /usr/lib64/mips4/libc.so
+    # /usr/lib64/mips4/crtn.o -warn_unused -init _main -fini _fini -no_unresolved
+
+    # -call_shared -transitive_link -demangle -elf -_SYSTYPE_SVR4 -OPT:Ofast= -mips4 -64 -cxx -o mrg -LANG:std
+    # -L/usr/lib64/mips4/r10000 -L/usr/lib64/mips4 -L/usr/lib64 -woff 134
+    # /usr/lib64/mips4/crt1.o /usr/lib64/c++init.o mrg.ipaa02QK7/1.o mrg.ipaa02QK7/symtab.o
+    # /usr/lib64/mips4/libscs.so /usr/lib64/mips4/libm.so /usr/lib64/libpthread.so
+    # /public/users/kwegncc/sps_source/Control/Stripset/obj/mount_control.o -dont_warn_unused
+    # /usr/lib64/libCsup.so /usr/lib64/libC.so /usr/lib64/libCio.so -Bdynamic /usr/lib64/mips4/libc.so
+    # /usr/lib64/mips4/crtn.o -warn_unused -init _main -fini _fini -no_unresolved
+
+    if (( 0 )); then
+        echo WARNING: the ipa_ident changes each compilation
+        echo TEMPORARY DIRECTORY IS ${IPA_TMPDIR}
+        echo PATH TO TEMPORARY DIRECTORY IS 
+        echo THE MAKEFILE IS $2
+        cat $2
+        cd ${here}/${IPA_TMPDIR} && cat linkopt.* > linkopt.all && echo THE LINK DIRECTIVE IS && cat linkopt.all && echo ''
+    fi
+
+    if (( 1 )); then
+        ######################################################################
+        # compile symtab.o and 1.o
+        ######################################################################
+        cd ${here}/${IPA_TMPDIR} && $DLT_CMD1
+        cd ${here}/${IPA_TMPDIR} && $DLT_CMD2
+
+        ######################################################################
+        # ld64 link mount_control.o, symtab.o and 1.o --> dlt executable
+        ######################################################################
+        (( 0 )) && /usr/lib32/cmplrs/ld64 -v -from ${IPA_TMPDIR}/linkopt.all
+        cd ${here} && /usr/lib32/cmplrs/ld64 \
+            -call_shared -transitive_link -demangle -elf -_SYSTYPE_SVR4 -mips4 -64 -cxx -dont_warn_unused -woff 134 \
+            -warn_unused -init _main -fini _fini -no_unresolved -Bdynamic ${EXTRA_FLAGS} \
+            -o $IPA_OUTFILENAME \
+            ${IPA_TMPDIR}/1.o ${IPA_TMPDIR}/symtab.o \
+            /tmp/sps_source/Control/Stripset/obj/mount_control.o \
+            /usr/lib64/mips4/crtn.o /usr/lib64/mips4/crt1.o \
+            /usr/lib64/c++init.o \
+            $WORKING/SpsTestBench/SpsTestUtilities/obj/SpsLib.a \
+            $WORKING/Control/Init/obj/Initialization.o \
+            /usr/lib64/mips4/r10000/libfastm.so \
+            /usr/lib64/mips4/libc.so /usr/lib64/mips4/libfetchop.so  /usr/lib64/libm.so /usr/lib64/mips4/libscs.so \
+            /usr/lib64/libCsup.so /usr/lib64/libC.so /usr/lib64/libCio.so /usr/lib64/libpthread.so
+    fi
+
+    if (( 0 )); then
+        echo FINAL STATE OF FILES IS
+        cd ${here} && ls -la ${IPA_TMPDIR}
+    fi
+
+    return 0
+}
+
+# THE FOLLOWING WERE REPLACED BY SpsLib.a
+#            $WORKING/Control/Init/obj/SPStatusAlert.o  $WORKING/Control/Init/obj/BarrierWait.o \
+#            $WORKING/Control/Init/obj/RTString.o       $WORKING/Control/Init/obj/SGITime.o $WORKING/Control/Init/obj/Sync.o \
+#            $WORKING/Control/Init/obj/CheckPoint.o     $WORKING/Control/Init/obj/RWLock.o \
+#            $WORKING/Utilities/Queue/obj/SPSQ.o        $WORKING/Utilities/Queue/obj/SPSQE.o \
+#            $WORKING/Utilities/Queue/obj/SPSQERandom.o $WORKING/Utilities/OS/obj/NonPosix.o \
+
+##############################################################################
+# smake
+##############################################################################
+function main ()
+{
+    unmake "$@"
+    return 0
+
+    if (( 0 )); then
+        cat $2 | sed "s/\!/\:/g" > /tmp/kurt_smake.txt
+        cp /tmp/kurt_smake.txt $2
+        declare -r MAKE='clearmake -C gnu -v'
+        echo unmaking ...
+        $MAKE -f $2 -s
+        echo smake "$@"
+        return 0
+    fi
+    return 0
+}
+
+
+########################################################################
+# entry point
+########################################################################
+main "$@"
+exit 0
+
+########################################################################'
+# example
+########################################################################'
+if (( 1 )); then
+    cd $WORKING/Control/Init/obj && ar -rv jena.a *.o 
+fi

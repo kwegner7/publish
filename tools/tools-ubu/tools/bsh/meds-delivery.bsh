@@ -1,0 +1,15 @@
+#!/bin/bash -norc
+########################################################################
+# delivery meds
+########################################################################
+declare -r PYDIR="/home/kurt/ubu/code/python"
+declare -r MEDS="/home/kurt/ubu/code/python/meds"
+
+mkdir --parents $PYDIR/delivery
+cd $PYDIR/delivery
+    rm -rf meds
+    mkdir --parents meds/src meds/out meds/history
+    cp $MEDS/meds.csv      meds/
+    cp $MEDS/src/*.py      meds/src
+    cp $MEDS/history/*.csv meds/history
+

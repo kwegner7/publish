@@ -1,0 +1,17 @@
+#!/bin/bash -norc
+
+########################################################################
+# Special Camp meds reporting
+########################################################################
+declare -r MUST_GOTO="/home/kurt/ubu/code/python/meds"
+
+cd $MUST_GOTO
+
+IFS=$'\n'
+    python src/meds.py
+IFS=$' \t\n'
+
+
+exit
+
+

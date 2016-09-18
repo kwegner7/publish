@@ -1,0 +1,72 @@
+#!/bin/bash
+
+################################################################################
+# Check the rsync
+#
+# Invocation:
+#     check-rsync.bsh
+################################################################################
+
+################################################################################
+# check_rsync
+################################################################################
+function check_rsync()
+{
+    echo ''
+    echo 'Filesystem      Size  Used Avail Use% Mounted Repository'
+
+    declare -a VOLUMES=(
+      "/media/kurt/Linux3TB/rsync"
+      "/media/kurt/8GB-BLUE1/rsync"
+      "/media/kurt/8GB-BLUE2/rsync"
+      "/media/kurt/8GB-BLUE3/rsync"
+      "/media/kurt/8GB-BLUE4/rsync"
+      "/media/kurt/32GB-GREEN1/rsync"
+    )
+
+    IFS=$'\n'
+    for VOLUME in ${VOLUMES[*]}
+    do
+        if [ -e ${VOLUME} ]
+        then 
+            : echo ''
+            df -kh ${VOLUME} | grep -v Filesystem
+        fi
+    done
+
+    echo ''
+    echo 'Filesystem      Size  Used Avail Use% Internal Hard Drive'
+    df --total -h / /home /data | grep -v Filesystem
+    echo ''
+
+    cat ~/rsync.log | egrep "^/dev/|^Begin rsync" | tr -s ' ' | tail --lines=41 > /tmp/check-rsync.txt
+    readarray -t LINES < /tmp/check-rsync.txt
+    declare -i NUMBER_LINES=${#LINES[@]}
+    declare -i i=1
+
+    while ((i<=NUMBER_LINES))
+    do
+        declare DATE_TIME=`echo ${LINES[i]} | cut -d' ' --fields=3-6`
+        (( i++ ))
+        declare VOLUME=`echo ${LINES[i]} | cut -d' ' --fields=5-6`
+         (( i++ ))
+        echo -e "$DATE_TIME $VOLUME"
+    done
+
+    echo -e "rsync.bsh -blue1"
+    echo -e "rsync.bsh -blue2"
+    echo -e "rsync.bsh -blue3"
+    echo -e "rsync.bsh -blue4"
+    echo -e "rsync.bsh -green1"
+    echo -e "rsync.bsh -Linux3TB"
+    echo ''
+}
+
+function main()
+{
+    check_rsync "$@"
+}
+
+main "$@"
+exit $?
+

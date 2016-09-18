@@ -1,0 +1,43 @@
+#!/bin/bash
+
+################################################################################
+# Invocation:
+#     proj-new-repository.bsh /proj/sabato
+#     proj-clone-repository.bsh /proj/sabato github
+#     proj-clone-repository.bsh /proj/sabato backup
+################################################################################
+function proj_new_repository()
+{
+    local -r NEW_PROJECT="${1}"
+
+    cd "${NEW_PROJECT}"
+    git init
+    git add .
+    git commit -m "New repository at ${NEW_PROJECT}"
+    echo "The files in the new repository at ${NEW_PROJECT} are:" 
+    git ls-files
+    git status
+}
+
+function main()
+{
+    proj_new_repository "$@"
+}
+
+main "$@"
+exit $?
+
+# deleted files and modified files (deleted files are also counted as
+# modified, so may come up twice...
+git ls-files -d -m
+# what's in the index; includes files that were "git add"ed
+git ls-files -s
+# conflicted files
+git ls-files -u
+# "other files"; includes EVERYthing not in d/m/s, I think
+# seems to be equal to untracked + ignored
+git ls-files -o
+# untracked files only
+git ls-files --exclude-standard -o
+# ignored files only
+git ls-files --exclude-standard -o -i

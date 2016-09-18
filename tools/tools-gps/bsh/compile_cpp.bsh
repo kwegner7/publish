@@ -1,0 +1,80 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+#############################################################################
+# Invocation:
+#     cd c:/data/cplusplus/src/kmw;
+#     compile_cpp hello_world.cpp && ./hello_world
+#     gcc hello_world.cpp -lstdc++ -o hello_world.exe;
+#############################################################################
+
+##############################################################################
+# compile
+##############################################################################
+function compile()
+{
+    declare -r number_params=${#@}
+    declare -r full_path=$1
+    declare -r name_only=$(filename_only $full_path)
+    echo $full_path $name_only
+    if [ $number_params -gt 0 ]
+    then
+        gcc $full_path -lstdc++ -o ./${name_only}.exe
+    else
+        echo ERROR: Wrong number of parameters!
+    fi
+    return 0
+
+    for next in ${files}
+    do
+    {
+        declare search=$1
+        declare replace=$2
+
+        if { cat $next | grep $search > /dev/null; } then
+            echo ================================================== BEFORE $next
+            cat $next | grep $search
+            if [ $NUMBER_PARAMS -lt 2 ]
+            then
+                : DO NOT REPLACE ANYTHING
+            else
+                echo ==================================================  AFTER $next
+                cat $next | sed "s@${search}@${replace}@g" > /tmp/kurt_tmp1
+                cp /tmp/kurt_tmp1 $next
+                cat $next | grep ${replace}
+            fi
+        fi
+    }
+    done
+}
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    ##########################################################################
+    # process input parameters
+    ##########################################################################
+    cd $PWD && compile $1
+    return 0
+}
+
+########################################################################
+# entry point
+########################################################################
+main "$@"
+exit 0
+
+########################################################################'
+# example
+########################################################################'
+if (( 0 )); then
+
+cd c:/data/cplusplus/src/kmw; gcc hello_world.cpp -lstdc++ -o hello_world.exe;
+ 
+   compile_cpp linear_algebra
+
+
+fi

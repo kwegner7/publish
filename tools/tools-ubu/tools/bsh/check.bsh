@@ -1,0 +1,28 @@
+#!/bin/bash
+
+declare -r HERE=`pwd`
+declare -r RUNS="${HERE}/runs/" 
+declare -r RUN="${1}" 
+declare -r FOLDER_CHECK="${RUNS}${RUN}/check/"
+declare -r FOLDER_OUT="${RUNS}${RUN}/out/"
+
+if [ ! -e $FOLDER_OUT ]
+then
+    echo -e "FOLDER NOT FOUND: $FOLDER_OUT"
+    exit 1
+fi
+
+if [ ! -e $FOLDER_CHECK ]
+then
+    echo -e "FOLDER NOT FOUND: $FOLDER_CHECK"
+    exit 1
+fi
+
+echo -e "\nOutput folder is:" 
+echo -e "    ${FOLDER_OUT}" 
+echo -e "Check folder is:" 
+echo -e "    ${FOLDER_CHECK}" 
+
+compare-files.bsh ${FOLDER_OUT} ${FOLDER_CHECK}
+exit 0   
+

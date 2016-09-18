@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# ----------------------------------------------------------------------
+# Specify the times of day to automatically perform daily backup
+# or use empty parentheses to disable automatic backups
+#
+#              rsync.bsh --crontab-replace
+# ----------------------------------------------------------------------
+declare -ax CRON_TIMES=(
+)
+
+# ----------------------------------------------------------------------
+# Location of the base repository folder
+# ----------------------------------------------------------------------
+
+declare -x REPOSITORY="/media/kurt/8GB-BLUE2/rsync"
+
+# ----------------------------------------------------------------------
+# List of folders to be backed up
+# ----------------------------------------------------------------------
+declare -ax FOLDERS=(
+  '/data/kurt/checked-out'
+  '/data/kurt/Documents'
+  '/data/kurt/kmw'
+  '/data/kurt/ubu'
+  '/data/kurt/working'
+  '/data/kurt/workspace'
+  '/data/proj'
+  '/home/kurt/.local/share/tomboy'
+)
+
+# ----------------------------------------------------------------------
+# Specify files to exclude (see the manual page for rsync and the section
+# entitled "INCLUDE/EXCLUDE PATTERN RULES")
+# ----------------------------------------------------------------------
+declare -ax INCLUDE_EXCLUDE=(
+    --exclude='*.pyc'
+    --exclude='*.jpg'  --exclude='*.JPG'
+    --exclude='*.png'  --exclude='*.PNG'
+    --exclude='*.tiff' --exclude='*.TIFF'
+    --exclude='*.bmp'  --exclude='*.BMP'
+    --exclude='*.mp3'  --exclude='*.MP3'
+    --exclude='*.mp4'  --exclude='*.MP4'
+    --exclude='*.m4a'  --exclude='*.M4a'
+    --exclude='*.avi'  --exclude='*.AVI'
+    --exclude='*.mov'  --exclude='*.MOV'
+    --exclude='.directory'
+    --exclude='out/**'
+    --exclude='Downloads/**'
+    --exclude='.cache/**'
+    --exclude='.gvfs/**'
+    --exclude='lost+found/**'
+    --max-size=5M
+)
+
+# ----------------------------------------------------------------------
+# Specify location of the log file (or /dev/null)
+# ----------------------------------------------------------------------
+declare -x LOG_FILE=~/rsync.log
+
+# ----------------------------------------------------------------------
+# Should hard links be created?
+# ----------------------------------------------------------------------
+declare -x CREATE_HARD_LINKS=true
+
+

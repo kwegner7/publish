@@ -1,0 +1,24 @@
+#!/bin/bash
+    
+# ----------------------------------------------------------------------
+# main
+# ----------------------------------------------------------------------
+function main()
+{
+    # ------------------------------------------------------------------
+    # place web class homework website at comcast
+    # ------------------------------------------------------------------
+    declare COMCAST="upload.comcast.net"
+    declare ACCOUNT="kmwegner"
+    declare PASSWORD="indonesia7"
+
+    ncftpput -u kmwegner -p indonesia7  upload.comcast.net /calendars /home/kurt/ubu/calendars/birthdays.ics
+    cd /home/kurt/ubu/post-album/EastCoast && post-album.bsh
+    ncftpput -R -m -u kmwegner -p indonesia7 upload.comcast.net /pictures /home/kurt/ubu/post-album/EastCoast
+    return 0
+}
+
+main "$@"
+exit $?
+
+

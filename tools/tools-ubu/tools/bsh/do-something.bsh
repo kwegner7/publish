@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if true
+then
+    declare -x REPOS_LOC=/repositories/python/repository
+    declare -x WORKBENCH_NAME=PYTHON
+    declare -x PROJECT_NAME=CSV
+
+    declare -x WORKBENCH_LOC=$(dirname $REPOS_LOC)/workbenches/$WORKBENCH_NAME
+    eclipse -data $WORKBENCH_LOC &
+fi
+

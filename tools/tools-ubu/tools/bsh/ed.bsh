@@ -1,0 +1,39 @@
+#!/bin/bash -norc
+########################################################################
+# Prepare the ML Downloads for spreadsheet
+########################################################################
+declare -r MEDS="/home/kurt/ubu/code/python/meds"
+
+declare -ra SRC_FILES=\
+(
+    'meds.py'
+    'BaseClasses.py'
+    'DerivedClasses.py'
+    'Html.py'
+    'CsvToCsv.py'
+    'CsvToHtml.py'
+    'MedsCsv.py'
+    'HtmlTable.py'
+    'Leftovers.py'
+    'CompareOutWithKurt.py'
+    'SplitCsvHtml.py'
+)
+
+declare -ra TOOL_FILES=\
+(
+    'copyhtml.bsh'
+    'meds.bsh'
+    'meds-delivery.bsh'
+    'meds-testing.bsh'
+)
+
+IFS=$'\n'
+    cd $MEDS/src
+    gedit ${SRC_FILES[*]} &
+    cd $TOOLS
+    if false
+    then
+        gedit ${TOOL_FILES[*]} &
+    fi
+IFS=$' \t\n'
+

@@ -1,0 +1,24 @@
+#!/bin/bash
+    
+# ----------------------------------------------------------------------
+# main
+# ----------------------------------------------------------------------
+function main()
+{
+    # ------------------------------------------------------------------
+    # place web class homework website at comcast
+    # ------------------------------------------------------------------
+    declare COMCAST="upload.comcast.net"
+    declare ACCOUNT="kmwegner"
+    declare PASSWORD="indonesia7"
+
+    local -r NaryLittleCamera="/media/kurt/MASTER PICS/all-pictures/NaryLittleCamera/"
+    cd /media/kurt/3061-6633/DCIM
+    find . -name "*.JPG" -print
+    return 0
+}
+
+main "$@"
+exit $?
+
+

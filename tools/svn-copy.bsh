@@ -1,0 +1,86 @@
+#!/bin/bash
+
+function xml_extract()
+{
+    echo $(svn info --xml | grep "<$1>" | sed "s@<$1>@@" | sed "s@</$1>@@")
+    return 0
+}
+
+function print_repos_folders()
+{
+    svn ls --recursive --verbose "${1}" \
+        | grep "/$" | cut --characters=43- | sed 's/^/    /'
+    return 0
+}
+
+function print_local_files()
+{
+    svn ls "${1}" | grep -v "/$" | sed 's/^/    /'
+    return 0
+}
+
+function check_for_folder()
+{
+    svn ls "${1}" > /dev/null
+    if (( $? != 0 ))
+    then
+        echo "${1}" does not exist
+        exit 1
+    fi
+    return 0
+}
+
+function svn_copy()
+{
+    #local -r SVN=`xml_extract root`
+    local -r SVN="${1}"
+    local -r COPY_FROM="${SVN}/${2}"
+    local -r CREATE_NEW="${SVN}/${3}"
+
+    echo "Copying from the repository folder $COPY_FROM"
+    check_for_folder    "${COPY_FROM}"
+    print_local_files   "${COPY_FROM}"
+    print_repos_folders "${COPY_FROM}"
+    echo "To the new repository folder $CREATE_NEW"
+
+    if true
+    then
+        svn mkdir  -m "" --parents "$CREATE_NEW"
+        svn copy -m "" -r HEAD $COPY_FROM $CREATE_NEW
+    else
+        echo svn mkdir  -m "" --parents "$CREATE_NEW"
+        echo svn copy -m "" -r HEAD $COPY_FROM $CREATE_NEW
+    fi
+
+    return 0
+}
+
+##############################################################################
+# Example:
+#    SVN="file:///media/kurt/8GB-BLUE2/svn/python/special-camp"
+#    svn-copy.bsh "${SVN}" main/revs main/improved/revs
+##############################################################################
+
+svn_copy "$@"
+exit "$?"
+
+    THIS CREATES SNAPSHOT OF SPECIAL CAMP:
+
+    SVN="file:///media/kurt/8GB-BLUE2/svn/rails/special-camp"
+    svn-copy.bsh "${SVN}" main/revs "main/2015-04-17-SpecialCamp-Rails"
+
+
+    SVN="file:///media/kurt/8GB-BLUE2/svn/python/special-camp"
+    svn-copy.bsh "${SVN}" main/revs "main/2015-04-17-SpecialCamp-Python"
+
+
+    SVN="file:///media/kurt/8GB-BLUE2/svn/python/special-camp"
+    svn-copy.bsh "${SVN}" main/revs "main/2015-04-17-SpecialCamp-Python"
+
+
+    SVN="file:///media/kurt/8GB-BLUE2/svn/workspace"
+    svn-copy.bsh "${SVN}" libs revs/BASELINE/libs
+    svn-copy.bsh "${SVN}" apps revs/BASELINE/apps
+    svn ls -R "${SVN}" | more
+
+

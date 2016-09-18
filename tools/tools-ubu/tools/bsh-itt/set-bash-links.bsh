@@ -1,0 +1,36 @@
+#!/bin/bash
+
+########################################################################
+# main
+########################################################################
+function main ()
+{
+    ########################################################################
+    # create a convenient link for each .bsh file
+    ########################################################################
+    echo '' && echo "  Adding commands to /usr/local/bin:"
+    for fullpath in $(ls ${SCRIPTS_BSH}/*.bsh)
+    do
+    {
+        local path_and_name=$(strip_ext $fullpath)
+        local name_only=$(filename_only $fullpath)
+        if false; then echo $path_and_name; fi # both of these execute a shell command
+        ( false ) && echo $name_only
+        if pushd /usr/local/bin > /dev/null
+        then
+            [ -e $name_only ] && rm $name_only  # this is using the 'test' command
+            #( test -e $name_only ) && rm $name_only # this is using the 'test' command
+            ln -s $fullpath $name_only &&
+            [ true ] && echo "    " `ls -1 $name_only`
+            popd > /dev/null
+        fi
+    }
+    done
+    echo ''
+    exit
+}
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"

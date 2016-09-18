@@ -1,0 +1,34 @@
+#!/bin/bash -norc
+
+declare -ri RUPIAHS_PER_DOLLAR=8950
+
+function convert_to_dollars ()
+{
+    declare -i RUPIAHS=$1
+    declare -i DOLLARS=$(( RUPIAHS/RUPIAHS_PER_DOLLAR ))
+    declare -i CENTS=$(( RUPIAHS*100/RUPIAHS_PER_DOLLAR % 100 ))
+    echo $DOLLARS dollars $CENTS cents
+    return 0
+}
+
+function convert_to_rupiahs ()
+{
+    declare -i DOLLARS=$1
+    declare -i RUPIAHS=$(( DOLLARS*RUPIAHS_PER_DOLLAR ))
+    echo $RUPIAHS rupiahs
+    return 0
+}
+
+convert_to_dollars $1
+convert_to_rupiahs $1
+
+if false
+then
+    echo $(( 10#$RUPIAHS_PER_DOLLAR ))
+    echo $(( 0xFFF ))
+    declare x=111
+    echo $(( x %= 100 ))
+fi
+
+exit
+

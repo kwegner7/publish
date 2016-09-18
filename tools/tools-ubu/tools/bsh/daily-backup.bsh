@@ -1,0 +1,83 @@
+#!/bin/bash -norc
+
+##############################################################################
+# Invocation:
+#
+#   --create creates a repository of the original folder
+#   --backup performs an incremental backup of each folder and commits
+#
+##############################################################################
+if false
+then
+    daily-backup --create /disk1/location-of-backup tag /disk2/folder-to-backup
+    daily-backup --backup /disk1/location-of-backup tag
+    daily-backup --export /disk1/location-of-backup tag /disk3/export-to-here date/orig/latest 
+    daily-backup --archive /disk1/location-of-backup /disk4/location-of-archive
+fi
+
+##############################################################################
+# create the repository and baseline of the folder
+##############################################################################
+function create()
+{
+    echo ''
+    echo Configure repository characteristics ...
+    echo Create baseline repository ...
+    echo Import all text files as baseline ...
+    echo Create delta repository ... 
+    return 0
+}
+
+##############################################################################
+# This is a function
+##############################################################################
+function functionA()
+{
+    declare FROM_FOLDER=$1
+    declare TO_FOLDER=$2
+
+    declare FILES=`cat /tmp/FILES_IN_BOTH_THAT_DIFFER`
+    for FILE in $FILES
+    do
+        echo copying $FILE
+        cp --verbose --preserve=timestamps $FROM_FOLDER/$FILE $TO_FOLDER/$FILE
+    done
+    return 0
+}
+
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    ##########################################################################
+    # get global parameters
+    ##########################################################################
+    declare -x PERFORM=${1:---backup}
+    declare -x   REPOS=${2:-/daily-backup/oom}
+    declare -x  FOLDER=${3:-/oom}
+
+    if true
+    then
+        echo -e "\n       Operation is: \$PERFORM"
+        echo      "Repositories are at: $REPOS"
+        echo      "       Folder is at: $FOLDER"
+    fi
+
+    ##########################################################################
+    # process
+    ##########################################################################
+      if [ $PERFORM = "--create" ]; then shift && create "$@"
+    elif [ $PERFORM = "--backup" ]; then shift && backup "$@"
+    elif [ $PERFORM = "--export" ]; then shift && export "$@"
+    else 
+        echo -e " \"$PERFORM\" is not recognized"
+    fi
+
+    return 0
+}
+main "$@"
+exit 0
+
+

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+declare -x BLACK_DRIVE="/media/BLACK-256GB/"
+
+declare -ax FOLDERS=(
+  '/home/kurt/ubu'
+  '/working'
+  '/home/kurt/.local/share/tomboy'
+  '/media/windows/Users/Kurt/Documents/kmw'
+)
+
+for FOLDER in ${FOLDERS[*]}; do
+
+    declare SUBFOLDER=`basename $FOLDER`
+    echo $SUBFOLDER
+    mkdir --parents "${BLACK_DRIVE}/snapshot/$SUBFOLDER"
+    cp --recursive --preserve=timestamps "$FOLDER/" "${BLACK_DRIVE}/snapshot/$SUBFOLDER"
+done
+
+
+

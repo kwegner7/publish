@@ -1,0 +1,456 @@
+#!/bin/bash
+
+#
+# Given: a repository with .../src and .../annotated/src
+#   and: a template workspace for either "baseline" or "annotated"
+#
+# Methods:
+#   Can create a folder system to hold the shared source code
+#
+
+#
+# $BASE/UEWR/MAS/repository
+# $BASE/UEWR/MAS/MAS-8023-Annotated/src
+# $BASE/UEWR/MAS/MAS-8023-Annotated/.metadata
+# $BASE/UEWR/MAS/MAS-8023-CuedSearch/.metadata
+# $BASE/UEWR/MAS/MAS-8023-MemoryPools/.metadata
+#
+
+
+
+
+
+##############################################################################
+#   Given: a CD with D:/export representing MAS 8.0.2.3
+# Produce: a repository folder
+##############################################################################
+function initial-repository()
+{
+    echo ''
+    declare SOURCE_CODE_FOLDERS=C:/zeus/SPS-801
+    declare SOURCE_CODE_FOLDERS=D:/export
+    echo -e "Creating repository at $REPOS" 
+
+    svnadmin create $BASE/code-studies/$PROGRAM/repository
+    svn mkdir -m "" $REPOS/$PROGRAM-$VERSION $REPOS/$PROGRAM-$VERSION/src 
+
+    cd $SOURCE_CODE_FOLDERS
+    for FOLDER in `ls -1`
+    do
+        svn import -m "" ./$FOLDER $REPOS/$PROGRAM-$VERSION/src/$FOLDER
+    done
+    true && svn list --recursive $REPOS
+    echo -e "Created repository at $REPOS" 
+
+    return 0
+}
+
+##############################################################################
+# create folder structure
+##############################################################################
+function folder-structure()
+{
+    echo ''
+    if [ ! -d $BASE/$PROJECT/$PROGRAM ]
+    then
+        echo Creating folder structure at $BASE/$PROJECT/$PROGRAM
+        mkdir --mode=755 --verbose --parents $BASE/$PROJECT/$PROGRAM
+    else
+        echo $BASE/$PROJECT/$PROGRAM already exists
+    fi
+
+    return 0
+}
+
+##############################################################################
+#   Given: a repository with annotations
+#     and: a template workspace
+# Produce: a workbench folder with shortcut
+#     and: an extracted source code folder
+##############################################################################
+function workbench-annotated()
+{
+    echo ''
+    if [ -d $REPOS_LOC ]
+    then
+        if [ ! -d $WORKBENCH_ANNOTATED -a ! -d $SOURCE_CODE_ANNOTATED ]
+        then
+            echo -e "################################################################################"
+            echo -e "Creating workbench at $WORKBENCH_ANNOTATED"
+            echo -e "And extracting source code to $SOURCE_CODE_ANNOTATED"
+            echo -e "The workbench is initially set to $TEMPLATE_WORKSPACE"
+            echo -e "Manual steps:"
+            echo -e "    1) Create a shortcut here to the workbench and reference it in TABLE-OF-CONTENTS"
+            echo -e "    2) Open in Eclipse and set the Task Tags to \"TOPIC:\""
+            echo -e "    3) Checkout the source code and create .project if necessary"
+            echo -e "           New - Other - SVN - Project from SVN"
+            echo -e "           Repository is $REPOS_ANNOTATED"
+            echo -e "           Name is $PROGRAM-$VERSION-Annotated"
+            echo -e "           Project location is $SOURCE_CODE"
+            echo -e "    4) If .project and .cproject do not exist in the repository, continue with 5) and 6)"
+            echo -e "    5) Convert generic project to C++ project and create .cproject"
+            echo -e "           New - Convert to C/C++ Project - Specify project type (uncheck)"
+            echo -e "    6) Checkin .project and .cproject"
+            echo -e "           Team - Commit"
+            echo -e "################################################################################"
+            umask 0000
+            cp -r $TEMPLATE_WORKSPACE $WORKBENCH_ANNOTATED
+            cd /tmp && rm -rf ./$PROGRAM-$VERSION-Annotated
+            svn export $REPOS_ANNOTATED ./$PROGRAM-$VERSION-Annotated
+            cp -r --verbose ./$PROGRAM-$VERSION-Annotated $SOURCE_CODE
+        else
+            echo $WORKBENCH_ANNOTATED already exists
+            echo or $SOURCE_CODE_ANNOTATED already exists
+        fi
+    else
+        echo $REPOS_LOC does not exist
+    fi
+
+    return 0
+}
+
+##############################################################################
+#   Given: a repository with baseline versions
+#     and: a template workspace
+# Produce: a workbench folder with shortcut
+#     and: an extracted source code folder
+##############################################################################
+function workbench-baseline()
+{
+    echo ''
+    if [ -d $REPOS_LOC ]
+    then
+        if [ ! -d $WORKBENCH_BASELINE -a ! -d $SOURCE_CODE_BASELINE ]
+        then
+            echo -e "################################################################################"
+            echo -e "Creating workbench at $WORKBENCH_BASELINE"
+            echo -e "And extracting source code to $SOURCE_CODE_BASELINE"
+            echo -e "The workbench is initially set to $TEMPLATE_WORKSPACE"
+            echo -e "Manual steps:"
+            echo -e "    1) Create a shortcut here to the workbench and reference it in TABLE-OF-CONTENTS"
+            echo -e "    2) Open in Eclipse and set the Task Tags to \"TOPIC:\""
+            echo -e "    3) Checkout the source code and create .project if necessary"
+            echo -e "           New - Other - SVN - Project from SVN"
+            echo -e "           Repository is $REPOS_BASELINE"
+            echo -e "           Name is $PROGRAM-$VERSION"
+            echo -e "           Project location is $SOURCE_CODE"
+            echo -e "    4) If .project and .cproject do not exist in the repository, continue with 5) and 6)"
+            echo -e "    5) Convert generic project to C++ project and create .cproject"
+            echo -e "           New - Convert to C/C++ Project - Specify project type (uncheck)"
+            echo -e "    6) Checkin .project and .cproject"
+            echo -e "           Team - Commit"
+            echo -e "################################################################################"
+            umask 0000
+            cp -r $TEMPLATE_WORKSPACE $WORKBENCH_BASELINE
+        else
+            echo $WORKBENCH_BASELINE already exists
+            echo or $SOURCE_CODE_BASELINE already exists
+        fi
+    else
+        echo $REPOS_LOC does not exist
+    fi
+
+    return 0
+}
+
+##############################################################################
+#   Given: an Eclipse project folder of annotated source code
+#     and: a template workspace
+# Produce: a workbench folder on particular topics with shortcut
+##############################################################################
+function workbench-topic()
+{
+    echo ''
+    if [ -d $SOURCE_CODE_ANNOTATED ]
+    then
+        if [ ! -d $WORKBENCH_TOPIC ]
+        then
+            echo -e "################################################################################"
+            echo -e "Creating workbench at $WORKBENCH_TOPIC"
+            echo -e "Using the existing project $SOURCE_CODE_ANNOTATED"
+            echo -e "The workbench is initially set to $TEMPLATE_WORKSPACE"
+            echo -e "Manual steps:"
+            echo -e "    1) Create a shortcut here to the workbench and reference it in TABLE-OF-CONTENTS"
+            echo -e "    2) Open in Eclipse and set the Task Tags to \"TOPIC: $TOPIC\""
+            echo -e "    3) Import the annotated source code as an existing project"
+            echo -e "       Import - General - Existing Projects Into Workspace"
+            echo -e "       Location of project is $SOURCE_CODE_ANNOTATED"
+            echo -e "################################################################################"
+            cp -r $TEMPLATE_WORKSPACE $WORKBENCH_TOPIC
+        else
+            echo $WORKBENCH_TOPIC already exists
+        fi
+    else
+        echo $SOURCE_CODE_ANNOTATED does not exist
+    fi
+
+    return 0
+}
+
+##############################################################################
+# add new topic view based upon annotated source code
+##############################################################################
+function add-new-topic()
+{
+    echo ''
+    if [ ! -d $WORKBENCH_TOPIC ]
+    then
+        echo -e "################################################################################"
+        echo -e "Copying template workbench AnnotatedCode to"
+        echo -e "    $WORKBENCH_TOPIC"
+        echo -e "Manual steps:"
+        echo -e "    1) Create a shortcut and add this new topic to the TABLE-OF-CONTENTS"
+        echo -e "    2) Modify the Task Tags to indicate the topic"
+        echo -e "    3) Import - General - Existing Projects Into Workspace"
+        echo -e "       $BASE/code-studies/$PROGRAM/source-code"
+        echo -e "################################################################################"
+        cp -r $TEMPLATE_WORKSPACE $WORKBENCH_TOPIC
+    else
+        echo $WORKBENCH_TOPIC already exists
+    fi
+
+    return 0
+}
+
+##############################################################################
+# main and entry point
+##############################################################################
+function main ()
+{
+    ##########################################################################
+    # establish common symbols
+    ##########################################################################
+    declare -x DO_THIS=${1:---add-new-topic}
+    declare -x    BASE=${2:-/sharing}
+    declare -x PROJECT=${3:-UEWR}
+    declare -x PROGRAM=${4:-MAS}
+    declare -x VERSION=${5:-8023}
+    declare -x   TOPIC=${6:-CuedSearch}
+
+    ##########################################################################
+    # process
+    ##########################################################################
+    if   [ $DO_THIS = "--initial-repository"  ]; then shift && initial-repository "$@"
+    elif [ $DO_THIS = "--folder-structure"    ]; then shift && folder-structure "$@"
+    elif [ $DO_THIS = "--workbench-annotated" ]; then shift && workbench-annotated "$@"
+    elif [ $DO_THIS = "--workbench-baseline"  ]; then shift && workbench-baseline "$@"
+    elif [ $DO_THIS = "--workbench-topic"     ]; then shift && workbench-topic "$@"
+    elif [ $DO_THIS = "--add-new-topic"       ]; then shift && add-new-topic "$@"
+    else                                   echo $SWITCH is not recognized
+    fi
+
+    return 0
+
+
+
+
+    declare CDRIVE_LOCAL="C:/local"
+    declare CDRIVE_COMMON="C:/common"
+    declare NETWORK_COMMON="//ittsyssenvault/users/kurt.wegner/common"
+    declare NETWORK_PUBLIC="//ittsyssenvault/users/kurt.wegner/public"
+
+    declare  CDRIVE_LOCAL_REPOS="file:///C:/local/$PROJECT/code-studies/$PROGRAM/repository"
+    declare CDRIVE_COMMON_REPOS="file:///C:/common/$PROJECT/code-studies/$PROGRAM/repository"
+    declare NETWORK_COMMON_REPOS="file://ittsyssenvault/users/kurt.wegner/common/$PROJECT/code-studies/$PROGRAM/repository"
+    declare NETWORK_PUBLIC_REPOS=$CDRIVE_LOCAL_REPOS
+
+    declare -x TEMPLATE_ANNOTATED_CODE=/cygdrive/c/itt/templates/AnnotatedCode
+    declare -x TEMPLATE_BASELINE_CODE=/cygdrive/c/itt/templates/BaselineCode
+
+    if   [ $CDRIVE_NETWORK = "cdrive" -a $ANNOT_BASELINE_TOPIC = "annotate" ]; then
+        declare -x BASE=$CDRIVE_LOCAL/$PROJECT
+        declare -x REPOS=$CDRIVE_LOCAL_REPOS
+        declare -x REPOS_LOC=$BASE/code-studies/$PROGRAM/repository
+        declare -x TEMPLATE_WORKSPACE=$TEMPLATE_ANNOTATED_CODE
+
+    elif [ $CDRIVE_NETWORK = "cdrive" -a $ANNOT_BASELINE_TOPIC = "view-baseline" ]; then
+        declare -x BASE=$CDRIVE_COMMON/$PROJECT
+        declare -x REPOS=$CDRIVE_COMMON_REPOS
+        declare -x REPOS_LOC=$BASE/code-studies/$PROGRAM/repository
+        declare -x TEMPLATE_WORKSPACE=$TEMPLATE_BASELINE_CODE
+
+    elif [ $CDRIVE_NETWORK = "network" -a $ANNOT_BASELINE_TOPIC = "view-baseline" ]; then
+        declare -x BASE=$NETWORK_COMMON/$PROJECT
+        declare -x REPOS=$NETWORK_COMMON_REPOS
+        declare -x REPOS_LOC=$BASE/code-studies/$PROGRAM/repository
+        declare -x TEMPLATE_WORKSPACE=$TEMPLATE_BASELINE_CODE
+
+    elif [ $CDRIVE_NETWORK = "network" -a $ANNOT_BASELINE_TOPIC = "view-topic" ]; then
+        declare -x BASE=$NETWORK_PUBLIC/$PROJECT
+        declare -x REPOS=$CDRIVE_LOCAL_REPOS
+        declare -x REPOS_LOC=$CDRIVE_LOCAL/$PROJECT/code-studies/$PROGRAM/repository
+        declare -x TEMPLATE_WORKSPACE=$TEMPLATE_ANNOTATED_CODE
+
+    else
+        declare -x BASE=$CDRIVE_LOCAL/$PROJECT
+        declare -x REPOS=$CDRIVE_LOCAL_REPOS
+        declare -x REPOS_LOC=$BASE/code-studies/$PROGRAM/repository
+        declare -x TEMPLATE_WORKSPACE=$TEMPLATE_ANNOTATED_CODE
+    fi
+ 
+    declare -x REPOS_BASELINE="$REPOS/$PROGRAM-$VERSION/src"
+    declare -x REPOS_ANNOTATED="$REPOS/$PROGRAM-$VERSION/annotated/src"
+
+    declare -x WORKBENCH="$BASE/code-studies/$PROGRAM/workbench"
+    declare -x WORKBENCH_BASELINE="$BASE/code-studies/$PROGRAM/workbench/$PROGRAM-$VERSION"
+    declare -x WORKBENCH_ANNOTATED="$BASE/code-studies/$PROGRAM/workbench/$PROGRAM-$VERSION-Annotated"
+    declare -x WORKBENCH_TOPIC="$BASE/code-studies/$PROGRAM/workbench/$PROGRAM-$VERSION-$TOPIC"
+
+    declare -x SOURCE_CODE="$BASE/code-studies/$PROGRAM/source-code"
+    declare -x SOURCE_CODE_BASELINE="$BASE/code-studies/$PROGRAM/source-code/$PROGRAM-$VERSION"
+    declare -x SOURCE_CODE_ANNOTATED="$BASE/code-studies/$PROGRAM/source-code/$PROGRAM-$VERSION-Annotated"
+
+}
+main "$@"
+exit 0
+
+##############################################################################
+# Given a repository and a $BASE, create a folder structure
+##############################################################################
+sharing-topics.bsh --folder-structure /sharing UEWR MAS
+
+cp -r --verbose /media/BLUE-8GB/repositories/local-MAS /sharing/UEWR/MAS/repository
+
+declare SVN=file:///sharing/UEWR/MAS/repository
+svn checkout $SVN/MAS-8023/annotated/src /sharing/UEWR/MAS/MAS-8023-Annotated/src
+
+
+eclipse -data /sharing/UEWR/MAS/MAS-8023-Annotated
+
+
+New - Project - General - Project 
+Name is "src" and use default location
+
+SubEclipse is installed and needs SVN Client!!!
+
+Try Subversive?
+Says SVNKit Library 1.3.7 is installed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##############################################################################
+# examples
+##############################################################################
+if false
+then
+    #
+    # C:/public/UEWR/code-studies/MAS/repository
+    # C:/public/UEWR/code-studies/MAS/workbench/MAS-8023-Annotated
+    #                                          /MAS-8023-CuedSearch
+    #                                          /MAS-8023-Goaltending
+    #                                          /MAS-8023-MemoryPools
+    #                                          /MAS-8023-ShortTermFence
+    #
+    # H:/public/UEWR/code-studies/MAS/workbench/MAS-8023-Annotated
+    #                                          /MAS-8023-CuedSearch
+    #                                          /MAS-8023-Goaltending
+    #                                          /MAS-8023-MemoryPools
+    #                                          /MAS-8023-ShortTermFence
+    #
+    # C:/common/UEWR/code-studies/MAS/repository
+    # C:/common/UEWR/code-studies/SPS/repository
+    # C:/common/UEWR/code-studies/MAS/workbench/MAS-8023
+    #                            /SPS/workbench/SPS-801
+    #
+    # H:/common/UEWR/code-studies/MAS/repository
+    # H:/common/UEWR/code-studies/SPS/repository
+    # H:/common/UEWR/code-studies/MAS/workbench/MAS-8023
+    #                            /SPS/workbench/SPS-801
+    #
+    #
+    if true
+    then
+        echo --------------------------
+        ls -1 C:/local/UEWR/code-studies/*/workbench && echo --------------------------
+        ls -1 H:/public/UEWR/code-studies/*/workbench && echo --------------------------
+        ls -1 C:/common/UEWR/code-studies/*/workbench && echo --------------------------
+        ls -1 H:/common/UEWR/code-studies/*/workbench && echo --------------------------
+    fi
+
+    ##########################################################################
+    # create C:/local so that Kurt can annotate UEWR source code
+    ##########################################################################
+    sharing-topics.bsh --folder-structure    cdrive annotate UEWR
+    sharing-topics.bsh --workbench-annotated cdrive annotate UEWR MAS 8023
+    sharing-topics.bsh --workbench-topic     cdrive annotate UEWR MAS 8023 CuedSearch
+    sharing-topics.bsh --workbench-topic     cdrive annotate UEWR MAS 8023 Goaltending
+    sharing-topics.bsh --workbench-topic     cdrive annotate UEWR MAS 8023 ShortTermFence
+    sharing-topics.bsh --workbench-topic     cdrive annotate UEWR MAS 8023 MemoryPools
+
+    ##########################################################################
+    # create C:/common so that Kurt can view the baseline source code sets
+    ##########################################################################
+    sharing-topics.bsh --folder-structure    cdrive view-baseline UEWR
+    sharing-topics.bsh --initial-repository  cdrive view-baseline UEWR MAS 8023
+    sharing-topics.bsh --workbench-baseline  cdrive view-baseline UEWR MAS 8023
+
+    ##########################################################################
+    # create H:/common so that anyone can view the baseline source code sets
+    ##########################################################################
+    sharing-topics.bsh --folder-structure    network view-baseline UEWR
+    echo Copy the repository from C:/common
+    sharing-topics.bsh --workbench-baseline  network view-baseline UEWR MAS 8023
+    echo Make sure all .log and .lock are read/write
+
+    ##########################################################################
+    # create H:/public so that anyone can view the various topics
+    ##########################################################################
+    sharing-topics.bsh --folder-structure    network view-topic UEWR
+    sharing-topics.bsh --workbench-annotated network view-topic UEWR MAS 8023
+    sharing-topics.bsh --workbench-topic     network view-topic UEWR MAS 8023 CuedSearch
+    sharing-topics.bsh --workbench-topic     network view-topic UEWR MAS 8023 Goaltending
+    sharing-topics.bsh --workbench-topic     network view-topic UEWR MAS 8023 ShortTermFence
+    sharing-topics.bsh --workbench-topic     network view-topic UEWR MAS 8023 MemoryPools
+    echo Make sure all .log and .lock are read/write
+
+    ##########################################################################
+    # create UEWR Code Studies.html at /common
+    #   UEWR Source Code from H:/common
+    #   UEWR Code Studies - Kurt from H:/public
+    #   UEWR RDA Materials from H:/public
+    #   Instructions
+    ##########################################################################
+
+    #########################################################################
+    # Obtain SPS 8.0.1 from zeus
+    ##########################################################################
+    if true
+    then
+        declare VIEW=kurtwegner_test_view
+        declare CONFIG_SPEC=C:/itt/notes/notes-clearcase/config-specs/laj18116_sps_801.txt
+        cleartool setcs -tag $VIEW $CONFIG_SPEC
+        cd z:/sps_source && copy-text-files.bsh c:/zeus/SPS-801 # exclude Documentation folder
+    fi
+
+    ##########################################################################
+    # SPS create C:/common so that Kurt can view the baseline source code sets
+    ##########################################################################
+    sharing-topics.bsh --initial-repository cdrive view-baseline UEWR SPS 801
+    sharing-topics.bsh --workbench-baseline cdrive view-baseline UEWR SPS 801
+
+    ##########################################################################
+    # SPS create H:/common so that anyone can view the baseline source code sets
+    ##########################################################################
+    echo Copy the repository from C:/common
+    sharing-topics.bsh --workbench-baseline  network view-baseline UEWR SPS 801
+    echo Make sure all .log and .lock are read/write
+
+
+
+
+fi

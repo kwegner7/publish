@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#
+# compare .py files in two folders
+#
+
+declare SRC1="/working/python/db/src/"
+declare SRC2="/working/python7/db/src/"
+
+IFS=$'\n'
+
+    cd $SRC1
+    declare FILES=$(find . -name "*.py" -print)
+    for FILE in $FILES
+    do
+        echo Comparing Python file $FILE
+        diff ${SRC1}/$FILE  ${SRC2}/$FILE
+    done
+
+IFS=$'\x20\t\n'

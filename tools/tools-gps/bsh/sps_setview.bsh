@@ -1,0 +1,17 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+    ###########################################################################
+    # specify the view 
+    ###########################################################################
+    view=kwegncc_sps
+    config_spec=/home/kwegncc/INSTRUCTIONS/CLEARCASE/CONFIG_SPECS/SPS
+
+    ###########################################################################
+    # set the view 
+    ###########################################################################
+    ct setcs -tag $view $config_spec
+    ct setview $view
+
+exit

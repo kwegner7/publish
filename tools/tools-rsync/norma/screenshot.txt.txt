@@ -1,0 +1,255 @@
+
+C:\cygwin\usr\local\bin>cd C:\cygwin\usr\local\bin
+
+C:\cygwin\usr\local\bin>C:\cygwin\bin\bash.exe .\rsync.bsh -norma
+cygwin warning:
+  MS-DOS style path detected: .\rsync.bsh
+  Preferred POSIX equivalent is: ./rsync.bsh
+  CYGWIN environment variable option "nodosfilewarning" turns off this warning.
+  Consult the user's guide for more details about POSIX paths:
+    http://cygwin.com/cygwin-ug-net/using.html#using-pathnames
+
+----------------------------------------
+Begin rsync Sat Oct  6 13:48:32 MDT 2012
+----------------------------------------
+
+           Reading config file rsync-config-norma.bsh
+
+ Existing repository folder at /cygdrive/k/rsync/My Documents
+                     source is /cygdrive/c/Documents and Settings/HP_Owner/My Do
+cuments
+            previous points to /cygdrive/k/rsync/My Documents/2012-10-04 1831
+              latest points to /cygdrive/k/rsync/My Documents/2012-10-04 1838
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1348/My
+ Pictures/2008 NJ ELEANOR APR/.EleanorBike.JPG.8zAVCN": Invalid argument (22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1348/My
+ Pictures/2008 NJ ELEANOR APR/.EleanorBike2.JPG.j2Hx0A": Invalid argument (22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1348/My
+ Pictures/2008 NJ ELEANOR APR/.EleanorCarSeat.JPG.R32f9d": Invalid argument (22)
+
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1348/My
+ Pictures/2008 NJ ELEANOR APR/.chris_eleanor10mo.JPG.JJ0S3I": Invalid argument (
+22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1348/My
+ Pictures/2008 NJ ELEANOR APR/.eleanorswing.JPG.OSAuSy": Invalid argument (22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1348/My
+ Pictures/2008 NJ ELEANOR APR/2008 NJ #2  BABY ELEANOR/.eleanorcap.jpg.CIA4kQ":
+Invalid argument (22)
+rsync error: some files/attrs were not transferred (see previous errors) (code 2
+3) at /home/lapo/package/rsync-3.0.9-1/src/rsync-3.0.9/main.c(1052) [sender=3.0.
+9]
+     source and latest produce /cygdrive/k/rsync/My Documents/2012-10-06 1348
+        previous now points to /cygdrive/k/rsync/My Documents/2012-10-04 1838
+          latest now points to /cygdrive/k/rsync/My Documents/2012-10-06 1348
+
+   SIZE OF REPOSITORY: du: cannot read directory `/cygdrive/k/rsync/My Documents
+/2012-10-06 1348/My Pictures/2010 NYC CATH ART Show': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2010 Puzzleer': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2010 TRACKMEETS SP SNOWS EASTER': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2010 XMAS': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2010_04_08': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 CO DEN & TRACEY': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 EARLY SPRING W.P. -TRACKMEET': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 FALL COLLEGE TOURS XMAS': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 FLOWERS NEW CAMERA': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 HENRY # 3': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 HENRY #2': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 HENRY B\'DAY': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 HENRY.S GRAD PIC': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 HENRY.S GRAD': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 July  NEIGHBORHOOD SCENES': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 LANDSCAPING MAY': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 LANSCAPING APRIL -BANTLY': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 LOREN B\'DAY 2': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 LOREN B\'DAY': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 MAY MITCH GRADUATION': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 MITCH PROM,ETC': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 Mitch Senior': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 OHIO HENRY VDS TRISH': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 Thomas Manning Luce War of 1812 article': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 WERNER': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 XMAS': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011 fall X-countryNew Folder': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2011_Snowshoe': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012  FLORIDA MARCH 2-12': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012  Lucy and Duane': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 Asht. OH Bessies Family Reunion Mich; GA': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 BESSIE AFGHAN': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 BETHANY BOB VEHICLE': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 BRECKSVILLE PARK': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 HENRY -DUP': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 HENRY CAP&GOWN': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 Joanne\'s b\'day': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 KEITH\'S HOUSE': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 MA Pirates aug': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 MARY LOU\'S COPY Folder': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 Norma & Don Wedding 1950': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 Norma\'s H.S. Pals 1948 or 49': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 OHIO HENRY\'S GRADUATION': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 OHIO TOM PICNIC': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 RMNP_09_01': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 Royal Gorge _08_10': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 STEVE & GLENDA': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 Steve Womble H.S Graduation 1961': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 TAMPA _13': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 TAMPA': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 TAMPA_03_07': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 TARPON SPGS 03_10': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 TARPON SPGS': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 TARPON SPGS_03_11': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 TRISH\'S HOUSE': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 YARD WORK VISITORS': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 Young Bessie': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012 bethany & bob': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012_ FLA SHELLS 3_20': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012_TAMPA  MOTEL 03_14': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/2012_TAMPA 03_12': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/August 2012 Cheryl RMNP': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/Cheryl Pics': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/Emily Scrap': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/HENRY GRAD -DUP': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/Jeff family May 2012': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/Jeff visit July 2012': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/MAP 1435 KINGS CROWN RD': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/MY PICTURES VALENTINE BOB FROM TRACEY 2010': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/Mandy visit june 2012': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/New Folder (2)': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/OLD SLIDES from Keith Folder': File too large
+du: cannot read directory `/cygdrive/k/rsync/My Documents/2012-10-06 1348/My Pic
+tures/50th Wedding Anniversary MARY-LOU & KURT(compressed files)': File too larg
+e
+19513337132535669 bytes
+
+
+C:\cygwin\usr\local\bin>pause
+Press any key to continue . . .
+
+
+
+
+
+
+
+
+
+C:\cygwin\usr\local\bin>cd C:\cygwin\usr\local\bin
+
+C:\cygwin\usr\local\bin>C:\cygwin\bin\bash.exe .\rsync.bsh -norma
+cygwin warning:
+  MS-DOS style path detected: .\rsync.bsh
+  Preferred POSIX equivalent is: ./rsync.bsh
+  CYGWIN environment variable option "nodosfilewarning" turns off this warning.
+  Consult the user's guide for more details about POSIX paths:
+    http://cygwin.com/cygwin-ug-net/using.html#using-pathnames
+
+----------------------------------------
+Begin rsync Sat Oct  6 15:05:34 MDT 2012
+----------------------------------------
+
+           Reading config file rsync-config-norma.bsh
+
+ Existing repository folder at /cygdrive/k/rsync/My Documents
+                     source is /cygdrive/c/Documents and Settings/HP_Owner/My Do
+cuments
+            previous points to /cygdrive/k/rsync/My Documents/2012-10-06 1348
+              latest points to /cygdrive/k/rsync/My Documents/2012-10-06 1348
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1505/My
+ Pictures/2008 NJ ELEANOR APR/2008 NJ #2  BABY ELEANOR/.eleanorcap.jpg.MhvaYG":
+Invalid argument (22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1505/My
+ Pictures/2008 NJ ELEANOR APR/morePictures/.EleanorBike.JPG.HfAKfC": Invalid arg
+ument (22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1505/My
+ Pictures/2008 NJ ELEANOR APR/morePictures/.EleanorBike2.JPG.Z9aPwq": Invalid ar
+gument (22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1505/My
+ Pictures/2008 NJ ELEANOR APR/morePictures/.EleanorCarSeat.JPG.oqmlwG": Invalid
+argument (22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1505/My
+ Pictures/2008 NJ ELEANOR APR/morePictures/.chris_eleanor10mo.JPG.Ktq99H": Inval
+id argument (22)
+rsync: failed to set times on "/cygdrive/k/rsync/My Documents/2012-10-06 1505/My
+ Pictures/2008 NJ ELEANOR APR/morePictures/.eleanorswing.JPG.6TbtHe": Invalid ar
+gument (22)
+rsync error: some files/attrs were not transferred (see previous errors) (code 2
+3) at /home/lapo/package/rsync-3.0.9-1/src/rsync-3.0.9/main.c(1052) [sender=3.0.
+9]
+Return code is: 23
+     source and latest produce /cygdrive/k/rsync/My Documents/2012-10-06 1505
+        previous now points to /cygdrive/k/rsync/My Documents/2012-10-06 1348
+          latest now points to /cygdrive/k/rsync/My Documents/2012-10-06 1505
+
+
+C:\cygwin\usr\local\bin>pause
+Press any key to continue . . .

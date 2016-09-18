@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# ----------------------------------------------------------------------
+# Location of the base repository folder
+# ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+# List of folders to be backed up
+# ----------------------------------------------------------------------
+declare -ax FOLDERS=(
+  '/home/kurt/ubu'
+  '/working'
+  '/home/kurt/.local/share/tomboy'
+  '/media/File System - Windows/Users/Kurt/Documents/kmw'
+)
+
+# ----------------------------------------------------------------------
+# List of folders to be backed up
+# ----------------------------------------------------------------------
+
+declare -ax FLASH_DRIVES=(
+  "/red/"
+  "/orange/"
+)
+
+declare -ax RSYNC_FOLDERS=(
+  'ubu'
+  'working'
+  'tomboy'
+  'kmw'
+)
+
+# ----------------------------------------------------------------------
+# This function produces a string of the form "2012-09-04 1130"
+# ----------------------------------------------------------------------
+function date_time()
+{
+    date --date=now +"%Y-%m-%d %H%M"
+    return 0
+}
+
+# ----------------------------------------------------------------------
+# rsync_all_folders
+# ----------------------------------------------------------------------
+function backup_to_black_drive()
+{  
+    declare -x DATE_TIME=`date_time`
+    declare -x NEW_FOLDER="$DATE_TIME"
+    if true
+        then declare -x BLACK_256GB="/media/BLACK-256GB/"
+        else declare -x BLACK_256GB="/tmp/"
+    fi
+
+    echo "" 
+    echo "    Time is $DATE_TIME"
+
+    IFS=$'\n'
+    for FLASH  in  ${FLASH_DRIVES[*]}; do
+    for FOLDER in ${RSYNC_FOLDERS[*]}; do
+        local NEW_FOLDER="${BLACK_256GB}backup-red-orange${FLASH}${DATE_TIME}/${FOLDER}/"
+        if [ ! -d "$NEW_FOLDER" ]
+        then
+            echo -e "\n    creating folder $NEW_FOLDER"
+            mkdir --parents "$NEW_FOLDER"
+        else
+            echo -e "ERROR: FILE EXISTS ALREADY $NEW_FOLDER"
+            return 1
+        fi
+        local PREVIOUS=$(cat "${FLASH}rsync/${FOLDER}/previous")
+        local LATEST=$(cat "${FLASH}rsync/${FOLDER}/latest")
+        echo -ne "\n    PREVIOUS " && echo $PREVIOUS/
+        echo -ne "      LATEST "   && echo $LATEST/
+        
+        echo -e "    copying previous to ${NEW_FOLDER}"
+        cp --recursive --preserve=timestamps "$PREVIOUS/" "${NEW_FOLDER}"
+        echo -e "    copying   latest to ${NEW_FOLDER}"
+        cp --recursive --preserve=timestamps "$LATEST/" "${NEW_FOLDER}"
+    done
+    done
+    IFS=$'\x20\t\n'
+    
+    if [ -d "$REPOSITORY" ]; then
+        echo -en "\n   SIZE OF REPOSITORY: "
+        printf "%'10d bytes\n" `du --byte --summarize "$REPOSITORY" | cut -f1`
+    fi
+    
+    echo '' 
+    
+    return 0
+}
+
+backup_to_black_drive
+exit $?

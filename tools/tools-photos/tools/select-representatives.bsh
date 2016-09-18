@@ -1,0 +1,35 @@
+#!/bin/bash
+
+########################################################################
+# useful functions
+########################################################################
+function set_checksums()
+{
+    cat "${1}" | sort --unique --key=1,1
+}
+
+########################################################################
+# prepend file names with its checksum
+########################################################################
+function main()
+{
+    local -r EQUIV_CLASSES="${1}"
+    local -r OUTFILE=$(mktemp)
+
+    echo -en "    Select one file from each equivalence class:" >&2
+    set_checksums "${EQUIV_CLASSES}" > "${OUTFILE}"
+    printf "%6d equivalence classes found\n" "`cat ${OUTFILE} | wc -l`" >&2
+
+    cat ${OUTFILE}
+    rm -f ${OUTFILE}
+    return 0
+
+}
+
+##############################################################################
+# Example:
+#    set-checksum.bsh '/tmp/list-of-files1a.txt'
+##############################################################################
+main "$@"
+exit "$?"
+

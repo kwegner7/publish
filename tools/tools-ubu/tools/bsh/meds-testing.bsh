@@ -1,0 +1,40 @@
+#!/bin/bash -norc
+########################################################################
+# compare meds results against standard success
+########################################################################
+declare -r MEDS="/home/kurt/ubu/code/python/meds"
+declare -r MEDS_ORIG="/home/kurt/ubu/code/python/meds-orig"
+declare -r HTML="/home/kurt/ubu/code/python/meds/html"
+declare -r WORKS="/home/kurt/ubu/code/python/meds-orig/works"
+declare -r DEST="/media/File System - Windows/Users/Kurt/My Documents/html"
+
+IFS=$'\n'
+    cd $MEDS
+    echo "Comparing $MEDS/html with $MEDS_ORIG/works" 
+    diff --brief -r $MEDS/html $MEDS_ORIG/works
+    echo diff $MEDS_ORIG/src/BaseClasses.py $MEDS/src/BaseClasses.py 
+    diff $MEDS_ORIG/src/BaseClasses.py $MEDS/src/BaseClasses.py 
+    echo diff $MEDS_ORIG/src/DerivedClasses.py $MEDS/src/DerivedClasses.py 
+    diff $MEDS_ORIG/src/DerivedClasses.py $MEDS/src/DerivedClasses.py 
+    echo diff $MEDS_ORIG/src/Html.py $MEDS/src/Html.py 
+    diff $MEDS_ORIG/src/Html.py $MEDS/src/Html.py 
+    
+    
+    for NEXT in 1 2 3 4 5 6
+    do
+        echo $NEXT
+        #rm -rf ${DEST}${NEXT}
+        #mkdir --parents ${DEST}${NEXT}
+    done
+
+    if false
+    then
+        cp $SOURCE/*CabinMeds*.html      ${DEST}1
+        cp $SOURCE/*Day*.html            ${DEST}2
+        cp $SOURCE/*HSMeds*.html         ${DEST}3
+        cp $SOURCE/*Health*.html         ${DEST}4
+        cp $SOURCE/*Parent*.html         ${DEST}5
+        cp $SOURCE/*LaBus*.html          ${DEST}6
+    fi
+IFS=$' \t\n'
+

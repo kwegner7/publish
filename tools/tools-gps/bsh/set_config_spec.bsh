@@ -1,0 +1,36 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# main
+########################################################################
+function main ()
+{
+    ########################################################################
+    # set the config spec
+    ########################################################################
+
+    cd $CONFIG_SPECS
+    {
+        declare -r view=kwegncc_using_cr
+        declare -r config_spec=${1:-SPS}
+        ls -1 && echo "" && echo Using $config_spec
+        cleartool setcs -tag $view $CONFIG_SPECS/$config_spec
+        cleartool setview $view
+    }
+
+    exit
+
+    ct catcs -tag mbarancc_sps > SPS.mbarancc_sps
+    ct catcs -tag hlaj2_sps_5219 > SPS.hlaj2_sps_5219
+    ln -s SPS.mbarancc_sps SPS
+    ln -s SPS.hlaj2_sps_5219 SPS
+
+    exit
+}
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"

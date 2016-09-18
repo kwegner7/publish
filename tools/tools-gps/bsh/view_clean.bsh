@@ -1,0 +1,65 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# Remove all derived objects from the VOB or SVN workspace.
+# Invocation:
+#               cd <someplace> && view_clean [ --cc | --svn ]
+########################################################################
+function main ()
+{
+    echo '' && echo "Cleaning $PWD ..." && echo ''
+
+    declare -r flag=${1:---cc}
+    if [[ ${flag} == --cc ]]; then
+        declare -r EXECS=$(ct lsprivate -do)
+        declare -r EXECS1=''
+    elif [[ ${flag} == --svn ]]; then
+        declare -r EXECS=$(svn status --no-ignore $PWD | grep '^?' | cut --characters=1-7 --complement)
+        declare -r EXECS1=$(svn status --no-ignore $PWD | grep '^I' | cut --characters=1-7 --complement)
+    else
+        declare -r EXECS=$(ct lsprivate -do)
+        declare -r EXECS1=''
+    fi
+
+    for DERIVED in ${EXECS} ${EXECS1}; do
+    {
+        if [ -f $DERIVED ]; then
+        {
+            if ls $DERIVED > /dev/null; then
+                echo removing $DERIVED ...
+                rm $DERIVED
+            else
+                echo FILE $DERIVED NOT FOUND
+            fi
+        }
+        else
+        {
+            if [ ! -d $DERIVED ]; then
+                echo FILE IS NOT A PLAIN FILE $DERIVED
+            fi
+        }
+        fi
+    }
+    done
+
+    return 0
+}
+ 
+########################################################################
+# entry point
+########################################################################
+main "$@"
+
+########################################################################
+# view must be set before invoking view_clean
+########################################################################
+if [ $false ]
+then
+    view=kwegncc_sps
+    config_spec=/home/kwegncc/INSTRUCTIONS/CLEARCASE/CONFIG_SPECS/SPS
+    ct setcs -tag $view $config_spec
+    ct setview $view
+fi
+

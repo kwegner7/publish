@@ -1,0 +1,108 @@
+#!/bin/bash
+
+##############################################################################
+# accumulate list of files - excludes txt out log dat
+##############################################################################
+function which_files()
+{
+    # find . -type f -exec file '{}' \;
+    local -r this_folder=$(filename_only ${PWD})
+    pushd .. > /dev/null
+    local -r files=$(find ${this_folder} \
+        -type f                          \
+        -a -name "*"                     \
+        -a ! -name "*\.svn*"             \
+        -a ! -name "*.txt"               \
+        -a ! -name "*.out"               \
+        -a ! -name "*.*log"              \
+        -a \(                            \
+                 ! -name "*.dat"         \
+                -o -name *Sap*.dat       \
+           \)                            \
+        -print                           )
+    popd > /dev/null
+    echo $files
+    return 0
+}
+
+##############################################################################
+# copy_text_files_only
+##############################################################################
+function copy_text_files_only()
+{
+    local -r NUMBER_PARAMS=${#@}
+    local -r destination_folder=$(path_only $1)
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    if                                     \
+    [                                      \
+           \( $NUMBER_PARAMS -ne 1   \)    \
+        -o \( -d $1                  \)    \
+    ]
+    then
+        echo Only one parameter permitted and it must be
+        echo an empty or non-existent directory
+        return 1
+    fi
+
+    ##########################################################################
+    # inputs are OK
+    ##########################################################################
+    local -r files=$(which_files)
+    local -r NUMBER_FILES=${#files}
+    mkdir --parents $destination_folder
+    echo -e "\n"Processing $NUMBER_FILES files ..."\n"
+
+    ##########################################################################
+    # copy text files only from one folder into a new folder
+    ##########################################################################
+    pushd .. > /dev/null
+    local -i i=0
+    for next in ${files}
+    do
+        if file --preserve-date --mime --brief $next | grep text > /dev/null
+        then
+            echo Copying $next ...
+            mkdir --parents --mode=775 $(path_only $destination_folder/$next)
+            cp --preserve=timestamps $next $destination_folder/$next
+            chmod 444 $destination_folder/$next
+            i+=1
+        fi
+    done
+    popd > /dev/null
+    echo -e "\n"Copied $i files"\n"
+}
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    cd $PWD && copy_text_files_only "$@"
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit 0
+
+##############################################################################
+# example
+##############################################################################
+if false; then
+{
+    for next in EC MASComp MpiAm Oom RadIf RadMsn RadOps
+    do
+        cd z:/$next
+        copy-text-files-only.bsh c:/zeus8023/$next
+    done
+}
+{
+    cd "/cygdrive/z/COTS/COTS/ace-tao/v1.2ap12/ACE_wrappers/ace"
+    copy-text-files-only c:/zeus8023/ace
+}
+fi

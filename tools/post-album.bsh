@@ -1,0 +1,74 @@
+#!/bin/bash
+
+################################################################################
+# Invoke post-album.bsh and specify a folder that is empty except for 
+# a subfolder called "images" containing the images of interest.
+#
+# Any existing .html files here will be removed.
+# For each picture in the ./images folder, there will be created
+# A related .html file in the . folder.
+# You can invoke the index.html in the . folder
+# The original ./images folder is unchanged
+#
+#   post-album.bsh /home/kurt/ubu/post-album/PracticeGit/pages
+# 
+################################################################################
+function pictures()
+{
+    IFS=$'\n'
+
+    # find all of the ./images files
+    declare PAGES_FOLDER="${1}"
+    declare IMAGES_FOLDER="${PAGES_FOLDER}/images"
+    declare -ra FILES=( $(ls -S "${IMAGES_FOLDER}" | grep -v "/$") )
+    declare -ri HOW_MANY=${#FILES[*]}
+    declare -ri LAST=$(( HOW_MANY-1 ))
+    declare -i indexA=${LAST}
+    declare -i indexB=0
+    declare -i indexC=1
+    declare -i i=0
+
+    mkdir --parents "${PAGES_FOLDER}"
+    rm -f "${PAGES_FOLDER}/Picture*.html"
+    for FILE in ${FILES[*]}
+    do
+        echo $FILE
+        declare -i which_picture=$(( indexB + 1 ))
+        cat `dirname ${0}`/helpers/NewTemplate.html \
+            | sed "s@PREVIOUS_HTML@Picture${indexA}.html@" \
+            | sed "s@THIS_JPG@images/$(basename ${FILES[$indexB]})@" \
+            | sed "s@NEXT_HTML@Picture${indexC}.html@" \
+            | sed "s@PICTURE_NUMBER@${which_picture}@" \
+            | sed "s@LAST_NUMBER@${HOW_MANY}@" \
+            > "${PAGES_FOLDER}/Picture${indexB}.html"
+
+        if [ $i -ne 0 ]
+        then
+            (( indexA++ ))
+        else
+            declare -i indexA=0
+        fi  
+       
+        (( indexB++ )) 
+
+        if [ $indexC -ne $LAST ]
+        then
+            (( indexC++ ))
+        else
+            declare -i indexC=0
+        fi                 
+        (( i++ )) 
+    done
+    cp "${PAGES_FOLDER}/Picture0.html" "${PAGES_FOLDER}/index.html"
+    IFS=$'\x20\t\n'
+}
+
+function main()
+{
+    pictures "$@"
+}
+
+main "$@"
+exit $?
+
+

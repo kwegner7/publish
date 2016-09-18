@@ -1,0 +1,26 @@
+#!/bin/bash
+
+##############################################################################
+# Move the small pictures to the publish area and post-album:
+#    picture-publish.bsh /home/edit-pictures/ana/smaller /proj/pictures/publish/ana
+##############################################################################
+function main()
+{
+    declare ORIG="${1}"
+    declare PUBLISH="${2}"
+    rm -rf "${PUBLISH}" && mkdir --parents "${PUBLISH}"
+    cp -rp "${ORIG}" "${PUBLISH}"/images
+    #post-album.bsh "${PUBLISH}"
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit "$?"
+
+
+
+
+
+

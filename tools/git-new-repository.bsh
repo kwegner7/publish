@@ -1,0 +1,225 @@
+#!/bin/bash
+
+##############################################################################
+# Creates a remote repository from a local folder and checks out
+##############################################################################
+
+function git_new_repository()
+{
+    echo ''
+    local -r LOCATION_OF_REPOSITORY="${1}"
+    local -r LOCATION_OF_PLAIN_FOLDER="${2}"
+
+    # validate inputs
+    if [ -e ${LOCATION_OF_REPOSITORY} ]
+    then
+        echo -e "ERROR: REPOSITORY ALREADY EXISTS"
+        echo '' && return 1
+    fi
+    if [ ! -d ${LOCATION_OF_PLAIN_FOLDER} ]
+    then
+        echo -e "ERROR: WORKING FOLDER DOES NOT EXIST"
+        echo '' && return 1
+    fi
+    if [ -e ${LOCATION_OF_PLAIN_FOLDER}/.git ]
+    then
+        echo -e "ERROR: WORKING FOLDER IS ALREADY CHECKED OUT"
+        echo '' && return 1
+    fi
+
+    # create a bare remote repository .git       
+    mkdir --parents ${LOCATION_OF_REPOSITORY}
+    cd ${LOCATION_OF_REPOSITORY}
+    git init --bare
+
+    # create a local repository .git containing all folder files       
+    cd ${LOCATION_OF_PLAIN_FOLDER}
+    cp /home/kurt/Documents/tools/.gitignore .
+    git init
+    git add . 
+    git commit -m "New working git"
+
+    # add the remote repository, call it "origin", and push
+    git remote add origin ${LOCATION_OF_REPOSITORY}
+    git push -u origin master
+
+    echo -e "\nComparing local folder with remote repository"
+    git diff master origin/master
+
+    echo -e "\nList the configuration items"
+    git config --list 
+
+    echo -e "\nList the remote repositories associated with this working folder"
+    git remote --verbose
+
+    echo -e "\nList all files in the local working folder"
+    git ls-tree -r --long  master | cut --delim=' ' --field=4-
+
+    echo -e "\nLog command"
+    git log
+
+    echo -e "\nCurrent status of the local working folder"
+    git status --short
+
+    echo '' && return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+git_new_repository "$@"
+exit "$?"
+
+##############################################################################
+# example
+##############################################################################
+declare REPOS="/media/kurt/8GB-BLUE1/repositories/upload/special-camp/git-src"
+declare WORKING="/home/kurt/checked-out/upload/special-camp/git-src"
+git_new_repository "${REPOS}" "${WORKING}"
+
+##############################################################################
+# example
+##############################################################################
+
+rm -rf /tmp/test
+mkdir --parents /tmp/test/plain-original
+cp -r /home/kurt/workspace/libs /tmp/test/plain-original
+
+declare REPOS="/tmp/test/libs.git"
+declare WORKING="/tmp/test/plain-original"
+git-new-repository.bsh "${REPOS}" "${WORKING}"
+
+# now checkout from this repository
+echo -e "\nUse clone to checkout to new folder"
+cd /tmp/test/
+git clone /tmp/test/libs.git
+
+# now modify a file and checkin
+echo -e "\nModify a file and checkin"
+cd /tmp/test/libs/libs
+cd /tmp/test/libs/libs/utils
+cat Container.py | sed 's/def/Def/g' > /tmp/Container.py
+cat /tmp/Container.py > Container.py
+git status
+git add Container.py
+git commit -m "Modify defs"
+git push origin master
+
+# now tag the latest and checkout new_new
+git tag -a 'Release_1_0' -m 'Tagged the initial release' HEAD
+git push origin tag Release_1_0
+git tag -l
+
+tag 'v2.0'
+cd /tmp/test/
+git clone /tmp/test/libs.git
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##############################################################################
+# svn_export
+##############################################################################
+function svn_export()
+{
+    local -r NUMBER_PARAMS=${#@}
+    declare -x PROJ="${1}"
+    declare -x REPOSITORY="${BASE}/${PROJ}"
+    declare -x SVN="file://${REPOSITORY}"
+    declare -x WORKING=/working/"${2}"
+    declare -x REVISION="${SVN}/main/${VERSION}"
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    echo -e "\n     REPOSITORY IS: ${SVN}"
+    echo -e "REVISION TO EXPORT: ${REVISION}"
+    echo -e "  EXPORT TO FOLDER: ${WORKING}\n"
+
+    if [ $NUMBER_PARAMS -eq 2 -a -e "${REPOSITORY}" -a ! -e "${WORKING}" ]
+    then
+        echo Exporting repository "${REPOSITORY}" to "${WORKING}"
+    else
+        echo ERROR DETECTED
+        return 1
+    fi
+
+    ##########################################################################
+    # export to empty folder
+    ##########################################################################
+    mkdir --parents $(dirname "${WORKING}")
+    svn export -r HEAD "${REVISION}" "${WORKING}"
+    return 0
+}
+
+##############################################################################
+# This script exports from main latest at /flash/svn/$1 to /working/$2
+# Example:
+#    svn-export.bsh python/special-camp python/compare
+##############################################################################
+declare -x BASE=/blue2/svn
+declare -x VERSION="2014-05-07(STANDARD)/revs"
+svn_export "$@"
+exit "$?"
+

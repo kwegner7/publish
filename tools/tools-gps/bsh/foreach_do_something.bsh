@@ -1,0 +1,195 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+##############################################################################
+# FUNCTION - recursive on sub-folders
+##############################################################################
+function subfolders()
+{
+    cd $1
+
+    readonly folders0=$(find .    \
+        \(                       \
+           -name "*Makefile*" -o \
+           -name "*.h*"       -o \
+           -name "*.in*"      -o \
+           -name "*.mak"      -o \
+           -name "*"          -o \
+           -name "*.c*"          \
+        \)                       \
+        -a ! -name "*\.svn*"     \
+        -type f -print)
+
+    readonly folders1=$(find .    \
+        \(                       \
+           -name "*.h*"       -o \
+           -name "*.c*"          \
+        \)                       \
+        -a ! -name "*\.svn*"     \
+        -type f -print)
+
+    readonly folders=$(find .    \
+        \(                       \
+           -name "*"       -o    \
+           -name "*"             \
+        \)                       \
+        -a ! -name "*\.svn*"     \
+        -type d -print)
+
+    echo GOT ALL FILES
+    for next in ${folders}
+    do
+    {
+        if (( 0 )); then
+            echo $next
+            echo $(strip_ext $next)
+            echo $(path_only $next)
+            echo $(filename_ext $next)
+            echo $(filename_only $next)
+            echo $(extension_only $next)
+        fi
+
+        if (( 1 )); then
+            echo $next
+            cd $1/$next && rm -f *.a *.o
+        fi
+
+        declare search='$(SPSRUN)'
+        declare search='/vobs/sps_source'
+        declare search='/sps_run'
+        declare search='ReadDcf'
+        declare search='SPStatusAlert'
+
+        (( 0 )) && if { cat $next | grep $search > /dev/null; } then
+            echo ===========================================================
+            (( 0 )) && echo $next
+            (( 0 )) && cat $next | grep $search
+            (( 0 )) && cat $next | sed "s@/sps_run@/public/users/kwegncc/sps_source/sps_run@g" > /tmp/kurt_tmp1
+            (( 0 )) && cat $next | sed "s@/vobs/sps_source@/public/users/kwegncc/sps_source@g" > /tmp/kurt_tmp1
+            (( 0 )) && cp /tmp/kurt_tmp1 $next
+        fi
+    }
+    done
+}
+##############################################################################
+# FUNCTION - recursive on sub-folders
+##############################################################################
+function archives()
+{
+    cd $1
+
+    readonly files=$(find .    \
+        \(                       \
+           -name "*.a" -o        \
+           -name "*.a"           \
+        \)                       \
+        -a ! -name "*\.svn*"     \
+        -type f -print)
+
+    echo GOT ALL FILES
+    for next in ${files}
+    do
+    {
+
+        if (( 1 )); then
+            echo $next
+            (( 1 )) && ar -t $next | grep uninit
+        fi
+    }
+    done
+}
+##############################################################################
+# FUNCTION - recursive on sub-folders
+##############################################################################
+function find_text()
+{
+    cd $1
+
+    readonly files=$(find .      \
+        \(                       \
+              -name "*.c*"       \
+           -o -name "*.h*"       \
+           -o -name "*Makefile*" \
+           -o -name "*.in*"      \
+           -o -name "*.mak"      \
+       \)                        \
+        -a ! -name "*\.svn*"     \
+        -type f -print)
+
+    echo GOT ALL FILES
+    for next in ${files}
+    do
+    {
+        declare search='GerrorQ'
+        declare search='checkPointKey'
+        declare search='CheckPointActionData'
+        declare search='CheckPoints'
+        declare search='CONDITIONAL_EXTERN'
+        declare search='USE_MAIN_SPS_DECLARATIONS'
+        declare search='defaults.hpp'
+        declare search='extern.hpp'
+        declare search='USE_MAIN_SPS_DECLARATIONS'
+        declare search='atom'
+        declare search='fetchop'
+        declare search='REPLACE_WITH'
+        declare search='/public/users/kwegncc/sps_source'
+        declare search='GpcDataQ'
+        declare search='taking'
+
+        declare replace='/tmp/sps_source'
+
+
+
+        if { cat $next | grep $search > /dev/null; } then
+            echo ==================================================
+            echo $next
+            cat $next | grep $search
+            (( 0 )) && cat $next | sed "s@/public/users/kwegncc/sps_source@${replace}@g" > /tmp/kurt_tmp1
+            (( 0 )) && cp /tmp/kurt_tmp1 $next
+
+        fi
+    }
+    done
+}
+
+##############################################################################
+# do something at each folder
+##############################################################################
+function main ()
+{
+    ##########################################################################
+    # process input parameters
+    ##########################################################################
+    declare -r capture=${1:-${WORKING}}
+    if (( 0 )); then
+    {
+        rm -f /public/users/kwegncc/sps_source;
+        ln -s $capture /public/users/kwegncc/sps_source;
+    }
+    fi
+
+    (( 0 )) && subfolders $WORKING
+    (( 0 )) && subfolders1 /usr/lib64
+    (( 0 )) && subfolders1 /usr/lib32
+    (( 0 )) && archives /usr/lib64
+    (( 1 )) && find_text $WORKING
+    (( 0 )) && find_text /usr/include
+
+    return 0
+}
+
+
+########################################################################
+# entry point
+########################################################################
+main "$@"
+exit 0
+
+########################################################################'
+# example
+########################################################################'
+if (( 1 )); then
+
+
+fi

@@ -1,0 +1,50 @@
+#!/bin/bash
+
+################################################################################
+# Check the svn repositories
+#
+# Invocation:
+#     check-svn.bsh
+################################################################################
+
+################################################################################
+# check_svn
+################################################################################
+function check_svn()
+{
+    echo -e "\nChecking SVN ..."
+
+    declare -ax REPOSITORIES=(
+      "camp"
+      "finance"
+      "pictures"
+      "website"
+    )
+    declare -ax REPOSITORIES=(`find /home/proj -iname '.svn'`)
+
+    IFS=$'\n'
+    for SVN in ${REPOSITORIES[*]}
+    do
+        declare FULLPATH=`dirname ${SVN}`
+        if [ -e ${FULLPATH} ]
+        then 
+            pushd ${FULLPATH} 1> /dev/null
+            echo -e "\n______________________________________________________________"
+            echo -e "The svn repository at ${FULLPATH}"
+            svn-status.bsh
+            popd 1> /dev/null
+        fi
+    done
+    IFS=$'\x20\t\n'
+
+    echo ''
+}
+
+function main()
+{
+    check_svn "$@"
+}
+
+main "$@"
+exit $?
+

@@ -1,0 +1,157 @@
+#!/bin/bash
+
+function xml_extract()
+{
+    echo $(svn info --xml | grep "<$1>" | sed "s@<$1>@@" | sed "s@</$1>@@")
+    return 0
+}
+
+function checkout_folder()
+{
+    echo Checking out from SVN folder $1 to folder $2
+    svn co -r HEAD "${1}" "${2}"
+    return 0
+}
+
+function check_for_folder()
+{
+    svn ls "${1}" > /dev/null
+    if (( $? != 0 ))
+    then
+        echo "${1}" does not exist
+        exit 1
+    fi
+    return 0
+}
+
+function svn_new_repository()
+{
+
+
+    local -r LOCATION_OF_REPOSITORY="${1}"
+    local -r LOCATION_OF_PLAIN_FOLDER="${2}"
+    local -r SVN="file://${LOCATION_OF_REPOSITORY}"
+
+    svnadmin create "${LOCATION_OF_REPOSITORY}"
+    svn import -m "" "${LOCATION_OF_PLAIN_FOLDER}" $SVN/workspace
+
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+svn_new_repository "$@"
+exit "$?"
+
+##############################################################################
+# examples
+##############################################################################
+
+    LOCATION_OF_REPOSITORY="/media/kurt/8GB-BLUE2/svn/workspace"
+    LOCATION_OF_PLAIN_FOLDER="/home/kurt/workspace"
+    svnadmin create "${LOCATION_OF_REPOSITORY}"
+    SVN="file:///media/kurt/8GB-BLUE2/svn/workspace"
+    cd "${LOCATION_OF_PLAIN_FOLDER}"
+    svn import -m "" libs $SVN/libs
+    svn import -m "" apps $SVN/apps
+    svn ls -R $SVN
+
+    SVN="file:///media/kurt/8GB-BLUE2/svn/workspace"
+    LOCATION_OF_PLAIN_FOLDER="/home/kurt/workspace"
+    svn co $SVN "${LOCATION_OF_PLAIN_FOLDER}"
+    then answer 'r' to 
+        local dir unversioned, incoming dir add upon update
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##############################################################################
+# svn_export
+##############################################################################
+function svn_export()
+{
+    local -r NUMBER_PARAMS=${#@}
+    declare -x PROJ="${1}"
+    declare -x REPOSITORY="${BASE}/${PROJ}"
+    declare -x SVN="file://${REPOSITORY}"
+    declare -x WORKING=/working/"${2}"
+    declare -x REVISION="${SVN}/main/${VERSION}"
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    echo -e "\n     REPOSITORY IS: ${SVN}"
+    echo -e "REVISION TO EXPORT: ${REVISION}"
+    echo -e "  EXPORT TO FOLDER: ${WORKING}\n"
+
+    if [ $NUMBER_PARAMS -eq 2 -a -e "${REPOSITORY}" -a ! -e "${WORKING}" ]
+    then
+        echo Exporting repository "${REPOSITORY}" to "${WORKING}"
+    else
+        echo ERROR DETECTED
+        return 1
+    fi
+
+    ##########################################################################
+    # export to empty folder
+    ##########################################################################
+    mkdir --parents $(dirname "${WORKING}")
+    svn export -r HEAD "${REVISION}" "${WORKING}"
+    return 0
+}
+
+##############################################################################
+# This script exports from main latest at /flash/svn/$1 to /working/$2
+# Example:
+#    svn-export.bsh python/special-camp python/compare
+##############################################################################
+declare -x BASE=/blue2/svn
+declare -x VERSION="2014-05-07(STANDARD)/revs"
+svn_export "$@"
+exit "$?"
+

@@ -1,0 +1,142 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# strip extension from file name
+########################################################################
+function strip_ext()
+{
+    local -r no_ext=$(echo $1 | sed 's,\..*$,,')
+    local -r better=${1%.*}
+    echo $better
+    return 0
+}
+
+########################################################################
+# recursive on sub-folders
+########################################################################
+function subfolders()
+{
+    readonly var_folders=$(ls -1 -R $1 | grep ':$')
+    for next in ${var_folders}
+    do
+    {
+        echo mkdir --parents --mode=777 ${next%:}
+    }
+    done
+}
+
+########################################################################
+# pipe in a file created in the script
+########################################################################
+function pipe_in()
+{
+	cat<<-input_lines
+		yes
+		12
+		UTC
+	input_lines
+}
+
+########################################################################
+# main
+########################################################################
+function main1 ()
+{
+    setenv DISPLAY `echo ${SSH_CONNECTION} | cut -d' ' -f1`:0.0
+
+    for next in kristi.bat lauren.bsh yim.tai
+    do
+    {
+        script_name=$(strip_ext $next)
+        echo full name is $next
+        echo without extension is $script_name
+
+    }
+    done
+
+    pipe_in
+
+    declare -a table1=(yimm laurenn kristii)
+    declare -a table2=(`sed -n '1p' /view/tools/batch_table.wri`)
+    declare -a table3
+    sed -n '1p' /view/tools/batch_table.wri | read -a table3
+    read -a table4 < /view/tools/batch_table.wri
+
+    echo dog
+    dog /view/tools/batch_table.wri --no-blanks | cut --delimiter=" " --field=1,3
+    echo enddog
+    declare -a table5=(`dog -l 3- /view/tools/batch_table.wri --no-blanks | cut --delimiter=" " --field=1`)
+    echo table5 ${table5[*]}
+    declare -a table6=(`dog -l 3- /view/tools/batch_table.wri --no-blanks | cut --delimiter=" " --field=2`)
+    echo table6 ${table6[*]}
+
+    table[0]=kristi
+    table[1]=lauren
+    table[2]=yim
+
+    i=0
+    while [ $i -lt 3 ]; do
+        echo ${table[$i]}
+        echo ${#table[$i]}
+        echo ${#table[*]}
+        echo table1 ${table1[*]}
+        echo table2 ${table2[*]}
+        echo table3 ${table3[*]}
+        echo table4 ${table4[*]}
+        i=$((i+1))
+    done
+
+    table=$TOOLS/batch_table.wri
+    {
+           msn=`grep "^${msn}" ${table} | awk '{ print $1 }'`
+            ip=`grep "^${msn}" ${table} | awk '{ print $2 }'`
+        do_bat=`grep "^${msn}" ${table} | awk '{ print $3 }'`
+        do_sys=`grep "^${msn}" ${table} | awk '{ print $4 }'`
+        do_mdp=`grep "^${msn}" ${table} | awk '{ print $5 }'`
+         do_dd=`grep "^${msn}" ${table} | awk '{ print $6 }'`
+    }
+
+    table=/view/tools/batch_table.wri
+    readonly -a    msns=(`dog -B $table | egrep -v '##' | awk '{ print $1 }'`)
+    readonly -a     ips=(`dog -B $table | egrep -v '##' | awk '{ print $2 }'`)
+    readonly -a do_bats=(`dog -B $table | egrep -v '##' | awk '{ print $3 }'`)
+    readonly -a do_syss=(`dog -B $table | egrep -v '##' | awk '{ print $4 }'`)
+    readonly -a do_mdps=(`dog -B $table | egrep -v '##' | awk '{ print $5 }'`)
+    readonly -a  do_dds=(`dog -B $table | egrep -v '##' | awk '{ print $6 }'`)
+
+    echo ${msns[*]}
+
+    (echo kerin; echo yim)     # new context
+    { echo yim; echo lauren; } # inherits context
+
+    declare -ri seven=7
+    (($seven+11))  && echo non-zero  || echo is zero  # evaluate arithmetic expression              
+    (($seven-7))   && echo non-zero || echo is zero              
+    let "$seven-7" && echo non-zero || echo is zero
+
+   [[ kristi == kri* ]] && echo true || echo false           
+   [[ kristi == krii* ]] && echo true || echo false           
+   [[ kristi == kri??? ]] && echo true || echo false           
+   [[ kristi == kri???? ]] && echo true || echo false           
+
+
+
+}
+
+########################################################################
+# main
+########################################################################
+function main()
+{
+    # setenv DISPLAY `echo ${SSH_CONNECTION} | cut -d' ' -f1`:0.0
+   export DISPLAY=AOK
+}
+
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+export DISPLAY=HELLP
+#main "$@"

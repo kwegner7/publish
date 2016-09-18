@@ -1,0 +1,59 @@
+#!/bin/bash
+
+##############################################################################
+# svn-propagate-fileset
+#   Changes the repository to include a new file set that propogates a copy
+#   of the predecessor file set, then checks out to the working folder.
+##############################################################################
+function svn-propagate-fileset()
+{
+    local -r NUMBER_PARAMS=${#@}
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    if                                  \
+    [                                   \
+        \( $NUMBER_PARAMS -ne 0   \)    \
+        -o ! -e $PROJ_SVN               \
+    ]
+    then
+        echo There are no parameters, the repository must exist
+        echo Invocation:
+        echo "   svn-propagate-fileset" 
+        return 1
+    fi
+
+    ##########################################################################
+    # create path within the repository to propagate the predecessor
+    ##########################################################################
+    local -r FEAT=$(path_only $(path_only $WORKING_FILESET))
+    local -r IMPL=$(path_only $WORKING_FILESET)
+    local -r CORR=$WORKING_FILESET
+    echo Adding folder to repository: $FEAT
+    echo Adding folder to repository: $IMPL
+    echo Adding folder to repository: $CORR
+    svn mkdir -m "" $FEAT $IMPL $CORR
+
+    ##########################################################################
+    # copy the files from the predecessor
+    ##########################################################################
+    svn copy -m "" $PREDECESSOR_FILESET/fileset $WORKING_FILESET/fileset
+
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+svn-propagate-fileset "$@"
+exit 0
+
+##############################################################################
+# example
+##############################################################################
+if false; then
+{
+    cd ~ && svn-propagate-fileset
+}
+fi

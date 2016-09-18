@@ -1,0 +1,54 @@
+#!/bin/bash
+
+function xml_extract()
+{
+    echo $(svn info --xml | grep "<$1>" | sed "s@<$1>@@" | sed "s@</$1>@@")
+    return 0
+}
+
+function check_folder()
+{
+    local -r LOCAL_VERSION=$2
+    local -r FOLDER=`basename $1`
+    local -r LATEST=`cat "$1/latest"`
+    local -r PREVIOUS=`cat "$1/previous"`
+
+    echo -e "\n Checking rsync folder $1"
+    ls -1 $1 | grep 2015
+    echo Previous is "$PREVIOUS"
+    echo Latest is "$LATEST"
+    echo DIFFERENCES BETWEEN LATEST AND DELL
+    #diff -r --brief "${PREVIOUS}" "${LATEST}
+    diff -r --brief "${LATEST}" "${2}"
+    if false
+    then
+        IFS=$'\n'
+        echo Copying ...
+        echo cp -rp "${LATEST}" /home/kurt/${FOLDER}
+        cp -rp "${LATEST}" /home/kurt/${FOLDER}
+        IFS=$'\x20\t\n'
+    fi
+    return 0
+}
+
+function fix_rsync()
+{
+    local RSYNC="/media/kurt/8GB-BLUE3/rsync"
+    local RSYNC="/media/kurt/8GB-BLUE2/rsync"
+
+    #check_folder "${RSYNC}/kmw"     /home/kurt/kmw
+    #check_folder "${RSYNC}/tomboy"  /home/kurt/.local/share/tomboy
+    check_folder "${RSYNC}/ubu"     /home/kurt/ubu
+    check_folder "${RSYNC}/working" /home/kurt/working
+
+    return 0
+}
+
+##############################################################################
+# Example: fix-rsync.bsh
+##############################################################################
+fix_rsync "$@"
+exit "$?"
+
+declare PATH=/home/kurt/Documents/tools:${PATH}
+

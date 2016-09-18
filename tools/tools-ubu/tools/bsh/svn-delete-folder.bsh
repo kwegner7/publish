@@ -1,0 +1,47 @@
+#!/bin/bash
+
+function xml_extract()
+{
+    echo $(svn info --xml | grep "<$1>" | sed "s@<$1>@@" | sed "s@</$1>@@")
+    return 0
+}
+
+function delete_folder()
+{
+    echo Removing the svn folder "${1}"
+    svn ls --recursive "${1}" | sed 's/^/    /'
+    echo svn delete "${1}" --force-interactive
+    svn delete "${1}" --force-interactive
+    return 0
+}
+
+function check_for_folder()
+{
+    svn ls "${1}" > /dev/null
+    if (( $? != 0 ))
+    then
+        echo The SVN folder "${1}" does not exist
+        exit 1
+    else
+        echo The SVN folder "${1}" exists
+    fi
+    return 0
+}
+
+function svn_delete_folder()
+{
+    local -r SVN=`xml_extract root`
+    local -r DELETE_FOLDER=$SVN/$1
+
+    check_for_folder "${DELETE_FOLDER}"
+    delete_folder    "${DELETE_FOLDER}"
+
+    return 0
+}
+
+##############################################################################
+# Example: svn-delete-folder.bsh main/improved/revs/revs
+##############################################################################
+svn_delete_folder "$@"
+exit "$?"
+

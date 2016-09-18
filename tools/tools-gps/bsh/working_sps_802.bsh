@@ -1,0 +1,21 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# main
+########################################################################
+function main ()
+{
+    version=${1-802}
+    cd $WORKING && svn switch $SVN/proj/sps/capture/$version $WORKING
+    nautilus --browser --no-desktop . &
+    return
+}
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"
+echo DONE
+echo ''

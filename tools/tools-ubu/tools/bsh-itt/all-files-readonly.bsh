@@ -1,0 +1,109 @@
+#!/bin/bash
+
+##############################################################################
+#  list of folders 
+##############################################################################
+function list_of_folders()
+{
+    local -r this_folder=$(filename_only .)
+    local -r folders=$(find ${this_folder}  \
+        -type d                             \
+        -a ! -name "*\.svn*"                \
+        -exec echo {} ';'                   )
+    echo $folders
+    return 0
+}
+
+##############################################################################
+# list of files
+##############################################################################
+function list_of_files()
+{
+    local -r this_folder=$(filename_only .)
+    local -r files=$(find ${this_folder}  \
+        -type f                             \
+        -a ! -name "*\.svn*"                \
+        -exec echo {} ';'                   )
+    echo $files
+    return 0
+}
+
+##############################################################################
+# all-files-readonly
+##############################################################################
+function all-files-readonly()
+{
+    local -r NUMBER_PARAMS=${#@}
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    if                                     \
+    [                                      \
+           \( $NUMBER_PARAMS -gt 0   \)    \
+    ]
+    then
+        echo No parameters allowed, invocation:
+        echo "   all-files-readonly.bsh" 
+        return 1
+    fi
+
+    ##########################################################################
+    # make all files to be read only
+    ##########################################################################
+    if false
+    then
+        local -r files=$(list_of_files)
+        echo '' && echo Current Directory: $PWD
+        for next in ${files}
+        do
+            if ( is-text-file $next )
+            then
+                chmod 444 $next
+                echo "    " `ls -l $next | cut --bytes=2-10` `ls -1 $next`
+            fi
+        done
+    fi
+
+    ##########################################################################
+    # make all directories to be read only
+    ##########################################################################
+    if true
+    then
+        local -r folders=$(list_of_folders)
+        echo '' && echo Current Directory: $PWD
+        for next in ${folders}
+        do
+            if ( is-directory $next )
+            then
+                chmod 555 $next
+                echo -n "    " `ls -l --directory $next | cut --bytes=2-10`
+                echo " " `ls -1 --directory $next`
+            fi
+        done
+    fi
+
+    echo ''
+    return 0
+}
+
+##############################################################################
+# main and entry point
+##############################################################################
+function main ()
+{
+    cd $PWD && all-files-readonly "$@"
+    return 0
+}
+main "$@"
+exit 0
+
+##############################################################################
+# example
+##############################################################################
+if false; then
+{
+    cd c:/zeus8023
+    all-files-readonly
+}
+fi

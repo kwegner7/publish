@@ -1,0 +1,511 @@
+#!/bin/bash
+
+########################################################################
+# determine the project and repository
+########################################################################
+if true
+then
+    declare -x PROJ=python/finance
+    #declare -x PROJ=python/special-camp
+    #declare -x PROJ=rails/special-camp
+
+    declare -x REPOSITORY=/blue2/svn/$PROJ
+    declare -x SVN="file://${REPOSITORY}"
+    declare -x WORKING=/working/$PROJ
+fi
+
+########################################################################
+# export to a new place
+########################################################################
+svn export -r HEAD $SVN/main/revs /tmp/$PROJ
+
+
+
+########################################################################
+# create repository and checkout from original location
+########################################################################
+
+    if false
+    then
+        svnadmin create $REPOSITORY
+        svn mkdir -m "" --parents $SVN/main/
+        svn import -m "" $WORKING $SVN/main/revs
+        svn ls $SVN/main/revs
+    fi
+
+########################################################################
+# make a branch (or tag) 
+########################################################################
+if true
+then
+    declare -x BRANCH_TITLE="2014-06-07(SpecialCamp01)"
+    svn ls --recursive --verbose -r HEAD $SVN/main/revs
+
+    svn mkdir  -m "" --parents $SVN/main/$BRANCH_TITLE
+    svn copy -m "" -r HEAD $SVN/main/revs $SVN/main/$BRANCH_TITLE/revs
+fi
+
+########################################################################
+# checkout the latest
+########################################################################
+declare -x PROJ=special-camp
+declare -x PROJ=finance
+declare -x REPOSITORY=/blue2/svn/python/$PROJ
+declare -x SVN="file://${REPOSITORY}"
+
+#This checks out into an empty folder
+svn co -r HEAD $SVN/main/revs /working/python/$PROJ
+
+#This checks out into an existing svn folder
+svn switch -r HEAD $SVN/main/revs /working/python/$PROJ
+
+svn ls -r HEAD --verbose $SVN/main/revs
+svn ls --verbose -r 185 --depth=files $SVN/main/revs
+
+svn co $SVN/main/latest/src/classes /working/python/finance/src/classes
+
+########################################################################
+# how to take a copy 
+########################################################################
+if true
+then
+    declare -x REPOSITORY=/blue2/svn/python/special-camp
+    declare -x SVN="file://${REPOSITORY}"
+    svn ls --verbose $SVN/main/branch
+    svn copy -m "" $SVN/main/branch $SVN/main/latest
+fi
+:;
+
+    svn mkdir -m "" --parents $SVN/preserve
+
+    svn ls -R $SVN/preserve
+    svn diff $SVN/preserve/2014-04-28
+
+    #svn rm -m "" $SVN/preserve/2014-04-28/
+
+    svn mv -m "" $SVN/main/latest $SVN/main/revs
+    svn mv -m "" $SVN/main/2013-07-16/tag $SVN/main/2013-07-16/revs
+    svn mv -m "" $SVN/main/2013-06-24/tag $SVN/main/2013-06-24/revs
+    svn mv -m "" $SVN/main/2014-02-17/snap $SVN/main/2014-02-17/revs
+    svn rm -m "" $SVN/main/branch
+
+########################################################################
+# The repository root is a folder containing:
+#    conf  db  format  hooks  locks
+# It contains a version number for each commit to this root.
+# There exists a complete fileset of multiple histories at:
+#     /blue2/svn/python/finance(1)
+#     /blue2/svn/python/finance(2)
+#              ...
+#     /blue2/svn/python/finance(56)
+svn ls -r 20 -R --verbose $SVN
+# /blue2/svn/python/finance(20) is a version of all sub-folders of finance
+# The leaf of each sub-folder of finance is a version of /src
+#
+# /blue2/svn/python/finance
+# /blue2/svn/python/finance/main/branch1/branch2/.../branchn/src/
+# /blue2/svn/python/finance/main/branch1/branch2/.../branchn/run.bsh
+# /blue2/svn/python/finance/main/branch1/branch2/.../branchn/clean.bsh
+#
+# Repository Root: file:///blue2/svn/python/finance
+
+
+# URL: file:///blue2/svn/python/finance/main/latest
+# Repository Root: file:///blue2/svn/python/finance
+########################################################################
+if true
+then
+    declare -x REPOS_PATH=/blue2/svn/python/finance
+    declare -x        SVN="file://${REPOS_PATH}"
+    declare -x    WORKING="/working/python/finance"
+fi
+:;
+
+svn ls -R $SVN
+svn ls -R $SVN/main
+
+
+
+
+########################################################################
+# how to take an important snapshot of a development tree 
+########################################################################
+if false
+then
+    svn mkdir -m "" --parents $SVN/preserve
+    svn copy -m "" $SVN/main/latest $SVN/preserve/2014-04-28
+    svn ls -R $SVN/preserve
+    svn diff $SVN/preserve/2014-04-28
+
+    #svn rm -m "" $SVN/preserve/2014-04-28/
+fi
+:;
+
+########################################################################
+# how export particular files
+########################################################################
+if false
+then
+    svn export $SVN/main/latest /working/export
+
+    mkdir --parents /working/export
+    svn export $SVN/main/latest/run.bsh /working/export/run.bsh
+    mkdir --parents /working/export/src
+    svn export $SVN/main/latest/src/GoChase.py /working/export/src/GoChase.py
+    mkdir --parents /working/export/src/classes
+    svn export $SVN/main/latest/src/classes/__init__.py /working/export/src/classes/__init__.py
+    svn export $SVN/main/latest/src/classes/report /working/export/src/classes/report
+    svn export $SVN/main/latest/src/classes/utils /working/export/src/classes/utils
+    svn export $SVN/main/latest/src/classes/html /working/export/src/classes/html
+    mkdir --parents /working/export/src/classes/database
+    svn export $SVN/main/latest/src/classes/database/__init__.py /working/export/src/classes/database/__init__.py
+    svn export $SVN/main/latest/src/classes/database/Account.py /working/export/src/classes/database/Account.py
+    svn export $SVN/main/latest/src/classes/database/config /working/export/src/classes/database/config
+    svn export $SVN/main/latest/src/classes/database/Db.py /working/export/src/classes/database/Db.py
+    svn export $SVN/main/latest/src/classes/database/Row.py /working/export/src/classes/database/Row.py
+fi
+:;
+
+
+########################################################################
+# how to move files and folders to obsolete 
+########################################################################
+cd /blue2 && mkdir --parents obsolete/2014-04-21
+
+svn export $SVN/main/latest/src/records /blue2/obsolete/2014-04-21/records
+diff -lsr /blue2/obsolete/2014-04-21/records /working/python/finance-export/src/records
+svn rm -m "" $SVN/main/latest/src/records
+
+svn export $SVN/main/latest/src/presentation /blue2/obsolete/2014-04-21/presentation
+diff -lsr /blue2/obsolete/2014-04-21/presentation /working/python/finance-export/src/presentation
+svn rm -m "" $SVN/main/latest/src/presentation
+
+svn export $SVN/main/latest/src/database /blue2/obsolete/2014-04-21/database
+diff -lsr /blue2/obsolete/2014-04-21/database /working/python/finance-export/src/database
+svn rm -m "" $SVN/main/latest/src/database
+svn ls -R $SVN/main
+mkdir --parents /blue2/obsolete/2014-04-21/classes/database/finance/chase
+svn export $SVN/main/latest/src/classes/database/finance/Configuration.py \
+     /blue2/obsolete/2014-04-21/classes/database/finance/Configuration.py
+svn rm -m "" $SVN/main/latest/src/classes/database/finance/Configuration.py
+:;
+
+svn mv -m "" $SVN/main/latest/src/classes/database/finance/ChaseCreditCard.py \
+             $SVN/main/latest/src/classes/database/finance/chase/ChaseCreditCard.py
+
+mkdir --parents /blue2/obsolete/2014-04-21/classes/database/finance
+svn export $SVN/main/latest/src/classes/database/finance/beyond_banking \
+     /blue2/obsolete/2014-04-21/classes/database/finance/beyond_banking
+svn rm -m "" $SVN/main/latest/src/classes/database/finance/beyond_banking
+
+
+
+
+
+
+if false # to branch from a snapshot
+then
+    svn mkdir -m "" --parents $SVN/main/2014-02-17/new-idea
+    svn copy -m "" $SVN/main/2014-02-17/snap $SVN/main/2014-02-17/new-idea/latest
+fi
+:;
+
+########################################################################
+# /red/svn/python are folders
+# /red/svn/python contains 4 repositories
+# /red/svn/python/db (this contains latest Special Camp)
+# /red/svn/python/database
+# /red/svn/python/records
+# /red/svn/python/meds
+#
+# These are the existing versions:
+#     /red/svn/python/db/main/2013-06-24/tag
+#     /red/svn/python/db/main/2013-07-16/tag
+#     /red/svn/python/db/main/2014-01-26/tag
+#     /red/svn/python/db/main/branch  (this is always latest on main branch)
+#
+########################################################################
+if true
+then
+    declare -x REPOS_PATH=/red/svn/python/db
+    declare -x REPOS_PATH="/home/kurt/Ubuntu%20One/svn/python/db"
+    declare -x REPOS_PATH="https://one.ubuntu.com/files/shareoffer/51694d73-bed6-4d0a-b7cc-cc0f88a690c1/python/db"
+    declare -x        SVN="file://${REPOS_PATH}"
+    declare -x    WORKING="/working/python/db"
+
+    echo ---------------    
+    svn ls "$SVN/main/2014-01-26/tag" # this is a snapshot on the main branch
+    echo ---------------    
+    svn ls "$SVN/main/branch" # this is the main branch of db
+    echo ---------------    
+fi
+:;
+svn
+########################################################################
+# find the deployed version of Special Camp
+########################################################################
+if true
+then
+    declare -x REPOS_PATH=/red/svn/python/db
+    declare -x        SVN="file://${REPOS_PATH}"
+    declare -x    WORKING="/working/python/db"
+
+    svn log $SVN
+fi
+:;
+
+------------------------------------------------------------------------
+r164 | kurt | 2014-01-08 06:31:35 -0700 (Wed, 08 Jan 2014) | 1 line
+------------------------------------------------------------------------
+r163 | kurt | 2013-07-16 16:23:45 -0600 (Tue, 16 Jul 2013) | 1 line
+------------------------------------------------------------------------
+r162 | kurt | 2013-07-16 09:16:09 -0600 (Tue, 16 Jul 2013) | 1 line
+------------------------------------------------------------------------
+r161 | kurt | 2013-07-16 07:45:55 -0600 (Tue, 16 Jul 2013) | 1 line
+----------------------------------------------------------------------
+r160 | kurt | 2013-06-24 14:35:50 -0600 (Mon, 24 Jun 2013) | 1 line
+
+if true
+then
+    svn copy -m "" $SVN@163 $SVN/main/2013-07-16
+fi
+:;
+r175 | kurt | 2014-01-26 08:36:58 -0700 (Sun, 26 Jan 2014) | 1 line
+
+if true
+then
+    svn copy -m "" $SVN/main/branch@175 $SVN/main/2014-01-26
+fi
+:;
+    svn mkdir -m "" $SVN/main/tag-2014-01-26
+if true
+then
+    svn mkdir -m "" $SVN/main/tag-2014-01-26
+    svn mkdir -m "" $SVN/main/tag-2013-07-16
+    svn mkdir -m "" $SVN/main/tag-2013-06-24
+fi
+:;
+
+if true
+then
+    svn mv -m "" $SVN/main/2014-01-26 $SVN/main/tag-2014-01-26/tag
+    svn mv -m "" $SVN/main/2013-07-16 $SVN/main/tag-2013-07-16/tag
+    svn mv -m "" $SVN/main/2013-06-24 $SVN/main/tag-2013-06-24/tag
+fi
+:;
+
+if true
+then
+    svn rename -m "" $SVN/main/tag-2014-01-26 $SVN/main/2014-01-26
+    svn rename -m "" $SVN/main/tag-2013-07-16 $SVN/main/2013-07-16
+    svn rename -m "" $SVN/main/tag-2013-06-24 $SVN/main/2013-06-24
+fi
+:;
+
+
+
+
+########################################################################
+# Check out from a repository to an empty working folder
+########################################################################
+if true
+then
+    declare -x SVN="file:///red/svn/python/db/main/version"
+    declare -x WORKING="/working/python/special_camp"
+    cd /tmp && svn co $SVN $WORKING
+fi
+
+########################################################################
+# EXPLANATION
+########################################################################
+if true
+then
+    declare WORKING_PATH=/working/python7/db
+    echo ------------------------------------------------------------
+    echo -e "\n/red/svn is a plain folder"
+    ls -la /red/svn
+    echo -e "\n/red/svn/python is a plain folder"
+    ls -la /red/svn/python
+    echo -e "\nBut /red/svn/python/db is an SVN repository"
+    ls -la /red/svn/python/db
+    echo -e ""
+    svn info $WORKING_PATH | grep Path \
+      | sed            "s/Path/THIS ENTIRE REPOSITORY HAS BEEN CHECKED OUT TO THIS WORKING FOLDER/g"
+    svn info $WORKING_PATH | grep "Repository Root" \
+      | sed "s/Repository Root/                      THUS, THE ROOT FOLDER OF THIS REPOSITORY IS/g"
+    svn info $WORKING_PATH | grep URL \
+      | sed             "s/URL/     FILES ARE CHECKED OUT FROM THIS SUB-FOLDER OF THE REPOSITORY/g"
+    echo ------------------------------------------------------------
+fi
+
+
+########################################################################
+# Check out from a repository to an empty working folder
+########################################################################
+if true
+then
+    declare WORKING_PATH=/working/python/meds
+    echo ------------------------------------------------------------
+    echo -e "\n/red/svn is a plain folder"
+    ls -la /red/svn
+    echo -e "\n/red/svn/python is a plain folder"
+    ls -la /red/svn/python
+    echo -e "\nBut /red/svn/python/db is an SVN repository"
+    ls -la /red/svn/python/db
+    echo -e ""
+    svn info $WORKING_PATH | grep Path \
+      | sed            "s/Path/THIS ENTIRE REPOSITORY HAS BEEN CHECKED OUT TO THIS WORKING FOLDER/g"
+    svn info $WORKING_PATH | grep "Repository Root" \
+      | sed "s/Repository Root/                      THUS, THE ROOT FOLDER OF THIS REPOSITORY IS/g"
+    svn info $WORKING_PATH | grep URL \
+      | sed             "s/URL/     FILES ARE CHECKED OUT FROM THIS SUB-FOLDER OF THE REPOSITORY/g"
+    echo ------------------------------------------------------------
+fi
+
+
+svn info file:///red/svn
+
+
+
+    if false
+    then
+        svnadmin create $SVN_PATH
+        svn import -m "" $WORKING $SVN
+        mv $WORKING $WORKING.orig
+    fi
+    cd `dirname $WORKING` && svn co $SVN
+fi
+exit 0
+
+declare -x         PROJ=database
+declare -x   REPOS_PATH=/red/svn
+declare -x WORKING_PATH=/working
+    declare -x          PRE=file://
+    declare -x     SVN_PATH="${REPOS_PATH}/${PROJ}"
+    declare -x          SVN="${PRE}${REPOS_PATH}/${PROJ}"
+    declare -x      WORKING="${WORKING_PATH}/${PROJ}"
+
+2013 /working/python/db >> svn status
+?       .pydevproject
+?       html
+?       .project
+?       out
+~       src/records/normalize/finance
+?       src/records/present/meds
+?       src/records/accumulate/finance/__init__.py
+?       src/records/accumulate/finance/beyond_banking
+
+########################################################################
+# choices
+########################################################################
+false  && declare -x PROJ=/python/meds
+true  && declare -x PROJ=/python/records
+false  && declare -x PROJ=/cplusplus/cpp-concepts
+
+########################################################################
+# common
+########################################################################
+
+if false
+then
+    svnadmin create $SVN_PATH
+    svn import -m "" $WORKING $SVN
+fi
+
+if true
+then
+    cd `dirname $WORKING` && svn co $SVN
+fi
+
+
+
+exit 0
+
+#
+#
+if true
+then
+    declare      WHERE_REPOS=/repos/cpp-concepts
+    declare      WHERE_REPOS=/media/BLACK-2GB/repos/cpp-concepts
+    declare            REPOS=file://${WHERE_REPOS}
+    declare             WORK=/working/cplusplus
+    declare          WORKING=/working/cplusplus/cpp-concepts
+    declare FOLDER_TO_IMPORT=/working/cplusplus/cpp-concepts-orig
+    
+    if [ ! -e ${WHERE_REPOS} -a ! -e ${WORKING} -a -d ${FOLDER_TO_IMPORT} ]
+    then
+        false && svnadmin create ${WHERE_REPOS}
+        false && svn import -m "" ${FOLDER_TO_IMPORT} ${REPOS}
+        cd ${WORK} && svn co ${REPOS}
+    else
+        echo ERROR
+    fi
+fi
+exit
+
+if false
+    gedit ~/.subversion/config &
+fi
+ 
+
+if false
+then
+    svnadmin create /repos/meds
+    svn import -m "" /home/kurt/ubu/code/python/meds file:///repos/meds
+    cd /working && svn co file:///repos/meds
+fi
+
+##############################################################################
+# svn-create-import
+##############################################################################
+function svn-create-importt()
+{
+    local -r NUMBER_PARAMS=${#@}
+    local -r SOURCE_CODE_FOLDERS=$1
+    #local -r FOLDER_NAME=`basename $SOURCE_CODE_FOLDERS`
+ 
+    if [ -e $PWD/$FOLDER_NAME ]
+    then
+        echo repository $PWD/$FOLDER_NAME already exists
+    else
+        echo ''
+        declare REPOS=file:///$PWD/$FOLDER_NAME
+        echo -e "Creating repository at $REPOS" 
+        svnadmin create $PWD/$FOLDER_NAME
+
+        cd $SOURCE_CODE_FOLDERS
+        for FOLDER in `ls -1`
+        do
+            svn import -m "" ./$FOLDER $REPOS
+        done
+        true && svn list --recursive $REPOS
+        echo -e "Created repository at $REPOS" 
+    fi
+
+    return 0
+}
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    cd $PWD && svn-create-import "$@"
+    return 0
+}
+#main "$@"
+#exit 0
+
+##############################################################################
+# example
+##############################################################################
+if false
+then
+    cd C:/repositories && svn-create-import.bsh c:/zeus/MAS-8035
+    cd /tmp && svn-create-import.bsh C:/itt/cplusplus/src/rdat/rdat
+    cd /repos && svn-create-import.bsh /home/kurt/ubu/code/python/meds
+fi
+
+
+
+

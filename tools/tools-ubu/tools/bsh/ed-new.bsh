@@ -1,0 +1,29 @@
+#!/bin/bash -norc
+########################################################################
+# edit certain files
+########################################################################
+declare -r MEDS="/home/kurt/ubu/code/python/meds-new"
+
+declare -ra SRC_FILES=\
+(
+    'meds-new.py'
+    'CsvToCsv.py'
+    'CsvToHtml.py'
+    'MedsCsv.py'
+    'Html.py'
+    'HtmlTable.py'
+    'Leftovers.py'
+)
+
+declare -ra TOOL_FILES=\
+(
+    'meds-new.bsh'
+)
+
+IFS=$'\n'
+    cd $MEDS/src
+    gedit ${SRC_FILES[*]} &
+    cd $TOOLS
+    gedit ${TOOL_FILES[*]} &
+IFS=$' \t\n'
+

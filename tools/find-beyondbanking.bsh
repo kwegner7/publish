@@ -1,0 +1,51 @@
+#!/bin/bash
+
+##############################################################################
+# find_bb
+##############################################################################
+function find_bb()
+{
+    declare START_FOLDER=/home
+    rm -rf /home/kurt/Documents/institutions/beyond-banking
+    mkdir --parents /home/kurt/Documents/institutions/beyond-banking
+    rm -f /tmp/SettledList.txt
+    rm -f /tmp/SettledActivity.csv
+
+    IFS=$'\n'
+    declare -i i=0
+    declare SETTLEDS=$(find "${START_FOLDER}" -iname "SettledActivity*" -print)
+    for SETTLED in ${SETTLEDS}
+    do
+        echo ${SETTLED}
+        cat ${SETTLED} >> /tmp/SettledActivity.csv
+        local NEWNAME=${i}`basename ${SETTLED}`
+        cp ${SETTLED} /home/kurt/Documents/institutions/beyond-banking/${NEWNAME}
+        echo /home/kurt/Documents/institutions/beyond-banking/${NEWNAME} >> /tmp/SettledList.txt
+        (( i++ ))
+    done
+    IFS=$'\x20\t\n'
+
+    #cat /tmp/SettledActivity.csv | sort -u | grep 'Bill Payment' > /tmp/SettledActivitySorted.csv 
+    return 0
+}
+
+##############################################################################
+#    find-beyondbanking.bsh
+##############################################################################
+function main()
+{
+    find_bb
+    return "$?"
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit "$?"
+
+##############################################################################
+# examples
+##############################################################################
+
+

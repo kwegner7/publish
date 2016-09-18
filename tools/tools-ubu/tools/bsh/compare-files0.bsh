@@ -1,0 +1,79 @@
+#!/bin/bash
+
+function compare_files()
+{
+    declare HERE=`pwd`
+    declare SRC1="${1}"
+    declare SRC2="${2}"
+    declare WHICH="${3}"
+
+    IFS=$'\n'
+
+    cd $HERE && cd $SRC1
+    declare FILES1=$(find . \( -name "*.csv" -o -name "*.html" -o -name "*.JPG" -o -name "*.jpg" \) -print)
+
+    cd $HERE && cd $SRC2
+    declare FILES2=$(find . \( -name "*.csv" -o -name "*.html" -o -name "*.JPG" -o -name "*.jpg" \) -print)
+
+    cd $HERE
+    declare -i NUMBER_FILES=0
+    echo -e "\nTHESE FILES MATCH CORRECTLY:"
+    for FILE in $FILES1; do
+        if [ -f ${SRC2}/$FILE ]; then
+            if cmp --silent ${SRC1}/$FILE ${SRC2}/$FILE; then 
+                echo "    $FILE"; (( NUMBER_FILES++ )); fi
+        fi
+    done
+    echo -e "    TOTAL $NUMBER_FILES"
+
+    cd $HERE
+    declare -i NUMBER_FILES=0
+    echo -e "\nTHESE FILES DO NOT MATCH:"
+    for FILE in $FILES1; do
+        if [ -f ${SRC2}/$FILE ]; then
+            if ! cmp --silent ${SRC1}/$FILE ${SRC2}/$FILE; then 
+                echo "    $FILE"; (( NUMBER_FILES++ )); fi
+                #echo "DIFFERENCES ARE:"
+                #diff ${SRC1}/$FILE ${SRC2}/$FILE
+        fi
+    done
+    echo -e "    TOTAL $NUMBER_FILES"
+
+    cd $HERE
+    declare -i NUMBER_FILES=0
+    echo -e "\nTHESE FILES EXIST IN ${SRC1}"
+    echo -e "          BUT NOT IN ${SRC2}:"
+    for FILE in $FILES1; do
+        if [ ! -f ${SRC2}/$FILE ]; then
+            echo "    $FILE"; (( NUMBER_FILES++ ))
+            if [[ $WHICH == --pictures ]]; then
+                cp -p --verbose "${SRC1}/$FILE" "${SRC2}/$FILE"
+            fi
+        fi
+    done
+    echo -e "    TOTAL $NUMBER_FILES"
+
+    cd $HERE
+    declare -i NUMBER_FILES=0
+    echo -e "\nTHESE FILES EXIST IN ${SRC2}"
+    echo -e "          BUT NOT IN ${SRC1}:"
+    for FILE in $FILES2; do
+        if [ ! -f ${SRC1}/$FILE ]; then
+            echo "    $FILE"; (( NUMBER_FILES++ )); fi
+    done
+    echo -e "    TOTAL $NUMBER_FILES"
+
+    IFS=$'\x20\t\n'
+
+    echo -e ""
+}
+
+function main()
+{
+    compare_files "$@"
+}
+
+main "$@"
+exit $?
+
+

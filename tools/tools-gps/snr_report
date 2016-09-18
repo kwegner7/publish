@@ -1,0 +1,86 @@
+#!/bin/bash
+
+function blank_line ()
+{
+    how_many=${1:-1}
+    for (( i=0; $i<$how_many; i=$(($i+1)) )) ; do echo "snr_report" ; done
+}
+
+{
+    blank_line
+    blank_line 2
+}
+
+########################################################################
+# Print the constellation, data gaps and satellite outages.
+########################################################################
+{
+    echo "1   2   3   4   5   6   7   8   9  10  11  12 only el snr"
+    cat $1                       |
+    grep "Wrn: SV 31"               |
+    cut -c 54-                   
+
+}
+exit
+
+scripts+=""
+scripts+=" crontab"
+scripts+=" daily_report"
+scripts+=" errors"
+scripts+=" fstab"
+scripts+=" gaps"
+scripts+=" group"
+scripts+=" inittab"
+scripts+=" install"
+scripts+=" interfaces"
+scripts+=" lilo.conf"
+scripts+=" startup"
+scripts+=" stats"
+scripts+=" syslog.conf"
+echo ${scripts}
+echo ""
+
+where=h:/work/sbc/system
+ls -lat ${where}
+for next in ${scripts}
+do
+    i=0
+    while [ ${i} -lt 1 ]
+    do
+        rmcr ${where}/${next};
+        i=$((i+1))
+    done
+done
+ls -lat ${where}
+
+exit
+
+colors="red green blue"
+files=`ls -1`
+
+for next in ${colors} ${files}
+do
+    i=0
+    while [ ${i} -lt 3 ]
+    do
+        echo ${next} ${i};
+        echo ${next} ${i};
+        i=$((i+1))
+    done
+done
+
+array=(aaa bbb ccc)
+echo ${array[1]}
+echo ${array[*]} ${array[*]}
+echo k{d,c,b}h
+
+hh="h:\work\sbc\system"
+kk=$(echo ${hh//\\//})
+echo $kk
+echo $hh ${hh//\\//} $kk
+kk=$(bash -c "(echo kristi | sed 's,k,c,g')")
+echo $hh | sed 's,\\,/,g'
+for (( i=0; $i<2; i=$(($i+1)) )) ; do echo "kristi" ; done
+exit
+
+exit

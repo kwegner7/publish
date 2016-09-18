@@ -1,0 +1,38 @@
+#!/bin/bash --norc
+
+##############################################################################
+# set-project 8023 
+##############################################################################
+declare FLASH_DRIVE="/media/BLUE-8GB"
+
+if false; then
+    : do nothing
+
+elif [ $1 == "8023" ]; then
+    declare -x PROJ_NAME=MAS-8023
+    declare -x REPOSITORY_DRIVE="$FLASH_DRIVE"
+
+elif [ $1 == "python" ]; then
+    declare -x PROJ=/cygdrive/c/DocumentsAndSettings/kurt.wegner/MyDocuments/itt/python
+
+else
+    echo ERROR: INCORRECT PROJECT $1
+
+fi
+
+# $WORKING contains source code and .svn folders 
+# $WORKSPACE contains source code and .project and .cproject
+if true; then
+    declare -x PROJ=/proj/$PROJ_NAME
+    declare -x WORKING=$PROJ/working
+    declare -x WORKSPACE=/workspaces/$PROJ_NAME
+    declare -x SVN="file://$REPOSITORY_DRIVE/proj/$PROJ_NAME/svn"
+fi
+
+if true; then
+    echo -e "\n       Project Name:                                 $PROJ_NAME \$PROJ_NAME"
+    echo -e "        SVN Project:                           $PROJ \$PROJ"
+    echo -e " SVN Working Folder:                   $WORKING \$WORKING"
+    echo -e "     SVN Repository: $SVN \$SVN"
+    echo -e "  Eclipse Workspace:                     $WORKSPACE \$WORKSPACE"
+fi

@@ -1,0 +1,40 @@
+$ net user AyamJ password /add /yes
+$ net localgroup <an_local_group> AyamJ /add
+$ mkpassd -l -u AyamJ >> /etc/passwd 
+
+
+mdpscreen 10.35.180.198
+
+rfw --input=tcp:10.35.180.198:8910 --output=- | mdpscreenx
+
+rfw --input=tcp:10.35.180.197:8910 --output=msn108_%03j.mdp
+
+cp -p j:/r132/126/msn132_126.mdp c:/data/r132; cp -p j:/r134/126/msn134_126.mdp c:/data/r134
+
+msn=134
+doy=126
+( cd /data; mdptool --input=r${msn}/msn${msn}_${doy}.mdp --output=r${msn}/msn${msn}_${doy}.rep )
+
+( cd /data; mdp2rinex --input=r${msn}/msn${msn}_${doy}.mdp --output=r${msn}/msn${msn}_126.o --nav=r${msn}/msn${msn}_${doy}.n )
+( cd /data; mdp2rinex --input=r134/msn134_126.mdp --output=r134/msn134_126.o --nav=r134/msn134_126.n )
+
+( cd /data; ddGen --obs1=r132/msn132_126.o --obs2=r134/msn134_126.o --eph=r132/msn132_126.n --pos="-2554344.9 -4622441.9 3564501.2" --cycle-slips > report.wri ) 
+
+--pos="-2554344.9 -4622441.9 3564501.2"
+ -2554344.9650 -4622441.9820  3564501.2430                  APPROX POSITION XYZ
+
+Simulator bench
+LAT 34.19543967
+LON 241.07511463 = -118.92488537
+ALT 181.20436946
+x -2554345.345
+y -4622442.285
+z 3564500.382
+
+DVT Bench
+    LAT =  34.19544836
+    LON = 241.07511666 = -118.92488334
+    ALT = 181.31696409
+      x = -2554344.965
+      y = -4622441.982
+      z =  3564501.243

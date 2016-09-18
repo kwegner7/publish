@@ -1,0 +1,35 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# main
+########################################################################
+function main ()
+{
+    ########################################################################
+    # create a convenient link for each .bsh file
+    ########################################################################
+    echo Setting bash links ...
+    for fullpath in $(ls ${SCRIPTS_BSH}/*.bsh) ### $(ls ${SCRIPTS_PY}/*.py)
+    do
+    {
+        local path_and_name=$(strip_ext $fullpath)
+        local name_only=$(filename_only $fullpath)
+        if false; then echo $path_and_name; fi
+        if false; then echo $name_only; fi
+        cd $USR_LOCAL_BIN &&
+            [ -L $name_only ] && rm $name_only
+        cd $USR_LOCAL_BIN &&
+            ln -s $fullpath $name_only &&
+            false && ls -la $name_only
+    }
+    done
+    today
+    exit
+}
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"

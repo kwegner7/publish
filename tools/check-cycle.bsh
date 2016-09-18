@@ -1,0 +1,59 @@
+#!/bin/bash
+
+##############################################################################
+# cycle_results
+##############################################################################
+function cycle_results()
+{
+
+    if [ ! -e "${2}" ]
+    then
+        echo -e "\nERROR: The folder ${2} does not exist!"        
+        exit 1
+    fi
+    
+    if [ ! -e "${1}"/check0 -a -e "${2}" ]
+    then
+        echo -e "\nInitial copy of "${2}" into ${1}"
+        mkdir --verbose --parents "${1}"
+        cp -rp "${2}" "${1}"/check0
+    else
+        echo ''
+        diff --brief --recursive --exclude="*.pdf" "${1}"/check0 "${2}"
+        if (( $? != 0 ))
+        then
+            echo -e "Results have changed, so cycling ${2} to ${1} ..."
+            rm -rf "${1}"/check4
+            if [ -e "${1}"/check3 ]; then mv -v  "${1}"/check3 "${1}"/check4; fi
+            if [ -e "${1}"/check2 ]; then mv -v  "${1}"/check2 "${1}"/check3; fi
+            if [ -e "${1}"/check1 ]; then mv -v  "${1}"/check1 "${1}"/check2; fi
+            if [ -e "${1}"/check0 ]; then mv -v  "${1}"/check0 "${1}"/check1; fi
+            if [ -e "${2}"        ]
+            then
+                cp -rp "${2}" "${1}"/check0
+                echo cp -rp "${2}" "${1}"/check0
+            fi
+        else
+            echo -e "Results have not changed, so no need to cycle"
+        fi
+    fi
+    
+    echo ''
+    return 0
+}
+
+##############################################################################
+# The only requirement is that there exist a folder at ./out
+##############################################################################
+function main ()
+{
+    cycle_results ./check ./out
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit 0
+

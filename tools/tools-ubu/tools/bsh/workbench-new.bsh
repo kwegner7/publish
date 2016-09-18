@@ -1,0 +1,65 @@
+#!/bin/bash
+#############################################################################
+# First follow the instructions to create a generic workspace.
+# Copy the generic workspace that is configured for C++ correctly.
+# This workspace has no projects attached yet.
+# Then checkout the source code from SVN.
+# Then convert it to a C++ project.
+#
+# Invocation:
+#   workbench-new MAS-8023-Annotated
+#############################################################################
+if true
+then
+    #########################################################################
+    # declare
+    #########################################################################
+    declare PROJ_NAME=$1
+    declare PROJ_NAME=MAS-8023-Annotated
+    declare FILE=file:///
+    declare SHARED_WORKBENCH="//ittsyssenvault/users/kurt.wegner/public/workbench"
+    declare SHARED_SOURCE_CODE="//ittsyssenvault/users/kurt.wegner/public/source-code"
+    declare LOCAL_WORKBENCH="C:/workbench"
+    declare LOCAL_SOURCE_CODE="C:/source-code"
+
+    #########################################################################
+    # Copy the generic C++ annotated source code workspace
+    #########################################################################
+    cp -r $LOCAL_WORKBENCH/Generic $SHARED_WORKBENCH/$PROJ_NAME
+
+    #########################################################################
+    # Add the project to the workspace, checkout from an SVN repository
+    #########################################################################
+    echo -e "\nNew - Other - SVN - Checkout Projects from SVN"
+    echo "Checkout as a project in the workspace - Project name - $PROJ_NAME"
+    echo "Select the project location as ../source-code/$PROJ_NAME"
+
+    #########################################################################
+    # And convert to a C++ project, this will add .cproject
+    #########################################################################
+    echo -e "\nNew - Convert to C++ Project - and clear Specify Project Type"
+    echo ".cproject does not attach to cygwin or any other toolchain"
+    echo "It is OK to checkin the .project and the .cproject"
+    eclipse -data ${FILE}${SHARED_WORKBENCH}/$PROJ_NAME &
+fi
+
+#############################################################################
+# Open the generic workspace.
+#############################################################################
+if false
+then
+    declare FILE=file:///
+    declare WORKBENCH="C:/workbench"
+    eclipse -data ${FILE}${WORKBENCH}/Generic &
+fi
+
+#############################################################################
+# Open the new workspace.
+#############################################################################
+if false
+then
+    declare FILE=file:///
+    declare WORKBENCH="//ittsyssenvault/users/kurt.wegner/public/workbench"
+    eclipse -data ${FILE}${WORKBENCH}/MAS-8023-Annotated &
+fi
+

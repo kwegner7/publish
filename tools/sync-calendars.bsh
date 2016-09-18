@@ -1,0 +1,36 @@
+#!/bin/bash
+    
+# ----------------------------------------------------------------------
+# main
+# ----------------------------------------------------------------------
+function main()
+{
+    # ------------------------------------------------------------------
+    # place web class homework website at comcast
+    # ------------------------------------------------------------------
+    declare COMCAST="upload.comcast.net"
+    declare ACCOUNT="kmwegner"
+    declare PASSWORD="indonesia7"
+    declare UPLOAD="-u ${ACCOUNT} -p ${PASSWORD} ${COMCAST}"
+
+    #cp /home/kurt/.local/share/evolution/calendar/system/calendar.ics /home/kurt/Documents/calendars/evolution-calendar.ics
+    ncftpput ${UPLOAD} /calendars /home/kurt/Documents/calendars/evolution-calendar.ics
+
+    #cp /home/kurt/Documents/calendars/birthdays.ics /home/kurt/Documents/calendars/birthdays-calendar.ics
+    ncftpput ${UPLOAD} /calendars /home/kurt/Documents/calendars/birthdays-calendar.ics
+
+    #cp /home/kurt/.local/share/evolution/calendar/1429484174.4093.2@kurt-Latitude-D820/calendar.ics /home/kurt/Documents/calendars/travel-calendar.ics
+    ncftpput ${UPLOAD} /calendars /home/kurt/Documents/calendars/travel-calendar.ics
+
+    return 0
+}
+
+main "$@"
+exit $?
+
+ncftpput -u kwegner7 -p unicorn7 icalx.com /public/kwegner7  /home/kurt/.local/share/evolution/calendar/system/calendar.ics 
+
+ncftpput -u kwegner7 -p unicorn7 kwegner7.github.io /pictures/publish/calendars  /home/kurt/.local/share/evolution/calendar/system/calendar.ics 
+
+
+http://kwegner7.github.io/pictures/publish/calendars/calendar.ics

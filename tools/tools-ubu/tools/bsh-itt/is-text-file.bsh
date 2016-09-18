@@ -1,0 +1,12 @@
+#!/bin/bash
+#############################################################################
+# Invocation:
+#               ( is_text_file abc.txt ) && echo IS A TEXT FILE
+#############################################################################
+if file --preserve-date --mime --brief $1 | grep text > /dev/null
+then
+    exit 0
+else
+    exit 1
+fi
+

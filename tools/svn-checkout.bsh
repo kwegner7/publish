@@ -1,0 +1,144 @@
+#!/bin/bash
+
+function xml_extract()
+{
+    echo $(svn info --xml | grep "<$1>" | sed "s@<$1>@@" | sed "s@</$1>@@")
+    return 0
+}
+
+function checkout_folder()
+{
+    echo Checking out from SVN folder $1 to folder $2
+    svn co -r HEAD "${1}" "${2}"
+    return 0
+}
+
+function check_for_folder()
+{
+    svn ls "${1}" > /dev/null
+    if (( $? != 0 ))
+    then
+        echo "${1}" does not exist
+        exit 1
+    fi
+    return 0
+}
+
+function svn_checkout()
+{
+
+    local -r SVN="${1}"
+    local -r CHECKOUT_FOLDER="${SVN}/${2}"
+    local -r WORKING_FOLDER="${3}"
+
+    check_for_folder "${CHECKOUT_FOLDER}"
+    checkout_folder "${CHECKOUT_FOLDER}" "${WORKING_FOLDER}"
+
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+svn_checkout "$@"
+exit "$?"
+
+##############################################################################
+# examples
+##############################################################################
+
+    SVN="file:///media/kurt/8GB-BLUE2/svn/python/special-camp"
+    svn-checkout.bsh "${SVN}" main/revs /home/kurt/working/special-camp/python
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##############################################################################
+# svn_export
+##############################################################################
+function svn_export()
+{
+    local -r NUMBER_PARAMS=${#@}
+    declare -x PROJ="${1}"
+    declare -x REPOSITORY="${BASE}/${PROJ}"
+    declare -x SVN="file://${REPOSITORY}"
+    declare -x WORKING=/working/"${2}"
+    declare -x REVISION="${SVN}/main/${VERSION}"
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    echo -e "\n     REPOSITORY IS: ${SVN}"
+    echo -e "REVISION TO EXPORT: ${REVISION}"
+    echo -e "  EXPORT TO FOLDER: ${WORKING}\n"
+
+    if [ $NUMBER_PARAMS -eq 2 -a -e "${REPOSITORY}" -a ! -e "${WORKING}" ]
+    then
+        echo Exporting repository "${REPOSITORY}" to "${WORKING}"
+    else
+        echo ERROR DETECTED
+        return 1
+    fi
+
+    ##########################################################################
+    # export to empty folder
+    ##########################################################################
+    mkdir --parents $(dirname "${WORKING}")
+    svn export -r HEAD "${REVISION}" "${WORKING}"
+    return 0
+}
+
+##############################################################################
+# This script exports from main latest at /flash/svn/$1 to /working/$2
+# Example:
+#    svn-export.bsh python/special-camp python/compare
+##############################################################################
+declare -x BASE=/blue2/svn
+declare -x VERSION="2014-05-07(STANDARD)/revs"
+svn_export "$@"
+exit "$?"
+

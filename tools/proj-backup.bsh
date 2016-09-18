@@ -1,0 +1,135 @@
+#!/bin/bash
+
+################################################################################
+# Invocation:
+#     proj-backup.bsh
+################################################################################
+function proj_backup()
+{
+    declare -a PROJECTS=(
+      '/proj/pictures'
+      '/proj/finance'
+      '/proj/website'
+    )
+
+    for PROJ in ${PROJECTS[*]}
+    do
+        echo -e "\nPROJECT        REPOSITORY  BRANCHES            LOCATION OF REPOSITORY"
+        cd ${PROJ}
+        declare WORKING_BRANCH=`git branch | grep '*' | tr -d  '* '`
+        printf "%-15s  %-7s   %-20s%s\n" ${PROJ} 'working' ${WORKING_BRANCH} ${PROJ}/.git
+
+        IFS=$'\n'
+        declare REMOTE_REPOSITORIES=$(git remote -v | grep '(push)')
+        for REMOTE_PATH in ${REMOTE_REPOSITORIES}
+        do
+            IFS=$'\x20\t\n'
+
+            # THE ASSIGNED NAME OF A REMOTE REPOSITORY
+            declare REMOTE=$(echo ${REMOTE_PATH} | cut --delimiter=' ' --fields=1)
+
+            # THE FULLPATH TO A REMOTE REPOSITORY
+            declare WHERE=$(echo ${REMOTE_PATH} | cut --delimiter=' ' --fields=2)
+            printf "                 %-10s" ${REMOTE}
+
+            declare -i i=0
+            declare REMOTE_REPOSITORIES=`git branch --list -r | grep -v HEAD | grep ${REMOTE}`
+            for REPOS_BRANCH in ${REMOTE_REPOSITORIES}
+            do
+                (( i++ ))
+                
+                # AGAIN THE ASSIGNED NAME OF A REMOTE REPOSITORY
+                declare REPOS=$(echo ${REPOS_BRANCH} | cut --delimiter='/' --fields=1)
+
+                # THIS IS ONE OF THE BRANCHES OF A REMOTE REPOSITORY
+                declare BRANCH=$(echo ${REPOS_BRANCH} | cut --delimiter='/' --fields=2)
+
+                printf "%-10s" ${BRANCH}
+
+                # THIS PRINTS A RELEVANT PUSH COMMAND
+                if [[ ${WORKING_BRANCH} == ${BRANCH} ]]
+                then
+                    declare PUSH="git push --dry-run ${REPOS} ${BRANCH}"
+                    : echo -e "   ${PUSH}"
+                else
+                    : echo ''
+                fi
+                #${PUSH} 
+            done
+            if (( i == 1 ))
+            then
+                printf "          "
+            fi
+            printf "%s\n" ${WHERE}
+        done
+        echo -e "\ncd ${PROJ} && git push --verbose --set-upstream github ${WORKING_BRANCH}"
+        echo -e "cd ${PROJ} && git push --verbose --set-upstream backup ${WORKING_BRANCH}"
+    done
+    echo ''
+
+    for PROJ in ${PROJECTS[*]}
+    do
+        echo -e "\ncd ${PROJ} && git status --verbose"
+        echo -e "cd ${PROJ} && git push backup && git push github"
+    done
+    echo ''
+}
+
+function nice_example_of_bash()
+{
+    IFS=$'\n'
+    # find all of the ./images files
+    declare PAGES_FOLDER="${1}"
+    declare IMAGES_FOLDER="${PAGES_FOLDER}/images"
+    declare -ra FILES=( $(ls -1tp --reverse "${IMAGES_FOLDER}" | grep -v "/$") )
+    declare -ri HOW_MANY=${#FILES[*]}
+    declare -ri LAST=$(( HOW_MANY-1 ))
+    declare -i indexA=${LAST}
+    declare -i indexB=0
+    declare -i indexC=1
+    declare -i i=0
+
+    mkdir --parents "${PAGES_FOLDER}"
+    rm -f "${PAGES_FOLDER}/Picture*.html"
+    for FILE in ${FILES[*]}
+    do
+        echo $FILE
+        declare -i which_picture=$(( indexB + 1 ))
+        cat `dirname ${0}`/helpers/NewTemplate.html \
+            | sed "s@PREVIOUS_HTML@Picture${indexA}.html@" \
+            | sed "s@THIS_JPG@images/$(basename ${FILES[$indexB]})@" \
+            | sed "s@NEXT_HTML@Picture${indexC}.html@" \
+            | sed "s@PICTURE_NUMBER@${which_picture}@" \
+            | sed "s@LAST_NUMBER@${HOW_MANY}@" \
+            > "${PAGES_FOLDER}/Picture${indexB}.html"
+
+        if [ $i -ne 0 ]
+        then
+            (( indexA++ ))
+        else
+            declare -i indexA=0
+        fi  
+       
+        (( indexB++ )) 
+
+        if [ $indexC -ne $LAST ]
+        then
+            (( indexC++ ))
+        else
+            declare -i indexC=0
+        fi                 
+        (( i++ )) 
+    done
+    cp "${PAGES_FOLDER}/Picture0.html" "${PAGES_FOLDER}/index.html"
+    IFS=$'\x20\t\n'
+}
+
+function main()
+{
+    proj_backup "$@"
+}
+
+main "$@"
+exit $?
+
+

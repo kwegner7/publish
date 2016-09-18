@@ -1,0 +1,90 @@
+#!/bin/bash
+
+########################################################################
+# SVN DECLARATIONS
+########################################################################
+if true
+then
+    declare -x REPOSITORY=/blue2/svn/python/finance
+    declare -x        SVN="file://${REPOSITORY}"
+    declare -x    WORKING="/working/python/finance"
+    svn ls -R $SVN
+fi
+
+########################################################################
+# HOW TO CHECKOUT FROM THE LATEST ON A BRANCH
+########################################################################
+if true
+then
+    svn co $SVN/main/latest $WORKING
+fi
+
+
+svn co file:///media/FLASHBLU/svn/python/finance/main/latest /working/python/finance-new
+
+
+svn co file:///media/FLASHBLU/svn/python/finance/main/latest /working/python/finance
+
+########################################################################
+# HOW TO SETUP SVN FOR A PROJECT
+########################################################################
+if true
+then
+    # this creates a repository in some flash or cloud sub-folder
+    svnadmin create $REPOSITORY
+
+    # create an initial main branch
+    svn mkdir -m "" --parents $SVN/main/
+
+    # import the source code to the latest on this branch
+    svn import -m "" $WORKING $SVN/main/latest
+    svn ls $SVN/main/latest
+
+    # OK to check out to the original source area 
+    svn co --force $SVN/main/latest $WORKING
+fi
+
+########################################################################
+# HOW TO TAKE A SNAPSHOT ALONG THIS BRANCH
+########################################################################
+if true
+then
+    svn mkdir -m "" --parents $SVN/main/2014-02-17
+    svn copy -m "" $SVN/main/latest $SVN/main/2014-02-17/snap
+    svn ls $SVN/main/2014-02-17/snap/src
+fi
+
+########################################################################
+# HOW TO MAKE A NEW BRANCH AT A SNAPSHOT
+########################################################################
+if true
+then
+    svn mkdir -m "" --parents $SVN/main/2014-02-17/new-idea
+    svn copy -m "" $SVN/main/2014-02-17/snap $SVN/main/2014-02-17/new-idea/latest
+fi
+
+########################################################################
+# HOW TO SETUP ECLIPSE AT THE WORKING FOLDER
+########################################################################
+if true
+then
+:   Open Eclipse
+:   Open the Pydev Package Explorer window
+:       Window - Show View - Pydev Package Explorer
+:   File - New - PyDev Project
+:   Project name: finance
+:   Clear the box "Use default"
+:   Directory: /working/python/finance
+:   Choose the project type: Python
+:   Check the bullet: Do not configure PYTHONPATH
+:   Next
+:   Do not select any Referenced projects
+:   Finish 
+:   At this point there are files called .project and .pydevproject and .svn
+:   And Eclipse stores this folder as top of a PyDev Package
+:   Do not enter a password
+:   Eclipse notices that this is SVN project
+:   Set up to run from inside Eclipse:
+:      Right click src/MasterControl.py - Run As - Python Run
+fi
+

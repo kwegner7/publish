@@ -1,0 +1,198 @@
+#!/bin/bash --norc
+
+##############################################################################
+# Set the project folder $PROJ and the repository $SVN:
+#   Folders $PROJ/orig and $PROJ/orig-bin are created
+#   All other files and folders under $PROJ are moved to "orig" or "orig-bin"
+#   The root folder of $SVN will be the basename of $PROJ
+#   Repository $PROJ/svn is created from $PROJ/orig
+#   Folder $PROJ/working is created and files are checked out
+##############################################################################
+
+##############################################################################
+# sync_to_flash 
+#   imports all files under the $PWD
+#   WARNING: this does not handle filenames with blanks
+##############################################################################
+function sync_to_flash()
+{
+    declare SYNC_FOLDER=/cygdrive/e/sync/kmw/ubuntu-docs/python
+    cd $SYNC_FOLDER
+    for next in `find . \( -name "*" -a ! -wholename "*\.svn*" -a ! -name "*.pyc*" \) -print`
+    do
+        if [ -f $next -a -f $WORKING/$next ]
+        then
+            false && echo "FILE EXISTS IN WORKING $next"
+            if diff $next $WORKING/$next > /dev/null
+            then
+                false && echo FILES MATCH $next
+            else
+                echo FILES DIFFER $next
+                false && diff $next $WORKING/$next
+                true && echo copying ...
+                true && cp $next $WORKING/$next
+            fi
+        fi
+
+        if [ -d $next -a ! -d $WORKING/$next ]
+        then
+            echo "DIR MISSING AT WORKING $next"
+        fi
+    done
+    cd $WORKING && svn status
+    true && cd $WORKING && svn commit -m ""
+    return 0
+}
+
+##############################################################################
+# import_to_svn 
+#   imports all files under the $PWD
+#   WARNING: this does not handle filenames with blanks
+##############################################################################
+function import_to_svn()
+{
+    local -r PROJNAME=`basename $PROJ`
+    echo Current Directory is $PWD
+
+    ##########################################################################
+    # create folders in the repository 
+    ##########################################################################
+    local -r DIRECTORIES=`find . -mindepth 1 -maxdepth 1 -type d -print`
+    for DIR in $DIRECTORIES
+    do
+        false && svn mkdir -m "" $SVN/$PROJNAME/`basename $DIR`
+    done
+    
+    ##########################################################################
+    # import 
+    ##########################################################################
+    for NEXT in `ls -1`
+    do
+        declare IMPORT_THIS=./$NEXT
+        declare INTO_SVN_FOLDER=$SVN/$PROJNAME/$NEXT
+        svn import -m "" $IMPORT_THIS $INTO_SVN_FOLDER
+    done
+
+    return 0
+}
+
+##############################################################################
+# create_svn_project
+##############################################################################
+function create_svn_project()
+{
+    ##########################################################################
+    # check for errors
+    ##########################################################################
+    if false
+    then
+        cd $PROJ && echo ''
+        if [ -e $PROJ/orig -o -e $PROJ/orig-bin -o -e $PROJ/svn -o -e $PROJ/working ]
+        then
+            echo "    ERROR: SUB-FOLDERS EXIST THAT SHOULD NOT EXIST YET"
+            return 1
+        fi
+    fi
+
+    ##########################################################################
+    # orig and orig-bin
+    ##########################################################################
+    if false
+    then
+        cd $PROJ && echo ''
+        mkdir --parents $PROJ/orig $PROJ/orig-bin
+        based-on-file-type --split-folder --recurse
+    fi
+
+    ##########################################################################
+    # Repository $PROJ/svn is created from $PROJ/orig
+    ##########################################################################
+    if true
+    then
+        cd $PROJ && echo ''
+        echo Creating repository at $PROJ/svn 
+        svnadmin create $PROJ/svn 
+        svn mkdir -m "" $SVN/$PROJNAME 
+    fi
+
+    ##########################################################################
+    # import all files from orig
+    ##########################################################################
+    if true
+    then
+        cd $PROJ/orig && echo ''
+        import_to_svn
+        echo -e "\nCONTENTS OF REPOSITORY AT $SVN"
+        svn list --recursive $SVN
+    fi
+
+    ##########################################################################
+    # checkout to $WORKING
+    ##########################################################################
+    if true
+    then
+        cd $PROJ && echo ''
+        rm -rf $WORKING
+        mkdir --parents $WORKING
+        echo -e "\nCHECKING OUT TO $WORKING"
+        svn checkout $SVN/$PROJNAME $WORKING
+    fi
+    return 0
+}
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    set-svn-project $1
+    shift 1
+
+    if   [[ $1 == "--show"               ]]; then shift 1 && show_types         "$@"; 
+    elif [[ $1 == "--create-svn-project" ]]; then shift 1 && create_svn_project "$@";
+    elif [[ $1 == "--sync-to-flash"      ]]; then shift 1 && sync_to_flash      "$@";
+    else
+        echo "ERROR: INVALID PARAMETER $1"
+        return 1
+    fi
+    return 0
+}
+
+##############################################################################
+# $PROJ global preset
+# $SVN  global preset
+# $1 is python
+# $2 is --folder --recurse --create-svn-project
+##############################################################################
+declare NUMBER_PARAMS=${#@}
+
+if (( $NUMBER_PARAMS < 2 )); then
+    echo ERROR: INVALID NUMBER OF PARAMETERS
+    exit 1
+fi
+
+if [[ $1 == --folder ]]; then
+    for NEXT in `ls -1`
+    do
+        svn-tasks --show "$NEXT"
+    done
+
+elif [[ $1 == --recurse ]]; then
+    for NEXT in `find . -print`
+    do
+        svn-tasks --show "$NEXT"
+    done
+
+else
+    main "$@"
+fi
+exit "$?"
+
+##############################################################################
+# example
+##############################################################################
+if false
+then
+    svn-tasks python --create-svn-project
+    svn-tasks python --sync-to-flash
+fi

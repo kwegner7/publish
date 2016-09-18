@@ -1,0 +1,48 @@
+#!/bin/bash
+
+##############################################################################
+# svn_status
+##############################################################################
+function xml_extract()
+{
+    echo $(svn info --xml | grep "<$1>" | sed "s@<$1>@@" | sed "s@</$1>@@")
+    return 0
+}
+
+
+function svn_status()
+{
+    echo ''
+    svn info
+    if (( $? != 0 ))
+    then
+        exit 1
+    fi
+
+    declare -x PWD=$(pwd)
+    declare -x SVN=`xml_extract root`
+    declare -x URL=`xml_extract url`
+    declare -x WRK=`xml_extract wcroot-abspath`
+
+    if false
+    then
+        echo -e "\nThis is the entire folder structure of the repository:"
+        svn ls --recursive --verbose $SVN \
+            | grep "/$" | cut --characters=43- | sed 's/^/    /'
+    fi
+
+    echo -e   " This working directory is: $WRK"
+    echo -e   "      Repository folder is: $SVN"
+    echo -e   "Checked out from subfolder: $URL"
+    echo -e "\nStatus of this working folder is:"
+    svn status
+    echo -e ""
+    return 0
+}
+
+##############################################################################
+# svn status
+##############################################################################
+svn_status "$@"
+exit "$?"
+

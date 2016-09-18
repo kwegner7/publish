@@ -1,0 +1,69 @@
+#!/bin/bash
+
+    source ${SCRIPTS_BSH}/initialize.bsh
+
+########################################################################
+# ssh dp3
+# ls -1 $CONFIG_SPECS
+# set_config_spec SPS
+# cd /vobs/sps_source && ls -la
+# fetch_cc /vobs/sps_source $VIEWS/matt8.0.1a
+########################################################################
+function main ()
+{
+    ########################################################################
+    # fetch each file from the VOB at the specified folder
+    ########################################################################
+    
+    declare -r VOB_FOLDER=${1:-/vobs/sps_source/Control}
+    declare -r FOLDER_OUT=${2:-.}
+
+    declare -r FOLDER_NAME=$(filename_ext $VOB_FOLDER)
+    declare -r FOLDER_IN=$(path_only $VOB_FOLDER)
+    cd $FOLDER_IN
+    declare -r WHICH_FILES=$(ct ls -vob_only -short -recurse -nxname ${FOLDER_NAME}) 
+
+    echo "Fetching from $FOLDER_IN"
+    echo "           to $FOLDER_OUT"
+    echo ""
+    for fullpath in $WHICH_FILES
+    do
+    {
+        local path_and_name=$(strip_ext $fullpath)
+        local name_only=$(filename_only $fullpath)
+        local name_ext=$(filename_ext $fullpath)
+        local path_only=$(path_only $fullpath)
+        [ $false ] && echo $fullpath
+        [ $false ] && echo $path_and_name
+        [ $false ] && echo $name_only
+        [ $false ] && echo $name_ext
+        [ $false ] && echo $path_only
+        echo $FOLDER_IN/$fullpath
+        [ $false ] && echo $FOLDER_OUT/$fullpath
+        if [ -d $FOLDER_IN/$fullpath ]; then
+            mkdir -p $FOLDER_OUT/$fullpath
+        else
+            cp $FOLDER_IN/$fullpath $FOLDER_OUT/$fullpath
+        fi
+    }
+    done
+
+    exit 0
+}
+
+########################################################################
+# pass all parameters to main as "$1" "$2" ...
+########################################################################
+main "$@"
+exit
+
+bash
+    TAG=mbarancc_sps
+    TAG=hlaj2_sps_5219
+    set_config_spec SPS.$TAG
+    TAG=hlaj2_sps_5219
+    fetch_cc /vobs/sps_source $VIEWS/$TAG
+exit
+
+
+

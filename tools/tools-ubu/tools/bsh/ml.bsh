@@ -1,0 +1,27 @@
+#!/bin/bash -norc
+########################################################################
+# Prepare the ML Downloads for spreadsheet
+########################################################################
+declare -r WHERE="/home/kurt/ubu/finances/MerrilLynch"
+declare -r COLLECT="$WHERE/download"
+declare -r TMP="/tmp/all.csv"
+declare -r OUT="$WHERE/all.csv"
+
+cd $COLLECT
+rm -f $TMP
+touch $TMP
+
+IFS=$'\n'
+for NEXT in `ls -1 *.csv`
+do
+    cat "$NEXT" >> $TMP
+done
+IFS=$' \t\n'
+
+# at this point invoke python to convert
+# to a better .csv
+
+cat $TMP | sort -u > $OUT
+false && /usr/lib/libreoffice/program/scalc $OUT &
+
+

@@ -1,0 +1,26 @@
+#############################################
+# Network Connections, Local Area Connection
+#############################################
+
+  MSN       IP       bat   sys  mdp   dd  ###
+  ---       --       ---   ---  ---   --  ###
+
+  # MSNs in lab
+  117  10.35.180.199  yes  yes  yes   no
+  111  10.35.180.174  yes  yes  yes   no
+  122  10.35.180.122  yes  yes  yes   no
+  131  10.35.180.196  yes  yes  yes   no
+  116  10.35.180.187  yes  yes  yes   no
+  125  10.35.180.125  yes  yes  yes   no
+  126  10.35.180.186  yes  yes  yes   no
+  130  10.35.180.119  yes  yes  yes   no
+  113  10.35.180.190  yes  yes  yes   no
+  127  10.35.180.142  yes  yes  yes   no
+
+  # linux machine in lab
+  101  10.35.182.131  yes  yes  yes   no  ###
+
+  # ntp server
+  000  10.35.180.7    yes  yes  yes   no  ###
+
+

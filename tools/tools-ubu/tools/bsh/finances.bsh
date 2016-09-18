@@ -1,0 +1,57 @@
+#!/bin/bash -norc
+
+
+##############################################################################
+# This is a function
+##############################################################################
+function transform-ml()
+{
+    cd /repositories/finances/ml
+    python ./ittCopyColumns.py
+    echo INPUT RECORDS:
+    cat ./dcr/inputs/DCR321.dat
+    echo OUTPUT RECORDS:
+    cat ./dcr/inputs/DCR321.csv
+    echo STATUS:
+    cat ./dcr/inputs/DCR321.csv.txt    
+    return 0
+}
+
+
+##############################################################################
+# main
+##############################################################################
+function main ()
+{
+    ##########################################################################
+    # get parameters
+    ##########################################################################
+    declare -x DO_THIS=${1:---default-to-do}
+    declare -x  PARAM1=${2:-default-param1}
+    declare -x  PARAM2=${3:-default-param2}
+    declare -x  PARAM3=${4:-default-param3}
+
+
+    ##########################################################################
+    # process
+    ##########################################################################
+      if [ $DO_THIS = "--default-to-do"    ]; then shift && default-to-do "$@"
+    elif [ $DO_THIS = "--transform-ml"     ]; then shift && transform-ml "$@"
+    elif [ $DO_THIS = "--please-do-thisB"  ]; then shift && please-do-thisB "$@"
+    else 
+        echo -e " \"$DO_THIS\" is not recognized"
+    fi
+
+    return 0
+}
+main "$@"
+exit 0
+
+##############################################################################
+# Examples
+##############################################################################
+if true
+then
+    finances.bsh --transform-ml
+fi
+

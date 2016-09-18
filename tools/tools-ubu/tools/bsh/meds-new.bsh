@@ -1,0 +1,19 @@
+#!/bin/bash -norc
+
+########################################################################
+# Special Camp meds reporting
+########################################################################
+declare -r MUST_GOTO="/home/kurt/ubu/code/python/meds-new"
+
+cd $MUST_GOTO
+
+IFS=$'\n'
+    python src/meds-new.py
+    #echo Comparing ...
+    #diff ../out ../works
+IFS=$' \t\n'
+
+
+exit
+
+

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+##############################################################################
+# svn-create-baseline
+##############################################################################
+function svn-create-baseline()
+{
+    local -r NUMBER_PARAMS=${#@}
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    if                                  \
+    [                                   \
+        \( $NUMBER_PARAMS -ne 0   \)    \
+        -o -e $WORKING/../svn           \
+    ]
+    then
+        echo There are no parameters, the repository must not exist
+        echo Invocation:
+        echo "   svn-repos-create" 
+        return 1
+    fi
+
+    ##########################################################################
+    # create an SVN repository at a project location
+    ##########################################################################
+    mkdir --parents $PROJ
+    svnadmin create $PROJ/svn
+
+    ##########################################################################
+    # create path within the repository for this baseline
+    ##########################################################################
+    svn mkdir -m ""                             \
+        $SVN/notes                              \
+        $SVN/$BASE_VERSION                      \
+        $SVN/$BASE_VERSION/$BASE_CORRECTION
+
+    ##########################################################################
+    # import the baseline files from a flat folder
+    ##########################################################################
+    if true
+    then
+        svn import -m "" $IMPORT_FOLDER $BASE_FILESET/fileset
+    fi
+
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+svn-create-baseline "$@"
+exit 0
+
+##############################################################################
+# example
+##############################################################################
+if false; then
+{
+    cd ~ && svn-create-baseline
+}
+fi

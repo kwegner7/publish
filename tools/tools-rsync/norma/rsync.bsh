@@ -1,0 +1,616 @@
+#!/bin/bash
+
+function print-help()
+{
+cat <<END
+
+This is a script to manually or automatically perform daily snapshots
+of local folders. The user specifies the folders to be backed up,
+the location of the repository and file names to exclude from the
+rsync. The user may also specify times of day to automatically perform
+the rsync. There will be one folder in the repository for each folder
+specified to be backed up. The repository folder will contain files
+as in this example:
+
+            2012-09-15,2000
+            2012-09-16,1600
+            2012-09-18,2000
+            2012-09-19,1400
+            2012-09-19,2200
+            2012-09-20,1400
+            2012-09-20,2200
+            2012-09-21,1400
+            2012-09-21,2200
+            2012-09-22,1400
+            latest
+            original
+            previous
+
+Each "date,time" folder is a copy of the original folder at the time
+of the snapshot. These repository files are formed using hard links
+so data that has not changed is stored only once in the repository.
+
+The folder "latest" is a soft link to the most recent snapshot. The
+folder "previous" is a soft link to the second most recent snapshot.
+The folder "original" is a hard link to the oldest snapshot.
+
+To see differences, change to the relevant repository folder, then:
+
+    diff --brief --recursive previous latest  
+    diff --brief --recursive 2012-09-22,1400 2012-09-21,1400
+
+The behavior of rsync.bsh depends on configuraton files created by
+the user. These configuration files must reside in the user's path
+and have the name "rsync-config<something>.bsh" where <something>
+is any string. The default configuration file is "rsync-config.bsh".
+
+Invocations:
+
+  rsync.bsh                   # performs rsync using rsync-config.bsh
+
+  rsync.bsh -example          # performs rsync using rsync-config-example.bsh
+
+  rsync.bsh --help            # prints help information
+
+  rsync.bsh --more-help       # describes how to create a Linux flash drive
+
+  rsync.bsh --crontab-show    # prints a crontab representing the
+                              # automatic backups specified in all of
+                              # the rsync-config files of the user
+
+  rsync.bsh --crontab-replace # replaces the user's crontab with the
+                              # crontab indicated by --crontab-show
+
+  rsync.bsh --testing         # does not perform the rsync but prints
+                              # all commands that would have been executed
+
+The file at $LOG_FILE receives progress and error messages.
+
+END
+}
+
+function print-more-help()
+{
+cat <<END
+
+When the operating system is Windows and the shell is cygwin, it is
+necessary to explicitly install "rsync" and "openssh" from the cygwin
+download. The rsync will write to a Windows formatted flash drive.
+
+When the operating system is Linux, the flash drive should be
+formatted as a Linux file system. The following are instructions
+for creating a flash drive that is a Linux file system:
+
+  -- Insert a Windows flash drive that you want to destroy
+     and make into a Linux file system.
+
+  -- Type "mount" to see the device designation. In this example
+     it is /dev/sdc1.
+
+  -- Unmount the flash drive and create the new filesystem
+     as type ext2 using the following commands:
+
+        sudo umount /dev/sdc1
+        sudo mkfs -t ext2 /dev/sdc1
+        sudo eject /dev/sdc1
+    
+  -- Remove the flash drive then re-insert it and type "mount". The
+     new flash designation will be shown. In this example, it is
+     /media/d3c4c905-9e3d-4dc9
+
+  -- The following commands will allow any user to access the flash
+     drive with a simple reference:
+
+         declare -r FLASH_DESIGNATOR=/media/d3c4c905-9e3d-4dc9
+         declare -r SIMPLE_REFERENCE=/flash2GB
+         sudo ln --symbolic --force \$FLASH_DESIGNATOR \$SIMPLE_REFERENCE
+         sudo chown root \$FLASH_DESIGNATOR
+
+         sudo chgrp root \$FLASH_DESIGNATOR
+         sudo chmod 777  \$FLASH_DESIGNATOR
+         ls -R /flash2GB
+
+END
+}
+
+# ----------------------------------------------------------------------
+# This function produces a string of the form "2012-09-04 1130"
+# ----------------------------------------------------------------------
+function date_time()
+{
+    date --date=now +"%Y-%m-%d %H%M"
+    return 0
+}
+
+# ----------------------------------------------------------------------
+# This function repairs the rsync, resets the latest and previous
+# ----------------------------------------------------------------------
+function repair()
+{
+    local -r BAD='2012-09-30pm0300'
+    local -r REPAIR_LATEST='2012-09-27 pm 10:00'
+    local -r REPAIR_PREVIOUS='2012-09-27 pm 03:00'
+    # ubu previous is 2012-09-25,2200
+    IFS=$'\n'
+        for NEXT in tomboy working
+        do
+            ls -ld "/red2GB/rsync/$NEXT/$BAD"
+            ls -ld "/red2GB/rsync/$NEXT/$REPAIR_LATEST"
+            ls -ld "/red2GB/rsync/$NEXT/$REPAIR_PREVIOUS"
+
+            rm -rf "/red2GB/rsync/$NEXT/$BAD"
+            rm -f  "/red2GB/rsync/$NEXT/latest"           "/red2GB/rsync/$NEXT/previous"
+            ln -s  "/red2GB/rsync/$NEXT/$REPAIR_LATEST"   "/red2GB/rsync/$NEXT/latest"
+            ln -s  "/red2GB/rsync/$NEXT/$REPAIR_PREVIOUS" "/red2GB/rsync/$NEXT/previous"
+        done
+        for NEXT in ubu
+        do
+            ls -ld "/red2GB/rsync/$NEXT/$BAD"
+            ls -ld "/red2GB/rsync/$NEXT/$REPAIR_LATEST"
+            ls -ld "/red2GB/rsync/$NEXT/2012-09-25,2200"
+
+            rm -rf "/red2GB/rsync/$NEXT/$BAD"
+            rm -f  "/red2GB/rsync/$NEXT/latest"           "/red2GB/rsync/$NEXT/previous"
+            ln -s  "/red2GB/rsync/$NEXT/$REPAIR_LATEST"   "/red2GB/rsync/$NEXT/latest"
+            ln -s  "/red2GB/rsync/$NEXT/2012-09-25,2200"  "/red2GB/rsync/$NEXT/previous"
+        done
+    IFS=$'\x20\t\n'
+    return 0
+}
+
+# ----------------------------------------------------------------------
+# This function replaces the user crontab file
+# ----------------------------------------------------------------------
+function crontab-replace()
+{
+    if which rsync.bsh 1>> /dev/null
+    then
+        local -r LOCATION_RSYNC_BSH="$(dirname $(which rsync.bsh))"
+        local -r CRONTAB="/tmp/rsync.crontab"
+        local -ra CONFIGS=(
+            `find "$LOCATION_RSYNC_BSH" -name "rsync-config*.bsh" -print`
+        )
+        rm -f "$CRONTAB"
+        printf "\nPATH=\"%s\"\n\n" "$PATH" >> "$CRONTAB"
+        echo ''
+        
+        IFS=$'\n'
+        for NEXT in ${CONFIGS[*]}
+        do
+            echo -e "Found configuration file: $NEXT"
+            . "$NEXT"
+            local RSYNC_CMD="$(basename $NEXT .bsh)"        
+            RSYNC_CMD="$(echo $RSYNC_CMD | sed 's/rsync-config//' )"
+            for TIME_OF_DAY in ${CRON_TIMES[*]}
+            do
+                local MIN_HR="${TIME_OF_DAY:2:2} ${TIME_OF_DAY:0:2}"   
+                printf "  $MIN_HR  *  *  *  %s\n" "rsync.bsh $RSYNC_CMD" \
+                    >> "$CRONTAB"
+            done
+        done
+        IFS=$'\x20\t\n'
+        
+        printf "\n"  >> "$CRONTAB"
+        if $CRONTAB_SHOW 
+            then
+                echo -e "Copy and paste the following into 'crontab -e':"
+                cat "$CRONTAB"
+            else
+                echo -e "Replacing user crontab with:"
+                crontab "$CRONTAB" && crontab -l
+        fi
+        return 0
+    else 
+        echo -e "\n   ERROR: Cannot find rsync.bsh"
+        return 1
+    fi
+    
+    return 0
+}
+
+function set-previous()
+{
+    $ENABLE_TEST_MODE || echo "$1" > "$PREVIOUS"
+}
+
+function get-previous()
+{
+    head -1 "$PREVIOUS"
+    return 0
+}
+
+function set-latest()
+{
+    $ENABLE_TEST_MODE || echo "$1" > "$LATEST"
+    return 0
+}
+
+function get-latest()
+{
+    head -1 "$LATEST"
+    return 0
+}
+ 
+# ----------------------------------------------------------------------
+# Perform daily rsync when media is Windows
+# ----------------------------------------------------------------------
+function daily-rsync-windows()
+{
+    # latest full file set is renamed to be current date/time
+    $TESTING mv "$(get-latest)" "$SNAPSHOT"
+
+    # current full file set is updated from source folder
+    # and items deleted go to newly created folder
+    $TESTING rsync                                    \
+        ${STANDARD_SWITCHES[*]} ${INCLUDE_EXCLUDE[*]} \
+        --backup --backup-dir="$(get-latest)"         \
+        "$SOURCE_FOLDER/" "$SNAPSHOT"
+
+    echo "Return code is: $?"
+    if true
+    then
+        # if some items were deleted by the transfer process
+        # then the deleted items become previous
+        if [ -d "$(get-latest)" ]
+        then
+            set-previous "$(get-latest)"
+            echo "     source and latest produce" $SNAPSHOT
+
+        # if no items were deleted by the transfer process
+        # then previous does not change
+        else
+            if [ ! -d "$(get-previous)" ]
+            then
+                mkdir --parents "$(get-previous)"
+            fi
+            echo "  No changes to existing files" $SNAPSHOT
+        fi
+
+        # latest always points to the full file set
+        set-latest "${SNAPSHOT}"
+        echo "        previous now points to" "$(get-previous)"
+        echo "          latest now points to" "$(get-latest)"
+        return 0
+
+    else
+        echo -e "\n   ERROR: RSYNC FAILED"
+        return 1
+    fi
+    return 0
+}
+
+
+# ----------------------------------------------------------------------
+# Perform original rsync when media is Windows
+# ----------------------------------------------------------------------
+function original-rsync-windows()
+{
+    $TESTING mkdir --parents "$SNAPSHOT"
+    $TESTING rsync                                    \
+        ${STANDARD_SWITCHES[*]} ${INCLUDE_EXCLUDE[*]} \
+        "$SOURCE_FOLDER/" "$SNAPSHOT"
+
+    if (( $? == 0 ))
+    then
+        set-latest "${SNAPSHOT}"
+        set-previous "${SNAPSHOT}"
+    else
+        echo -e "\n   ERROR: RSYNC FAILED"
+        return 1
+    fi
+}
+
+# ----------------------------------------------------------------------
+# Perform original rsync when media is Linux
+# ----------------------------------------------------------------------
+function original-rsync-linux()
+{
+    $TESTING mkdir --parents "$ORIGINAL"
+    $TESTING rsync                                    \
+        ${STANDARD_SWITCHES[*]} ${INCLUDE_EXCLUDE[*]} \
+        "$SOURCE_FOLDER/" "$ORIGINAL"
+
+    if (( $? == 0 ))
+    then
+        set-latest "${ORIGINAL}"
+        set-previous "${ORIGINAL}"
+    else
+        echo -e "\n   ERROR: RSYNC FAILED"
+        return 1
+    fi
+}
+
+# ----------------------------------------------------------------------
+# Perform daily rsync when media is Linux
+# ----------------------------------------------------------------------
+function daily-rsync-linux()
+{
+    $TESTING rsync                                    \
+        ${STANDARD_SWITCHES[*]} ${INCLUDE_EXCLUDE[*]} \
+        --link-dest="$(get-latest)"                   \
+        "$SOURCE_FOLDER/" "$SNAPSHOT"
+
+    if (( $? == 0 ))
+    then
+        $TESTING diff --brief --recursive "$(get-latest)" "$SNAPSHOT" 1> /dev/null
+        if (( $? == 0 )) && ! $FIRST_TIME
+        then         
+            $TESTING rm -rf "$SNAPSHOT"
+            $TESTING mv "$(get-latest)" "$SNAPSHOT"
+            set-latest "${SNAPSHOT}"
+            echo " No changes, setting latest to" $SNAPSHOT
+        else
+            set-previous "$(get-latest)"
+            set-latest "${SNAPSHOT}"
+            echo "     source and latest produce" $SNAPSHOT
+        fi
+        if true
+        then
+            echo "        previous now points to" "$(get-previous)"
+            echo "          latest now points to" "$(get-latest)"
+        fi
+    else
+        echo -e "\n   ERROR: RSYNC FAILED"
+        return 1
+    fi
+    return 0
+}
+   
+# ----------------------------------------------------------------------
+# This function performs an rsync on a single folder and its sub-folders.
+# ----------------------------------------------------------------------
+function rsync_one_folder()
+{
+    # ------------------------------------------------------------------
+    # establish symbols
+    # ------------------------------------------------------------------
+    if $ENABLE_TEST_MODE
+        then declare -x TESTING=echo
+        else declare -x TESTING=''
+    fi
+    
+    declare -x SOURCE_FOLDER="$1"
+    declare -x   FOLDER_NAME="$(basename $SOURCE_FOLDER)"
+    declare -x  SYNC_TO_HERE="$REPOSITORY/$FOLDER_NAME"
+    declare -x     DATE_TIME=`date_time`
+    declare -x      ORIGINAL="$SYNC_TO_HERE/original"
+    declare -x      PREVIOUS="$SYNC_TO_HERE/previous"
+    declare -x        LATEST="$SYNC_TO_HERE/latest"
+    declare -x      SNAPSHOT="$SYNC_TO_HERE/$DATE_TIME"
+    
+    declare -ax STANDARD_SWITCHES=(
+        --modify-window=3
+        --no-verbose
+        --no-progress
+        --no-inplace
+        --no-compress
+        --recursive
+        --times
+        --perms
+        --delete
+        --quiet
+        --human-readable
+        --protect-args
+        --no-specials
+        --no-links
+        --cvs-exclude
+    )
+
+    # ------------------------------------------------------------------
+    # the source folder must exist
+    # ------------------------------------------------------------------
+    if [ ! -d "$SOURCE_FOLDER" ]
+    then
+        echo -e "\n   ERROR: Source $SOURCE_FOLDER must be an existing folder"
+        return 1
+    fi
+
+    # ------------------------------------------------------------------
+    # the repository base folder must exist
+    # ------------------------------------------------------------------
+    if [ ! -d "$REPOSITORY" ]
+    then
+        echo -e "\n   ERROR: Repository $REPOSITORY must be an existing folder"
+        return 1
+    fi
+
+    # ------------------------------------------------------------------
+    # the snapshot must not exist, must wait one minute
+    # ------------------------------------------------------------------
+    if [ -e "$SNAPSHOT" ]
+    then
+        echo -e "\n   ERROR: Snapshot $SNAPSHOT already exists, wait one minute"
+        return 1
+    fi
+
+    # ------------------------------------------------------------------
+    # if repository folder does not exist, then this is the first time
+    # ------------------------------------------------------------------
+    if [ ! -d "$SYNC_TO_HERE" ]
+    then
+        declare -x FIRST_TIME=true
+        echo -e "\n      New repository folder at" $SYNC_TO_HERE
+        if $CREATE_HARD_LINKS
+        then
+            original-rsync-linux
+            (( $? != 0 )) && return 1
+        else
+            original-rsync-windows
+            (( $? != 0 )) && return 1
+        fi
+    else
+        declare -x FIRST_TIME=false
+        echo -e "\n Existing repository folder at" $SYNC_TO_HERE
+    fi
+
+    # ------------------------------------------------------------------
+    # check for illegal links in the repository
+    # ------------------------------------------------------------------
+    if $ENABLE_TEST_MODE; then            
+        echo -e "\nChecking for illegal links in the repository ..."
+        find "$(get-latest)" -type l -print
+        echo ''
+    fi
+
+    # ------------------------------------------------------------------
+    # perform the sync
+    # ------------------------------------------------------------------
+    if [ -d "$(get-latest)" ]
+    then
+        if true
+        then
+            echo "                     source is" $SOURCE_FOLDER
+            echo "            previous points to" "$(get-previous)"
+            echo "              latest points to" "$(get-latest)"
+        fi
+        
+        if $CREATE_HARD_LINKS
+        then
+            daily-rsync-linux
+        fi
+
+        if ! $CREATE_HARD_LINKS && ! $FIRST_TIME
+        then
+            daily-rsync-windows
+        fi
+    else
+        echo -e "\n   ERROR: $(get-latest) must be an existing folder"
+        return 1
+    fi
+    return 0
+}
+
+# ----------------------------------------------------------------------
+# rsync_all_folders
+# ----------------------------------------------------------------------
+function rsync_all_folders()
+{    
+    IFS=$'\n'
+    for FOLDER in ${FOLDERS[*]}
+    do
+        rsync_one_folder "$FOLDER"
+    done
+    IFS=$'\x20\t\n'
+    
+    #if [ -d "$REPOSITORY" ]; then
+    #    echo -en "\n   SIZE OF REPOSITORY: "
+    #    printf "%'10d bytes\n" `du --byte --summarize "$REPOSITORY" | cut -f1`
+    #fi
+    
+    echo '' 
+    
+    return 0
+}
+    
+# ----------------------------------------------------------------------
+# main
+# ----------------------------------------------------------------------
+function main()
+{
+    declare PATH=${PATH}:/usr/bin:/usr/local/bin
+	
+    # ------------------------------------------------------------------
+    # special switches
+    # ------------------------------------------------------------------
+    local -i NUMBER_PARAMS=${#@}
+    
+    if (( $NUMBER_PARAMS == 1 )) && [[ $1 == "--help" ]]
+    then
+        print-help
+        return 0
+    fi
+
+    if (( $NUMBER_PARAMS == 1 )) && [[ $1 == "--more-help" ]]
+    then
+        print-more-help
+        return 0
+    fi
+
+    if (( $NUMBER_PARAMS == 1 )) && [[ $1 == "--crontab-show" ]]
+    then
+        declare -rx CRONTAB_SHOW=true
+        crontab-replace
+        return 0
+    fi
+    
+    if (( $NUMBER_PARAMS == 1 )) && [[ $1 == "--crontab-replace" ]]
+    then
+        declare -rx CRONTAB_SHOW=false
+        crontab-replace
+        return 0
+    fi
+    
+    if (( $NUMBER_PARAMS == 1 )) && [[ $1 == "--repair" ]]
+    then
+        repair
+        return 0
+    fi
+    
+    if [[ $1 == "--testing" ]]
+        then
+            shift 1
+            declare -rx ENABLE_TEST_MODE=true
+        else
+            declare -rx ENABLE_TEST_MODE=false
+    fi
+
+    local -i NUMBER_PARAMS=${#@}
+    if (( $NUMBER_PARAMS > 1 ))
+    then
+        echo -e "   INVOCATIONS:"
+        echo -e "       rsync.bsh"
+        echo -e "       rsync.bsh <name of configuration to use>"
+        echo -e "       rsync.bsh --help"
+        echo -e "       rsync.bsh --more-help"
+        echo -e "       rsync.bsh --crontab-show"
+        echo -e "       rsync.bsh --crontab-replace"
+        echo -e "       rsync.bsh --testing"
+        return 1
+    fi
+
+    # ------------------------------------------------------------------
+    # read the configuration file
+    # ------------------------------------------------------------------
+    local -r CONFIG=rsync-config$1.bsh
+    if which $CONFIG 1>> /dev/null
+    then
+        local -r CONFIG_FOUND=true
+        . $CONFIG
+    else
+        local -r CONFIG_FOUND=false
+    fi
+    
+    # ------------------------------------------------------------------
+    # perform rsync on all specified folders
+    # ------------------------------------------------------------------
+    local -r DASHES="----------------------------------------"
+    if ! $CONFIG_FOUND; then
+        echo -e "\n${DASHES}"                     | tee --append $LOG_FILE
+        echo -e "Begin rsync `date`"              | tee --append $LOG_FILE
+        echo -e "${DASHES}"                       | tee --append $LOG_FILE
+        echo -en "\n   ERROR: The configuration"  | tee --append $LOG_FILE
+        echo -e  " file $CONFIG does not exist"   | tee --append $LOG_FILE
+        return 1
+        
+    elif $ENABLE_TEST_MODE; then
+        echo -e "\n${DASHES}"           
+        echo -e "Begin rsync `date`"   
+        echo -e "${DASHES}"           
+        echo -e "\n           Reading config file" $CONFIG
+        rsync_all_folders
+        
+    else
+        echo -e "\n${DASHES}"                              | tee --append $LOG_FILE
+        echo -e "Begin rsync `date`"                       | tee --append $LOG_FILE
+        echo -e "${DASHES}"                                | tee --append $LOG_FILE
+        echo -e "\n           Reading config file" $CONFIG | tee --append $LOG_FILE
+        rsync_all_folders                                  | tee --append $LOG_FILE
+    fi 
+
+    return 0
+}
+
+main "$@"
+exit $?
+
+

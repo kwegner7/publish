@@ -1,0 +1,48 @@
+#!/bin/bash
+
+##############################################################################
+# svn-checkout
+##############################################################################
+function svn-checkout()
+{
+    local -r NUMBER_PARAMS=${#@}
+ 
+    ##########################################################################
+    # verify inputs
+    ##########################################################################
+    if [ $NUMBER_PARAMS -eq 0 -a -e "${REPOSITORY}" -a ! -e "${WORKING}" ]
+    then
+        echo Checking out repository "${REPOSITORY}" to "${WORKING}"
+    else
+        echo ERROR DETECTED
+        return 1
+    fi
+
+    svn co -r HEAD "${SVN}"/main/revs "${WORKING}"
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+declare -x PROJ=special-camp
+declare -x REPOSITORY=/blue2/svn/rails/$PROJ
+declare -x SVN="file://${REPOSITORY}"
+declare -x WORKING=/working/rails/$PROJ
+
+if false; then
+    declare -x REPOSITORY=/blue2/svn/python/finance
+    declare -x    WORKING="/working/python/finance1"
+fi
+
+if false; then
+    declare -x REPOSITORY=/blue2/svn/python/special-camp
+    declare -x    WORKING="/working/python/special-camp"
+fi
+
+
+
+
+svn-checkout "$@"
+exit "$?"
+

@@ -1,0 +1,5 @@
+REM diskpart /s d:/view/tools/change_drive_letter.wri
+list disk
+list volume
+select volume 3
+detail volume

@@ -1,0 +1,53 @@
+#!/bin/bash
+
+##############################################################################
+# check_results
+##############################################################################
+function check_results()
+{
+    if [ ! -e "${1}/check0" -o ! -e "${2}" ]
+    then
+        echo -e "\nERROR: The folders ${2} and ${1}/check0 must exist!"        
+        exit 1
+    fi
+
+    echo ''
+    # show files that have changed but do not show the detailed changes
+    diff -r --brief --exclude="*.pdf" --exclude=".directory" "${1}"/check0 "${2}"
+    if (( $? != 0 ))
+    then
+        echo -e "Results have changed"
+    else
+        echo -e "Results have not changed"
+    fi
+    diff -r --brief "${1}"/check0 "${2}"
+    find "${1}"/check0 -name "*.pdf" -exec ls -l {} ';'
+    find "${2}" -name "*.pdf" -exec ls -l {} ';'
+    echo ''
+    return 0
+}
+
+##############################################################################
+# The only requirement is that there exist a folder at ./out and ./check
+##############################################################################
+function main0 ()
+{
+    check_results ./check ./out
+    return 0
+}
+
+##############################################################################
+# The only requirement is that there exist a folder at ./out and ./check
+##############################################################################
+function main ()
+{
+    /home/kurt/Documents/tools/compare-folders.bsh ./check/check0 ./out
+    return 0
+}
+
+##############################################################################
+# entry point
+##############################################################################
+main "$@"
+exit 0
+
