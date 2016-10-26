@@ -19,7 +19,7 @@ function prevPhoto()
 function initialize() { 
 	doc.constructDoc();
     doc.refreshDomElements();
-    window.alert("Photos Have Been Loaded");
+    /* window.alert("Photos Have Been Loaded"); */
 } 
 
 
