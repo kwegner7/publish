@@ -1,6 +1,6 @@
- 
 
 http://kwegner7.github.io/publish/photos/2016-10/index.html
+
      declare NEW_ALBUM="2016-10"
      cd /data/proj/publish/photos/${NEW_ALBUM}
      cd /data/edit-pictures/${NEW_ALBUM}
